@@ -317,8 +317,7 @@ def update_music(data):
 
 def update_goal(data):
 
-    with open(f"{local_work('appdata_path')}/VibesBot/web/src/config/goal.json", 'r', encoding='utf-8') as file_goal:
-        goal_data = json.load(file_goal)
+    goal_data = manipulate_json(f"{local_work('appdata_path')}/VibesBot/web/src/config/goal.json", "load")
 
     try:
 
@@ -326,15 +325,12 @@ def update_goal(data):
 
             type_goal = data['type_goal']
 
-            goal_path = f"{local_work('appdata_path')}/VibesBot/web/src/html/goal/{type_goal}/goal.html"
-
             data = {
                 'title_text_value' : goal_data[type_goal]['goal_text'],
                 'outer_bar' : goal_data[type_goal]['outer_bar'],
                 'title_text' : goal_data[type_goal]['title_text'],
                 'progress_bar' : goal_data[type_goal]['progress_bar'],
                 'progress_bar_background' : goal_data[type_goal]['progress_bar_background'],
-                'html_path' : goal_path
             }
 
             return data
@@ -343,22 +339,22 @@ def update_goal(data):
 
             type_goal = data['type_goal']
 
-            roaming_path = normpath_simple(f"{local_work('appdata_path')}/VibesBot/web/src/html/goal/{type_goal}/goal.html")
-
-            with open(roaming_path, "r") as html:
+            path = normpath_simple(f"{local_work('appdata_path')}/VibesBot/web/src/html/goal/{type_goal}/goal.html")
+            
+            with open(path, "r") as html:
                 soup = bs(html, 'html.parser')
 
             outer_bar = soup.find("div", {"class": "progress-outer"})
             title_text = soup.find("h3", {"class": "progress-title"})
             goal_text = soup.find("span", {"id": "progress-title"})
             progress_bar = soup.find("div", {"class": "progress-bar"})
-            progress_bar_background = soup.find("div", {"class": "progress"})
+            progress_bar_bg = soup.find("div", {"class": "progress"})
 
             goal_text.string = data['text_value']
             outer_bar['style'] = f"background-color: {data['outer_color']}"
             title_text['style'] = f"color: {data['text_color']}"
             progress_bar['style'] = f"background-color: {data['bar_color']}"
-            progress_bar_background['style'] = f"background-color: {data['background_bar_color']}"
+            progress_bar_bg['style'] = f"background-color: {data['background_bar_color']}"
 
             goal_data[type_goal]['goal_text'] = data['text_value']
             goal_data[type_goal]['outer_bar'] = data['outer_color']
@@ -366,27 +362,20 @@ def update_goal(data):
             goal_data[type_goal]['progress_bar'] = data['bar_color']
             goal_data[type_goal]['progress_bar_background'] = data['background_bar_color']
 
-            with open(f"{local_work('appdata_path')}/VibesBot/web/src/config/goal.json", 'w', encoding='utf-8') as goal_file_w:
-                json.dump(goal_data, goal_file_w, indent=6, ensure_ascii=False)
-            
-            mei_path = normpath_simple(f"{local_work('datadir')}/web/src/html/goal/{type_goal}/goal.html")
-            roaming_path = normpath_simple(f"{local_work('appdata_path')}/VibesBot/web/src/html/goal/{type_goal}/goal.html")
+            manipulate_json(f"{local_work('appdata_path')}/VibesBot/web/src/config/goal.json", "save", goal_data)
 
-
-            with open(mei_path, "w", encoding="utf-8") as html_w:
+            with open(path, "w", encoding="utf-8") as html_w:
                 html_w.write(str(soup))
-
-            with open(roaming_path, "w", encoding="utf-8") as html_w_roaming:
-                html_w_roaming.write(str(soup))
-
+                
+            return str(soup)
+        
         elif data['type_id'] == 'update_goal':
 
             type_goal = data['type_goal']
 
-            mei_path = normpath_simple(f"{local_work('datadir')}/web/src/html/goal/{type_goal}/goal.html")
-            roaming_path = normpath_simple(f"{local_work('appdata_path')}/VibesBot/web/src/html/goal/{type_goal}/goal.html")
+            path = normpath_simple(f"{local_work('appdata_path')}/VibesBot/web/src/html/goal/{type_goal}/goal.html")
 
-            with open(mei_path, "r") as html:
+            with open(path, "r") as html:
                 soup = bs(html, 'html.parser')
             
             return str(soup)

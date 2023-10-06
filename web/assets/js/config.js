@@ -880,9 +880,10 @@ async function ttk_goal(type_id){
         }
 
         var data_parse = JSON.stringify(data);
-        window.pywebview.api.tiktok_goal(data_parse);
 
-        iframe.src = `http://127.0.0.1:7000/src/html/goal/${goal_html_type.value}/goal.html?ts=${new Date().getTime()}`
+        res_html = await window.pywebview.api.tiktok_goal(data_parse);
+
+        iframe.src = `${res_html}ts=${new Date().getTime()}`
 
 
     } else if (type_id == 'get_html'){
@@ -890,6 +891,7 @@ async function ttk_goal(type_id){
         var iframe = document.getElementById('iframe-bar');
         
         var goalText = document.getElementById("goal-text");
+
         var goalTextColorInput = document.getElementById("goal-text-color-text");
         var goalBarColorInput = document.getElementById("goal-bar-color-text");
         var goalBackgroundBarColorInput = document.getElementById("goal-background-bar-color-text");
@@ -899,6 +901,8 @@ async function ttk_goal(type_id){
         var goalBarColorspan = document.getElementById("goal-bar-color-span");
         var goalBackgroundBarColorspan = document.getElementById("goal-background-bar-color-span");
         var goalBackgroundColorspan = document.getElementById("goal-background-color-span");
+
+        var GoalLinkInput = document.getElementById("iframe-link");
         
         data = {
             type_id : type_id,
@@ -916,6 +920,7 @@ async function ttk_goal(type_id){
             document.getElementById('html_editor').hidden = false
 
             goalText.value = html_data_parse.title_text_value;
+
             goalTextColorInput.value = html_data_parse.title_text;
             goalBarColorInput.value = html_data_parse.progress_bar;
             goalBackgroundBarColorInput.value = html_data_parse.progress_bar_background;
@@ -926,7 +931,18 @@ async function ttk_goal(type_id){
             goalBackgroundBarColorspan.style.backgroundColor = html_data_parse.progress_bar_background;
             goalBackgroundColorspan.style.backgroundColor = html_data_parse.outer_bar;
 
-            iframe.src = html_data_parse.html_path
+            DataIframeLinks = {
+                "likes" : "http://127.0.0.1:7000/src/html/goal/likes/iframe.html",
+                "follow" : "http://127.0.0.1:7000/src/html/goal/follow/iframe.html",
+                "gift" : "http://127.0.0.1:7000/src/html/goal/gift/iframe.html",
+                "share" : "http://127.0.0.1:7000/src/html/goal/share/iframe.html",
+                "diamonds": "http://127.0.0.1:7000/src/html/goal/diamonds/iframe.html",
+                "max_viewer" : "http://127.0.0.1:7000/src/html/goal/max_viewer/iframe.html"
+            } 
+
+            iframe.src = `${DataIframeLinks[goal_html_type.value]}?ts=${new Date().getTime()}`
+
+            GoalLinkInput.value = DataIframeLinks[goal_html_type.value]
         }
 
 

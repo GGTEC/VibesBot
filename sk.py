@@ -174,28 +174,24 @@ def receive_message(client_socket):
 
                     broadcast_message(json.dumps(data_goal))
 
-                if 'gifts' in message:
-
-                    print(f'Mensagem recebida: {message}')
+                if 'gift' in message:
 
                     data_goal = {
                         'type' : 'update_goal',
-                        'type_goal' : 'likes',
-                        'html' : utils.update_goal({'type_id' : 'update_goal','type_goal' :'gifts'}),
+                        'type_goal' : 'gift',
+                        'html' : utils.update_goal({'type_id' : 'update_goal','type_goal' :'gift'}),
                         'current' : int(0),
                         'goal' : 1000
                     }
 
                     broadcast_message(json.dumps(data_goal))
 
-                if 'shares' in message:
-
-                    print(f'Mensagem recebida: {message}')
+                if 'share' in message:
 
                     data_goal = {
                         'type' : 'update_goal',
-                        'type_goal' : 'likes',
-                        'html' : utils.update_goal({'type_id' : 'update_goal','type_goal' :'shares'}),
+                        'type_goal' : 'share',
+                        'html' : utils.update_goal({'type_id' : 'update_goal','type_goal' :'share'}),
                         'current' : int(0),
                         'goal' : 1000
                     }
@@ -208,7 +204,7 @@ def receive_message(client_socket):
 
                     data_goal = {
                         'type' : 'update_goal',
-                        'type_goal' : 'likes',
+                        'type_goal' : 'diamonds',
                         'html' : utils.update_goal({'type_id' : 'update_goal','type_goal' :'diamonds'}),
                         'current' : int(0),
                         'goal' : 1000
@@ -218,11 +214,9 @@ def receive_message(client_socket):
 
                 if 'max_viewer' in message:
 
-                    print(f'Mensagem recebida: {message}')
-
                     data_goal = {
                         'type' : 'update_goal',
-                        'type_goal' : 'likes',
+                        'type_goal' : 'max_viewer',
                         'html' : utils.update_goal({'type_id' : 'update_goal','type_goal' :'max_viewer'}),
                         'current' : int(0),
                         'goal' : 1000
@@ -230,14 +224,12 @@ def receive_message(client_socket):
 
                     broadcast_message(json.dumps(data_goal))
 
-                if 'follows' in message:
-
-                    print(f'Mensagem recebida: {message}')
+                if 'follow' in message:
 
                     data_goal = {
                         'type' : 'update_goal',
-                        'type_goal' : 'likes',
-                        'html' : utils.update_goal({'type_id' : 'update_goal','type_goal' :'follows'}),
+                        'type_goal' : 'follow',
+                        'html' : utils.update_goal({'type_id' : 'update_goal','type_goal' :'follow'}),
                         'current' : int(0),
                         'goal' : 1000
                     }

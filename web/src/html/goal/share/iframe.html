@@ -24,6 +24,7 @@
         
             socket.onopen = function(event) {
               console.log("Conectado ao servidor");
+              socket.send('share');
             };
         
             socket.onmessage = function(event) {

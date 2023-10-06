@@ -232,6 +232,7 @@ function start_resizable(){
   
 }
 
+
 function start_color_inputs(){
 
   $("#goal-text-button").click(function(event) {

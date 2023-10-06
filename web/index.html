@@ -1119,197 +1119,198 @@
           </div>
         </div>
         <div class="tab-pane" id="v-pills-goal" role="tabpanel" aria-labelledby="v-pills-goal-tab">
-          <div id="ger-counter-div">
-            <div class="internal-top">
-              <span>Configurar metas</span>
-            </div>
-            <div class="h-scroll flex-wrap flex-wrap justify-content-center">
-              <div class="internal-block">
-                <div class="bg-dark form-block">
-                  <div class="form-group mt-3">
-                    <label for="goal-select">Selecione o tipo de meta</label>
-                    <div class="input-group none-flex mt-3">
-                      <select class="bg-dark" id="goal-select">
-                        <option value="likes">
-                          Likes
-                        </option>
-                        <option value="follow">
-                          Follows
-                        </option>
-                        <option value="share">
-                          Compartilhamentos
-                        </option>
-                        <option value="gift">
-                          Presentes
-                        </option>
-                        <option value="diamonds">
-                          Moedas
-                        </option>
-                        <option value="max_viewer">
-                          Máximo de espectadores
-                        </option>
-                      </select>
-                      <button class="btn bt-submit" type="button" onclick="ttk_goal('get')">
-                        Editar
-                      </button>
+          <div class="internal-top">
+            <span>Configurar metas</span>
+          </div>
+          <div class="h-scroll flex-wrap flex-wrap justify-content-center">
+            <div class="internal-block">
+              <div class="bg-dark form-block">
+                <div class="form-group mt-3">
+                  <label for="goal-select">Selecione o tipo de meta</label>
+                  <div class="input-group none-flex mt-3">
+                    <select class="bg-dark" id="goal-select">
+                      <option value="likes">
+                        Likes
+                      </option>
+                      <option value="follow">
+                        Follows
+                      </option>
+                      <option value="share">
+                        Compartilhamentos
+                      </option>
+                      <option value="gift">
+                        Presentes
+                      </option>
+                      <option value="diamonds">
+                        Moedas
+                      </option>
+                      <option value="max_viewer">
+                        Máximo de espectadores
+                      </option>
+                    </select>
+                    <button class="btn bt-submit" type="button" onclick="ttk_goal('get')">
+                      Editar
+                    </button>
+                  </div>
+                </div>
+                <div class="form-group mt-4 mb-3 ">
+                  <div class="row mt-3">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Status da meta
+                      </p>
                     </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="goal-status" type="checkbox" />
+                        <label for="goal-status" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div id="edit-goal-div" hidden>
+                  <div class="form-group mt-3">
+                    <label for="goal">Meta</label>
+                    <input type="number" class="form-control bg-dark mt-3" id="goal"/>
+                  </div>
+                  <div class="form-group mt-3" id="goal-gift-select" hidden>
+                    <label for="goal">Presente para meta</label>
+                    <select class="bg-dark mt-2" id="goal-gift" data-live-search="true" >
+                    </select>
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="goal-event mb-2">Ao completar a meta</label>
+                    <select class="bg-dark mt-2" id="goal-event" onchange="ttk_goal('select_event')">
+                      <option value="double">
+                        Dobrar
+                      </option>
+                      <option value="add">
+                        Adicionar Valor
+                      </option>
+                      <option value="none">
+                        Não fazer nada
+                      </option>
+                    </select>
+                  </div>
+                  <div class="form-group mt-3" id="goal-add-div">
+                    <label for="goal-add-value">Valor para adicionar</label>
+                    <input type="number" class="form-control bg-dark mt-3" id="goal-add-value"/>
                   </div>
                   <div class="form-group mt-4 mb-3 ">
                     <div class="row mt-3">
                       <div class="col">
                         <p class="form-check-label">
-                          Status da meta
+                          Excutar som ao completar a meta
                         </p>
                       </div>
                       <div class="col-2">
                         <div class="material-switch bg-white d-flex justify-content-end">
-                          <input id="goal-status" type="checkbox" />
-                          <label for="goal-status" class="form-check-label"></label>
+                          <input id="goal-status-sound" type="checkbox" />
+                          <label for="goal-status-sound" class="form-check-label"></label>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div id="edit-goal-div" hidden>
-                    <div class="form-group mt-3">
-                      <label for="goal">Meta</label>
-                      <input type="number" class="form-control bg-dark mt-3" id="goal"/>
-                    </div>
-                    <div class="form-group mt-3" id="goal-gift-select" hidden>
-                      <label for="goal">Presente para meta</label>
-                      <select class="bg-dark mt-2" id="goal-gift" data-live-search="true" >
-                      </select>
-                    </div>
-                    <div class="form-group mt-3">
-                      <label for="goal-event mb-2">Ao completar a meta</label>
-                      <select class="bg-dark mt-2" id="goal-event" onchange="ttk_goal('select_event')">
-                        <option value="double">
-                          Dobrar
-                        </option>
-                        <option value="add">
-                          Adicionar Valor
-                        </option>
-                        <option value="none">
-                          Não fazer nada
-                        </option>
-                      </select>
-                    </div>
-                    <div class="form-group mt-3" id="goal-add-div">
-                      <label for="goal-add-value">Valor para adicionar</label>
-                      <input type="number" class="form-control bg-dark mt-3" id="goal-add-value"/>
-                    </div>
-                    <div class="form-group mt-4 mb-3 ">
-                      <div class="row mt-3">
-                        <div class="col">
-                          <p class="form-check-label">
-                            Excutar som ao completar a meta
-                          </p>
-                        </div>
-                        <div class="col-2">
-                          <div class="material-switch bg-white d-flex justify-content-end">
-                            <input id="goal-status-sound" type="checkbox" />
-                            <label for="goal-status-sound" class="form-check-label"></label>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="form-group mt-3">
-                      <label for="file-select-ttk-goal-sound">Arquivo de audio .mp3</label>
-                      <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar" id="file-select-ttk-goal-sound" onclick="getFolder('file-select-ttk-goal-sound','sound')" required />
-                    </div>
-                    <div class="form-group mt-3">
-                      <label for="audio-volume-ttk-goal-sound">Volume</label>
-                      <input class="w-100" type="range" min="0" max="100" value="50" id="audio-volume-ttk-goal-sound" step="1"
-                        oninput="rangevalue_ttk_goal.innerText = this.value" />
-                      <output id="rangevalue_ttk_goal">50</output>
-                    </div>
-                    <button class="btn bt-submit mt-3" type="button" onclick="ttk_goal('save')">
-                      Salvar
+                  <div class="form-group mt-3">
+                    <label for="file-select-ttk-goal-sound">Arquivo de audio .mp3</label>
+                    <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar" id="file-select-ttk-goal-sound" onclick="getFolder('file-select-ttk-goal-sound','sound')" required />
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="audio-volume-ttk-goal-sound">Volume</label>
+                    <input class="w-100" type="range" min="0" max="100" value="50" id="audio-volume-ttk-goal-sound" step="1"
+                      oninput="rangevalue_ttk_goal.innerText = this.value" />
+                    <output id="rangevalue_ttk_goal">50</output>
+                  </div>
+                  <button class="btn bt-submit mt-3" type="button" onclick="ttk_goal('save')">
+                    Salvar
+                  </button>
+                </div>
+              </div>
+              <div class="bg-dark form-block">
+
+                <h5>Aparência da barra de progresso</h5>
+
+                <div class="form-group mt-3">
+                  <label for="goal-html-select">Selecione o tipo de meta</label>
+                  <div class="input-group none-flex mt-3">
+                    <select class="bg-dark" id="goal-html-select">
+                      <option value="likes">
+                        Likes
+                      </option>
+                      <option value="follow">
+                        Follows
+                      </option>
+                      <option value="share">
+                        Compartilhamentos
+                      </option>
+                      <option value="gift">
+                        Presentes
+                      </option>
+                      <option value="diamonds">
+                        Moedas
+                      </option>
+                      <option value="max_viewer">
+                        Máximo de espectadores
+                      </option>
+                    </select>
+                    <button class="btn bt-submit" type="button" onclick="ttk_goal('get_html')">
+                      Editar
                     </button>
                   </div>
                 </div>
-                <div class="bg-dark form-block">
-
-                  <h5>Aparência da barra de progresso</h5>
-
+                <div id="html_editor" hidden="true">
                   <div class="form-group mt-3">
-                    <label for="goal-html-select">Selecione o tipo de meta</label>
-                    <div class="input-group none-flex mt-3">
-                      <select class="bg-dark" id="goal-html-select">
-                        <option value="likes">
-                          Likes
-                        </option>
-                        <option value="follow">
-                          Follows
-                        </option>
-                        <option value="share">
-                          Compartilhamentos
-                        </option>
-                        <option value="gift">
-                          Presentes
-                        </option>
-                        <option value="diamonds">
-                          Moedas
-                        </option>
-                        <option value="max_viewer">
-                          Máximo de espectadores
-                        </option>
-                      </select>
-                      <button class="btn bt-submit" type="button" onclick="ttk_goal('get_html')">
-                        Editar
-                      </button>
+                    <label for="goal-text">Texto da barra de progresso</label>
+                    <div class="input-group none-flex mt-2">
+                      <input type="text" class="form-control bg-dark mt-3" id="goal-text"/>
+                      <button type="button" class="btn bt-submit mt-3" id="goal-text-button">Salvar</button>
                     </div>
                   </div>
-                  <div id="html_editor" hidden="true">
-                    <div class="form-group mt-3">
-                      <label for="goal-text">Texto da barra de progresso</label>
-                      <div class="input-group none-flex mt-2">
-                        <input type="text" class="form-control bg-dark mt-3" id="goal-text"/>
-                        <button type="button" class="btn bt-submit mt-3" id="goal-text-button">Salvar</button>
-                      </div>
+                  <div class="form-group mt-3">
+                    <label for="goal-text-color">Cor do texto</label>
+                    <div class="input-group none-flex mt-2">
+                      <span class="color-span mt-3" id="goal-text-color-span"></span>
+                      <input type="color" id="goal-text-color"/>
+                      <input type="text" class="form-control bg-dark mt-3" id="goal-text-color-text"/>
+                      <button type="button" class="btn bt-submit mt-3" id="goal-text-color-button">Selecionar</button>
                     </div>
-                    <div class="form-group mt-3">
-                      <label for="goal-text-color">Cor do texto</label>
-                      <div class="input-group none-flex mt-2">
-                        <span class="color-span mt-3" id="goal-text-color-span"></span>
-                        <input type="color" id="goal-text-color"/>
-                        <input type="text" class="form-control bg-dark mt-3" id="goal-text-color-text"/>
-                        <button type="button" class="btn bt-submit mt-3" id="goal-text-color-button">Selecionar</button>
-                      </div>
-                    </div>
-                    <div class="form-group mt-3">
-                      <label for="goal-bar-color">Cor do preenchimento da barra de progresso</label>
-                      <div class="input-group none-flex mt-2">
-                        <span class="color-span mt-3" id="goal-bar-color-span"></span>
-                        <input type="color" id="goal-bar-color"/>
-                        <input type="text" class="form-control bg-dark mt-3" id="goal-bar-color-text"/>
-                        <button type="button" class="btn bt-submit mt-3" id="goal-bar-color-button">Selecionar</button>
-                      </div>
-                    </div>
-                    <div class="form-group mt-3">
-                      <label for="goal-background-bar-color">Cor de fundo da barra de progresso</label>
-                      <div class="input-group none-flex mt-2">
-                        <span class="color-span mt-3" id="goal-background-bar-color-span"></span>
-                        <input type="color" id="goal-background-bar-color"/>
-                        <input type="text" class="form-control bg-dark mt-3" id="goal-background-bar-color-text"/>
-                        <button type="button" class="btn bt-submit mt-3" id="goal-background-bar-color-button">Selecionar</button>
-                      </div>
-                    </div>
-
-                    <div class="form-group mt-3">
-                      <label for="goal-background-color">Cor do bloco de fundo</label>
-                      <div class="input-group none-flex mt-2">
-                        <span class="color-span mt-3" id="goal-background-color-span"></span>
-                        <input type="color" id="goal-background-color"/>
-                        <input type="text" class="form-control bg-dark mt-3" id="goal-background-color-text"/>
-                        <button type="button" class="btn bt-submit mt-3" id="goal-background-color-button">Selecionar</button>
-                      </div>
-                    </div>
-
-                    <iframe class="iframe-bar" id="iframe-bar" src="http://127.0.0.1:7000/src/html/goal/likes/iframe.html" frameborder="0" allowtransparency = "true"></iframe>
-  
                   </div>
-
+                  <div class="form-group mt-3">
+                    <label for="goal-bar-color">Cor do preenchimento da barra de progresso</label>
+                    <div class="input-group none-flex mt-2">
+                      <span class="color-span mt-3" id="goal-bar-color-span"></span>
+                      <input type="color" id="goal-bar-color"/>
+                      <input type="text" class="form-control bg-dark mt-3" id="goal-bar-color-text"/>
+                      <button type="button" class="btn bt-submit mt-3" id="goal-bar-color-button">Selecionar</button>
+                    </div>
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="goal-background-bar-color">Cor de fundo da barra de progresso</label>
+                    <div class="input-group none-flex mt-2">
+                      <span class="color-span mt-3" id="goal-background-bar-color-span"></span>
+                      <input type="color" id="goal-background-bar-color"/>
+                      <input type="text" class="form-control bg-dark mt-3" id="goal-background-bar-color-text"/>
+                      <button type="button" class="btn bt-submit mt-3" id="goal-background-bar-color-button">Selecionar</button>
+                    </div>
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="goal-background-color">Cor do bloco de fundo</label>
+                    <div class="input-group none-flex mt-2">
+                      <span class="color-span mt-3" id="goal-background-color-span"></span>
+                      <input type="color" id="goal-background-color"/>
+                      <input type="text" class="form-control bg-dark mt-3" id="goal-background-color-text"/>
+                      <button type="button" class="btn bt-submit mt-3" id="goal-background-color-button">Selecionar</button>
+                    </div>
+                  </div>
+                  <iframe class="iframe-bar" id="iframe-bar" src="http://127.0.0.1:7000/src/html/goal/likes/iframe.html" frameborder="0" allowtransparency = "true"></iframe>
+                  <div class="form-group mt">
+                    <label for="iframe-link">Link para Vincular o Overlay para metas</label>
+                    <div class="input-group none-flex mt-2">
+                      <input type="text" class="form-control bg-dark mt-3" id="iframe-link" readonly/>
+                    </div>
+                  </div>
                 </div>
+
               </div>
             </div>
           </div>
@@ -2187,6 +2188,14 @@
                     onclick="sr_config_js('event','save')">
                     Salvar
                   </button>
+                </div>
+                <div class="bg-dark form-block">
+                  <div class="form-group mt">
+                    <label for="iframe-link">Link para Vincular o Overlay para notificações de pedidos de musica</label>
+                    <div class="input-group none-flex mt-2">
+                      <input type="text" class="form-control bg-dark mt-3" value="http://127.0.0.1:7000/src/html/music/iframe.html" readonly/>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="modal" id="modal_list_block" tabindex="-1" aria-hidden="true">

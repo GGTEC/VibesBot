@@ -1424,9 +1424,7 @@ def tiktok_goal(data):
 
     type_id = data["type_id"]
 
-    goal_json_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json"
-
-    goal_data = utils.manipulate_json(goal_json_path, "load")
+    goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json", "load")
 
     if type_id == "get":
 
@@ -1434,9 +1432,7 @@ def tiktok_goal(data):
 
         if goal_type == "gift":
 
-            gifts_json_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/gifts.json"
-
-            ttk_data_gifts = utils.manipulate_json(gifts_json_path, "load")
+            ttk_data_gifts = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/gifts.json", "load")
 
             gift_list = []
 
@@ -1469,6 +1465,7 @@ def tiktok_goal(data):
         return json.dumps(data, ensure_ascii=False)
 
     if type_id == "save":
+        
         goal_type = data["goal_type"]
 
         if goal_type == "gift":
@@ -1482,12 +1479,23 @@ def tiktok_goal(data):
         goal_data[goal_type]["sound_file"] = data["sound_file"]
         goal_data[goal_type]["sound_volume"] = data["sound_volume"]
 
-        utils.manipulate_json(goal_json_path, "save", goal_data)
+        utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json", "save", goal_data)
 
     if type_id == "save_html":
-        utils.update_goal(data)
+        
+        try:
+            
+            toast('Salvo')
+            
+            return utils.update_goal(data)
+            
+        except Exception as e:
+            
+            toast('erro')
+            utils.error_log(e)
 
     if type_id == "get_html":
+        
         html_info = utils.update_goal(data)
         data_dump = json.dumps(html_info, ensure_ascii=False)
         return data_dump
@@ -4215,7 +4223,7 @@ def webview_start_app(app_mode):
             userdata_py,
         )
 
-        webview.start(storage_path=utils.local_work("datadir"),private_mode=True,debug=True,http_server=True,http_port=7000)
+        webview.start(storage_path=utils.local_work("datadir"),private_mode=True,debug=debug_status,http_server=True,http_port=7000)
 
     elif app_mode == "chat":
         
@@ -4255,7 +4263,7 @@ def start_ttk():
                 }
 
                 client_ttk: TikTokLiveClient = TikTokLiveClient(
-                    unique_id='ronaldinhososiaoficial',
+                    unique_id=username,
                     enable_detailed_gifts=True,
                     additional_cookies=cookie_data,
                 )
