@@ -1,0 +1,17 @@
+{     
+      "likes": [],
+      "joins": [],
+      "follow": [],
+      "username_color" : {
+                  "status" : 1,
+                  "color" : ""
+      },
+      "border_color" : {
+                  "status" : 1,
+                  "color" : ""
+      },
+      "logs": [
+            
+      ]
+
+}

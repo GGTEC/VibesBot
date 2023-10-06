@@ -1,0 +1,11 @@
+{
+    "status": 1,
+    "command" : "!voz",
+    "user_level": [
+          "spec",
+          "follow",
+          "gifts"
+    ],
+    "delay": "5",
+    "last_use": 0
+}

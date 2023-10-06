@@ -1,0 +1,432 @@
+
+@font-face {
+  font-family: 'Kanit';
+  src: url('./Kanit/Kanit-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Kanit';
+  src: url('./Kanit/Kanit-BlackItalic.ttf') format('truetype');
+  font-weight: 900;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Kanit';
+  src: url('./Kanit/Kanit-Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Kanit';
+  src: url('./Kanit/Kanit-BoldItalic.ttf') format('truetype');
+  font-weight: bold;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Kanit';
+  src: url('./Kanit/Kanit-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Kanit';
+  src: url('./Kanit/Kanit-ExtraBoldItalic.ttf') format('truetype');
+  font-weight: 800;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Kanit';
+  src: url('./Kanit/Kanit-ExtraLight.ttf') format('truetype');
+  font-weight: 200;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Kanit';
+  src: url('./Kanit/Kanit-ExtraLightItalic.ttf') format('truetype');
+  font-weight: 200;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Kanit';
+  src: url('./Kanit/Kanit-Italic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Kanit';
+  src: url('./Kanit/Kanit-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Kanit';
+  src: url('./Kanit/Kanit-LightItalic.ttf') format('truetype');
+  font-weight: 300;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Kanit';
+  src: url('./Kanit/Kanit-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Kanit';
+  src: url('./Kanit/Kanit-MediumItalic.ttf') format('truetype');
+  font-weight: 500;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Kanit';
+  src: url('./Kanit/Kanit-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Kanit';
+  src: url('./Kanit/Kanit-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Kanit';
+  src: url('./Kanit/Kanit-SemiBoldItalic.ttf') format('truetype');
+  font-weight: 600;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Kanit';
+  src: url('./Kanit/Kanit-Thin.ttf') format('truetype');
+  font-weight: 100;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Kanit';
+  src: url('./Kanit/Kanit-ThinItalic.ttf') format('truetype');
+  font-weight: 100;
+  font-style: italic;
+}
+
+body {
+    height: 100%;
+    font-family: 'Kanit';
+    color: white;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background: linear-gradient(170deg, 
+    rgba(107, 74, 140, 0.8) 20%, 
+    rgba(63, 20, 102, 0.5) 20%, 
+    rgba(4, 4, 5, 0.5) 35%, 
+    rgba(49, 57, 73, 0.5) 75%), 
+    linear-gradient(45deg, 
+    rgba(4, 4, 5, 0.8) 0%, 
+    rgba(55, 1, 67, 0.8) 50%, 
+    rgba(36, 8, 47, 0.8) 50%, 
+    rgba(48, 2, 59, 0.8) 100%) #260137;
+    overflow: hidden;
+    
+  }
+
+  .event-message {
+    padding: 1%;
+    margin: 1%;
+    color: white;
+    padding-right: 15px;
+    height: auto;
+    border:  solid #4f016c 3px;
+    overflow-wrap: anywhere;
+    user-select: text;
+    font-size: 18px;
+  }
+
+  .text-muted-1{
+    color: rgb(237, 237, 237) !important;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #594270;
+    border: 0px none transparent;
+    border-radius: 50px;
+    transition: all .25s linear;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover { background: #524267;}
+  ::-webkit-scrollbar-thumb:active { background: #754b99;}
+  ::-webkit-scrollbar-corner { background: #594270; }
+  ::-webkit-scrollbar-track {
+    background: #000000;
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: #594270;
+    border: 0px none transparent;
+  }
+
+.chat-col-new {
+  height: 100vh;
+}
+
+.chat-col-new .nav-link {
+    color: #fff;
+    padding: 2px !important;  
+    border: solid #4f016c 2px !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+}
+
+.chat-col-new .nav-link.active {
+    color: #fff;
+    background-color: #524267 !important;
+}
+
+.chat-col-new .nav-tabs{
+    border-bottom: none !important;
+}
+
+.top-tab {
+    position: relative;
+    height: 5%;
+}
+
+.tab-content {
+    position: relative;
+    height: 100%;
+}
+
+.form-chat {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: auto;
+}
+
+.h-scroll-chat {
+  padding-bottom: 10%;
+  height: 100%;
+  position:relative;
+  overflow-y: scroll;
+}
+
+.users-chat-list {
+  height: 95%;
+  position:relative;
+  overflow-y: scroll !important;
+}
+
+.name-user-list:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.name-users-list:hover {
+  background-color: #4f016c;
+}
+.bg-dark {
+  background-color: #000 !important;
+}
+
+.events-sub-color {
+  color: #b3b3b3;
+}
+
+.chat-message {
+  padding: 1%;
+  margin: 1%;
+  color: white;
+  padding-right: 15px;
+  height: auto;
+  border:  solid #4f016c 3px;
+  overflow-wrap: anywhere;
+  user-select: text;
+  font-size: 18px;
+}
+
+
+.material-switch {
+    margin-top: 14px; 
+}
+  
+.material-switch > input[type="checkbox"] {
+    display: none;   
+}
+  
+.material-switch > label {
+    cursor: pointer;
+    height: 0px;
+    position: relative; 
+    width: 40px;  
+}
+  
+.material-switch > label::before {
+    background: rgb(0, 0, 0);
+    box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    border: #7902a4 1px solid;
+    content: '';
+    height: 16px;
+    margin-top: -8px;
+    position:absolute;
+    opacity: 1;
+    transition: all 0.4s ease-in-out;
+    width: 40px;
+}
+  
+.material-switch > label::after {
+    background: rgb(255, 255, 255);
+    border-radius: 16px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+    content: '';
+    height: 14px;
+    left: 0;
+    margin-top: -3px;
+    position: absolute;
+    top: -4px;
+    transition: all 0.3s ease-in-out;
+    width: 14px;
+}
+  
+.material-switch > input[type="checkbox"]:checked + label::before {
+    background: #7902a4;
+    opacity: 1;
+}
+  
+.material-switch > input[type="checkbox"]:checked + label::after {
+    background: #7902a4;
+    left: 26px;
+}
+
+.purple-border-block {
+    background-color: #000000;
+    border:  solid #4f016c 2px;
+  }
+  
+#user-chat {
+    margin-left: 2px;
+    display: inline-block;
+    font-weight: 500;
+    user-select: text;
+}
+
+#user-chat:hover {
+  text-decoration: underline;
+}
+
+#message-chat {
+    margin-left: 3px;
+    user-select: text;
+}
+
+.message-time {
+  color: rgb(175, 174, 174);
+  margin-right: 3px !important;
+}
+
+.message-time-current {
+  color: rgb(175, 174, 174);
+  margin-right: 3px !important;
+}
+
+.bt-submit {
+    border: solid #6f0196 2px !important;
+    color: white !important;
+    background-color: black !important;
+  }
+  
+.bt-submit:hover {
+    outline: #6f0196;
+    background-color: #6f0196 !important;
+}
+
+.form-control, .form-control:focus {
+    color: white;
+}
+
+select ,input[type=text] {
+    color: white;
+    border-color: #710299 !important;
+}
+
+select:active,
+select:focus,
+input[type="text"]:active ,
+input[type="text"]:focus,
+button:active,
+button:focus {
+    border-color: #5f0181 !important;
+    outline: none !important;
+    box-shadow: inset 0 2px 2px rgba(148, 0, 194, 0.729),0 0 8px rgba(118, 0, 154, 0.781) !important;
+}
+
+.link-style {
+  cursor: pointer;
+  color: #7cc8eb !important;
+  text-decoration: underline;
+}
+
+.chat-block-color-announce {
+  border-left: 10px solid #A42495;
+  animation: colorC 1.5s normal;
+}
+
+.chat-block-color {
+    animation: colorC 1.5s normal;
+}
+  
+@keyframes colorC {  
+  0% { background-color: #4f016c; }
+  100% { background-color: transparent; }
+}
+
+#message-replyed-div {
+  color: rgb(164, 164, 164) !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#message-replyed-div span,#message-replyed-div i {
+  color: rgb(164, 164, 164) !important;
+}
+
+#nav-chat {
+  position: relative;
+  height: 100%;
+}
+
+#nav-users {
+  position: relative;
+  height: 100%;
+}
+.box-collapse-list {
+  background-color: #5f0181;
+}
+
+img.emoji {
+  height: 1em;
+  width: 1em;
+  margin: 0 .05em 0 .1em;
+  vertical-align: -0.1em;
+}

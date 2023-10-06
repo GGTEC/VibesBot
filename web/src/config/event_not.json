@@ -1,0 +1,20 @@
+{
+
+      "ttk_like" : {
+            "delay" : 60,
+            "sound": 0,
+            "sound_loc": "",
+            "sound_volume": "27"
+      },
+      "ttk_share" : {
+            "delay" : 60,
+            "sound": 0,
+            "sound_loc": "",
+            "sound_volume": "27"
+      },
+      "ttk_follow" : {
+            "sound": 0,
+            "sound_loc": "",
+            "sound_volume": "27"
+      }
+}

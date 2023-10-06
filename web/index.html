@@ -1,0 +1,3034 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--...-->
+
+  <title>VibesBot</title>
+
+  <!-- Favicons -->
+  <link href="assets/img/favicon.png" rel="icon">
+  
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta2/dist/css/bootstrap-select.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/flickity@2/dist/flickity.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/black-tie/jquery-ui.css">
+  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+
+  <link rel="stylesheet" href="assets/css/style.css" >
+
+  <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/showdown@1.9.0/dist/showdown.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta2/dist/js/bootstrap-select.min.js"></script>
+  <script src="https://unpkg.com/flickity@2/dist/flickity.pkgd.min.js"></script>
+  <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+  <script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+
+  <script src="assets/vendor/Bs5Utils.js"></script>
+  <script src="assets/vendor/dragscroll.js"></script>
+
+  
+</head>
+<body id="body-pd">
+  <div  id="loading" class="loading">
+    <div class="container">
+        <div class="row vh-100">
+            <div class="col-sm-12 my-auto">
+                <div class="card card-block w-50 mx-auto">
+                    <div class="card-body text-center">
+                        <div class="lds-ellipsis "><div></div><div></div><div></div><div></div></div>
+                        <h5 class="card-title">Carregando... <span id="progress-span"></span></h5>
+                        <div id="progress-start" class="progress h-auto bg-black">
+                          <div class="progress-bar progress-bar-striped progress-bar-animated"
+                            id="progress-bar-start" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <div id="auth" class="d-flex flex-grow-1 flex-column vh-100 d-none">
+    <nav id="main-navbar" class="navbar navbar-expand-lg navbar-light bg-dark top">
+      <div class="container-fluid">
+        <img src="/src/about.png" class="m-2" width="30" height="30" alt="" />
+        <h1 class="navbar-brand text-white mt-1 mb-0">
+          VibesBot Autenticação
+        </h1>
+      </div>
+    </nav>
+
+    <div class="d-flex justify-content-center align-content-center h-100" style="margin-right: 0px !important">
+
+      <div class="w-75 block-auth d-flex flex-column justify-content-center" id="page-1">
+        <h2>Olá, seja bem-vindo ao VibesBot</h2>
+        <p class="mt-1">Para iniciarmos o aplicativo é necessário efetuar a autenticação da sua conta,
+          a autenticação é necessária para termos acessos á alguns dados importantes para o funcionamento
+          correto do sistema, fique tranquilo, todos os dados de autenticação são salvos localmente e somente você e o
+          TikTok tem acesso ao token de autenticação.
+        </p>
+        <p class="mt-1" >
+          Na autenticação será necessário informar o seu SESSIONID e o SIDGUARD, essas informações são para o aplicativo conseguir se conectar totalmente ao tiktok,
+          Caso opte por não inserir estas informações as mensagens de certos usuários não irão aparecer no chat.
+        </p>
+        <p class="mt-4">Bom, agora que já esclarecemos algumas coisas, clique no botão abaixo para iniciarmos.</p>
+        <button class="btn bt-submit mt-1" onclick="auth('next-terms')">Próximo passo</button>
+      </div>
+
+      <div class="w-75 block-auth pt-2 pb-3" id="page-2"  hidden>
+        <h3 class="text-center">Termos de uso</h3>
+        <div class="text-white bg-dark text_resize h-scroll-terms" >
+          <h2>1. Termos</h2>
+          <p>Ao executar o software VibesBot, concorda em cumprir estes
+            termos de uso, todas as leis e regulamentos aplicáveis
+             ​​e concorda que é responsável pelo cumprimento de todas as leis locais aplicáveis. Se você não concordar
+            com algum desses termos, está proibido de usar este software. O código contido neste software são
+            protegidos pelas leis de direitos autorais e marcas comerciais aplicáveis.</p>
+          <h2>2. Uso de Licença</h2>
+          <p>É concedida permissão para baixar uma cópia do software no site
+            VibesBot , apenas para visualização transitória pessoal e não comercial. Esta é a concessão de uma licença, não uma transferência
+            de título e, sob esta licença, você não pode: </p>
+          <ol>
+            <li>modificar ou copiar o código-fonte; </li>
+            <li>usar o código-fonte para qualquer finalidade comercial ou para exibição pública (comercial ou não
+              comercial); </li>
+            <li>tentar descompilar ou fazer engenharia reversa de qualquer código-fonte contido no software VibesBot; </li>
+            <li>remover quaisquer direitos autorais ou outras notações de propriedade do código-fonte; ou </li>
+            <li>transferir o código-fonte materiais para outra pessoa.</li>
+          </ol>
+          <p>Esta licença será automaticamente rescindida se você violar alguma dessas restrições e poderá ser
+            rescindida por GGTECApps a qualquer momento.</p>
+          <h2>3. Isenção de responsabilidade</h2>
+          <ol>
+            <li>A GGTECApps não garante ou faz qualquer representação relativa à precisão, aos resultados
+              prováveis ​​ou à confiabilidade do uso das bibliotecas em seu software ou de outra forma relacionado a esses
+              código-fontes ou em código-fontes vinculados a este software.</li>
+          </ol>
+          <h2>4. Limitações</h2>
+          <p>Em nenhum caso a GGTECApps ou seus fornecedores serão responsáveis ​​por quaisquer danos (incluindo, sem
+            limitação, danos por perda de dados ou lucro ou devido a interrupção dos negócios) decorrentes do uso ou da
+            incapacidade de usar o software VibesBot, mesmo que GGTECApps ou um representante autorizado da
+            GGTECApps tenha sido notificado oralmente ou por escrito da possibilidade de tais danos. Como algumas
+            jurisdições não permitem limitações em garantias implícitas, ou limitações de responsabilidade por danos
+            conseqüentes ou incidentais, essas limitações podem não se aplicar a você.</p>
+          <h2>5. Precisão dos materiais</h2>
+          <p>Os materiais exibidos no software VibesBot podem incluir erros técnicos, tipográficos ou fotográficos.
+            GGTECApps não garante que qualquer material em seu software seja preciso, completo ou atual. GGTECApps
+            pode fazer alterações nos código-fonte contidos em seu software a qualquer momento, sem aviso prévio. 
+            No entanto,
+            GGTECApps não se compromete a atualizar o código-fonte.</p>
+          <h2>6. bibliotecas</h2>
+          <p>A GGTECApps não analisou todas as bibliotecas vinculadas ao seu software e não é responsável pelo conteúdo de
+            nenhum código-fonte vinculado. A inclusão de qualquer código-fonte não implica endosso por GGTECApps do software. O uso de
+            qualquer código-fonte vinculado é por conta e risco do usuário.</p>
+          <h3>7. Modificações</h3>
+          <p>A GGTECApps pode revisar estes termos de serviço do software a qualquer momento, sem aviso prévio. Ao usar
+            este software, você concorda em ficar vinculado à versão atual desses termos de serviço.</p>
+          <h3>8. Lei aplicável</h3>
+          <p>Estes termos e condições são regidos e interpretados de acordo com as leis do GGTECApps e você se
+            submete irrevogavelmente à jurisdição exclusiva dos tribunais naquele estado ou localidade.</p>
+          <h3>9. Informações de contato</h3>
+          <p>Se você quiser entrar em contato conosco para saber mais sobre este 
+            Termo de uso, ou quiser acessar quaisquer informações relativas aos seus 
+            direitos individuais e às suas Informações Pessoais, 
+            você poderá enviar um e-mail para o endereço jheferson1gambet@gmail.com.</p>
+        </div>
+
+        <p class="mt-4">*Caso não concorde com os termos de uso, apenas encerre a aplicação.
+        </p>
+        <button class="btn bt-submit mt-4" onclick="auth('next-auth')">Aceitar</button>
+      </div>
+
+      <div class="w-75 block-auth" id="page-3"  hidden>
+
+        <h4 class="text-white">
+          Inisira as informações requisitadas abaixo.
+        </h4>
+
+        <div class="mt-5">
+          <div class="form-group">
+            <label for="username">Nome de usuário da conta (O mesmo username do seu canal tiktok.com/@(seu_username))</label>
+            <input type="text" class="form-control bg-dark mt-3" id="username" placeholder="Digite o seu nickname do TikTok" required />
+          </div>
+          <div class="form-group mt-3">
+            <label for="sessionid">SESSIONID Obtido no cookie do tiktok (Veja o tutorial no youtube ou na pagina de download)</label>
+            <input type="text" class="form-control bg-dark mt-3" id="sessionid" required />
+          </div>
+          <div class="form-group mt-3">
+            <label for="sessionid">SIDGUARD Obtido no cookie do tiktok (Veja o tutorial no youtube ou na pagina de download)</label>
+            <input type="text" class="form-control bg-dark mt-3" id="sidguard" required />
+          </div>
+          <button type="button" class="btn bt-submit mt-4" onclick="auth('submit-auth')">Salvar</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="main" class="d-none">
+      <div class="l-navbar" id="nav-bar">
+        <nav class="nav">
+              <button class="nav-link active" id="v-pills-start-tab"  data-bs-placement="right" data-bs-toggle="pill" data-bs-target="#v-pills-start" type="button" role="tab" aria-controls="v-pills-start" aria-selected="true">
+              <i class="fa-sharp fa-solid fa-home nav_icon" title="Inicio"></i>
+                <span class="nav_name">Inicio</span>
+              </button>
+              <button class="nav-link" id="v-pills-comandos-tab" data-bs-placement="right" data-bs-toggle="pill" data-bs-target="#v-pills-comandos" type="button" role="tab" aria-controls="v-pills-comandos">
+                <i class="fa-sharp fa-solid fa-terminal nav_icon"  title="Comandos"></i>
+                <span class="nav_name">Comandos</span>
+              </button>
+              <button class="nav-link" id="v-pills-goal-tab"   data-bs-placement="right" data-bs-toggle="pill" data-bs-target="#v-pills-goal" type="button" role="tab" aria-controls="v-pills-goal" >
+                <i class="fa-solid fa-bullseye nav_icon" title="Meta"></i>
+                <span class="nav_name">Meta</span>
+              </button>
+              <button class="nav-link" id="v-pills-alerts-tab"  data-bs-placement="right" onclick="ttk_alerts('get')" data-bs-toggle="pill" data-bs-target="#v-pills-alerts" type="button" role="tab" aria-controls="v-pills-alerts" >
+                <i class="fa-solid fa-bell nav_icon" title="Alertas"></i>
+                <span class="nav_name">Alertas</span>
+              </button>
+              <button class="nav-link" id="v-pills-gifts-tab"   data-bs-placement="right" onclick="ttk_gift('get')" data-bs-toggle="pill" data-bs-target="#v-pills-gifts" type="button" role="tab" aria-controls="v-pills-gifts" >
+                <i class="fa-solid fa-gift nav_icon" title="Presentes"></i>
+                <span class="nav_name">Presentes</span>
+              </button>
+              <button class="nav-link" id="v-pills-queue-tab"  data-bs-placement="right" onclick="queue_js('get','null')" data-bs-toggle="pill" data-bs-target="#v-pills-queue" type="button" role="tab" aria-controls="v-pills-queue" >
+                <i class="fa-solid fa-bars-staggered nav_icon" title="Fila"></i>
+                <span class="nav_name">Fila</span>
+              </button>
+              <button class="nav-link" id="v-pills-giveaway-tab"  data-bs-placement="right" onclick="giveaway_js('get_config','null')" data-bs-toggle="pill" data-bs-target="#v-pills-giveaway" type="button" role="tab" aria-controls="v-pills-giveaway" >
+                <i class="fa-solid fa-dice nav_icon" title="Sorteio"></i>
+                <span class="nav_name">Sorteio</span> 
+              </button>
+              <button class="nav-link" id="v-pills-player-tab"  data-bs-placement="right" data-bs-toggle="pill" data-bs-target="#v-pills-player" type="button" role="tab" aria-controls="v-pills-player">
+                <i class="fa-solid fa-music nav_icon" title="Player"></i>
+                <span class="nav_name">Player</span>
+              </button>
+              <button class="nav-link" id="v-pills-config-tab"  data-bs-placement="right" data-bs-toggle="pill" data-bs-target="#v-pills-config" type="button" role="tab" aria-controls="v-pills-config" >
+                <i class="fa-sharp fa-solid fa-gear nav_icon" title="Configurações"></i>
+                <span class="nav_name">Configurações</span>
+              </button>
+              <button class="nav-link" id="v-pills-sobre-tab"  data-bs-placement="right" onclick="debug_status('debug-get')" data-bs-toggle="pill" data-bs-target="#v-pills-sobre" type="button" role="tab" aria-controls="v-pills-sobre" >
+                <i class="fa-sharp fa-solid fa-circle-question nav_icon" title="Sobre"></i>
+                <span class="nav_name">Sobre</span>
+              </button>
+              <div id="header-toggle" class="nav-link">
+                <i class="fa-solid fa-chevron-right"></i>
+                <span class="nav_name">Ocultar</span> 
+              </div>
+        </nav>
+      </div>
+      <div class="tab-content h-100 w-100" id="v-pills-tabContent">
+        <div class="tab-pane active vh-100" id="v-pills-start" role="tabpanel" aria-labelledby="v-pills-start-tab">
+          <div class="row p-1" style="height: 90%;">
+            <div class="events-col" id="events-col">
+              <div class="out-redeem">
+                <div class="bg-dark redeem-block" style="height: auto;">
+                  <div class="bg-dark top-toggler d-flex justify-content-between" id="recent-toggler"
+                    data-bs-toggle="collapse" data-bs-target="#colapse-recent" aria-expanded="false"
+                    aria-controls="colapse-recent">
+                    <p class="m-1">Eventos recentes</p>
+                    <div>
+                      <span class="m-1" id="recent-icon-toggler"><i class="fa-solid fa-square-caret-down"></i></span>
+                      <span class="m-1" title="Abrir em nova janela" onclick="window.pywebview.api.webview_start_app('events')">
+                        <i class="fa-solid fa-square-arrow-up-right"></i></span>
+                    </div>
+                  </div>
+                  <div class="div-events" id="colapse-recent">
+                    <div class="h-scroll-events dragscroll" id="div-events"></div>
+                  </div>
+                </div>
+                <div class="bg-dark redeem-block" style="height: auto;">
+                  <div class="bg-dark top-toggler d-flex justify-content-between" id="carroucel-toggler" data-bs-toggle="collapse" data-bs-target="#colapse-carroucel" aria-expanded="false" aria-controls="colapse-carroucel">
+                    <p class="m-1">Informações TikTok</p>
+                    <p class="m-1">
+                      <i class="fa-solid fa-square-caret-down"></i>
+                    </p>
+                  </div>
+                  <div class="collapse show m-3" id="colapse-carroucel">
+                    <div class="carousel main-carousel">
+                      <div class="carousel-cell">
+                        <div class="h-100">
+                          <h5 id="like-user-ttk"></h5>
+                          <h5 id="like-counter-ttk"></h5>
+                          <div class="h-100">
+                            <h5 id="progress-title-likes-user"></h5>
+                            <h6 class="progress-title" style="color: #ffffff"><span id="progress-title-likes">Likes</span>: <span id="progress-value-likes"></span></h6>
+                            <div class="progress mt-4" style="height: 10px;">
+                              <div class="progress-bar progress-bar-striped progress-bar-animated" id="progress-bar-likes" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        </div>
+                      </div>  
+                      <div class="carousel-cell">
+                        <div class="h-100">
+                          <span>Principal Espectador</span>
+                          <div id="top-specs" class="container-rank">
+                            <div class="card_rank">
+                              <img id="avatar-rank" src="assets/img/favicon.png" alt="Avatar">
+                              <div class="texto_rank">
+                                  <p id="text-rank-user" class="texto_rank_user"></p>
+                                  <span><i class="fa-solid fa-coins"></i>: <span id="diamonds-rank"></span></span>
+                              </div>
+                          </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="carousel-cell">
+                        <div class="h-100">
+                            <h5 class="progress-title" style="color: #ffffff"><span id="progress-title-follow">Follows</span>: <span id="progress-value-follow"></span></h5>
+                            <div class="progress mt-4" style="height: 10px;">
+                              <div class="progress-bar progress-bar-striped progress-bar-animated" id="progress-bar-follow" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="chat-col" id="chat-col">
+              <div class="nav-chat-div bg-black" style="height: 100%;">
+                <button type="button" id="scrollBtn" class="btn btn-sm scrollBtn">Rolar para novas mensagems</button>
+                <div class="h-scroll-chat d-block" id="chat-block-inner" style="position: relative;">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row bottom-info m-0 d-flex align-content-center">
+            <div class="col-3">
+              <span title="Tempo em live"><i class="fa-solid fa-circle" id="live-dot"></i> :
+                <span id="time-in-live"></span></span>
+            </div>
+            <div class="col-3 d-flex flex-row">
+              <span title="Espectadores"><i class="fa-solid fa-eye ms-1 me-1"></i>:</span>
+                <div id="tiktok-spec" hidden>
+                  <span class="ms-1" id="text-counter-ttk"></span>
+                </div>
+            </div>
+            <div class="col-6">
+              <form id="form-disclosure" onsubmit="disclosure(event,'save')">
+                <div class="input-group">
+                  <input type="text" class="form-control-sm bg-dark" id="message-disclosure-send" style="width: 80%;"
+                    aria-describedby="submit-message-disclosure" placeholder="Insira o texto para divulgação">
+                  <button class="btn btn-sm bt-submit" style="font-size: 12px;" type="submit" id="submit-message-disclosure" title="Salvar mensagem">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                  </button>
+                  <button class="btn btn-sm bt-submit" style="font-size: 12px;" id="copy-dis" type="button" onclick="disclosure('event','copy')">
+                    <i class="fa-solid fa-copy" title="Copiar mensagem"></i>
+                  </button>
+                  <button class="btn btn-sm bt-submit " style="font-size: 12px;" type="button" id="open-chat" onclick="window.pywebview.api.webview_start_app('chat')" title="Abrir chat em uma nova janela">
+                    <i class="fa-solid fa-circle-plus"></i>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane" id="v-pills-comandos" role="tabpanel" aria-labelledby="v-pills-comandos-tab">
+          <div id="commands-div">
+            <div class="internal-top">
+              <span>Comandos</span>
+            </div>
+            <div class="internal-block grid-buttons-commands">
+              <button class="btn redeem-block-bt"  type="button" onclick="show_commands_div('create-commands-div')">
+                <i class="fa-solid fa-circle-plus fa-2xl"></i>
+                  <p>Criar</p>
+              </button>
+              <button class="btn redeem-block-bt" type="button" onclick="show_commands_div('edit-commands-div')">
+                <i class="fa-solid fa-pen-to-square fa-2xl"></i>
+                  <p>Editar</p>
+              </button>
+              <button class="btn redeem-block-bt" type="button" onclick="show_commands_div('del-commands-div')">
+                <i class="fa-solid fa-eraser fa-2xl"></i>
+                <p>Excluir</p>
+              </button>
+              <button class="btn redeem-block-bt" type="button" onclick="show_commands_div('player-commands-div')">
+                <i class="fa-solid fa-music fa-2xl"></i>
+                  <p>Música</p>
+              </button>
+              <button class="btn redeem-block-bt" type="button" onclick="show_commands_div('queue-commands-div')">
+                <i class="fa-solid fa-elevator fa-2xl"></i>
+                  <p>Fila de espera</p>
+              </button>
+              <button class="btn redeem-block-bt" type="button" onclick="show_commands_div('giveaway-commands-div')">
+                <i class="fa-solid fa-circle-dollar-to-slot fa-2xl"></i>
+                  <p>Sorteio</p>
+              </button>
+              <button class="btn redeem-block-bt" type="button" onclick="show_commands_div('tts-commands-div')">
+                <i class="fa-solid fa-terminal fa-2xl"></i>
+                  <p>Texto Falado</p>
+              </button>
+              <button class="btn redeem-block-bt" type="button" onclick="commands_fun('command-list')">
+                <i class="fa-solid fa-terminal fa-2xl"></i>
+                  <p>Lista de comandos</p>
+              </button>
+            </div>
+          </div>
+          <div id="create-commands-div" hidden>
+            <div class="internal-top">
+              <span>Criar comando</span>
+              <button class="btn" onclick="hide_commands_div('create-commands-div')" data-toggle="tooltip" data-bs-placement="left" title="Voltar">
+                <i class="fa-sharp fa-solid fa-chevron-left fa-xl"></i>
+              </button>
+            </div>
+            <div class="h-scroll flex-wrap flex-wrap justify-content-center">
+              <div class="internal-block">
+                <div id="command-create-form" class="bg-dark form-block">
+                  <div class="form-group mt-3">
+                    <label for="new-command">Comando</label>
+                    <input type="text" class="form-control bg-dark mt-3" id="new-command" placeholder="Digite o comando" required pattern="[^\s]+" />
+                    <p class="text-muted text-sm-start m-0">Utilize qualquer prefixo (!,@,#,$), O comando não deve conter espaços</p>
+                  </div>
+                  <div class="form-group mt-2">
+                    <label for="new-delay">Tempo de recarga</label>
+                    <input type="number" class="form-control bg-dark mt-3" min="5" value="5" id="new-delay" required />
+                  </div>
+                  <div class="form-group mb-3 mt-4">
+                    <label for="user-level-command">Permissão</label>
+                    <select class="form-control bg-dark mt-3" id="user-level-command" multiple>
+                      <option value="spec">
+                        Todos
+                      </option>
+                      <option value="follow">
+                        Seguidor
+                      </option>
+                      <option value="gifts">
+                        Presenteador
+                      </option>
+                      <option value="Likes">
+                        Curtidor (Likes)
+                      </option>
+                      <option value="shares">
+                        Compartilhador
+                      </option>
+                      <option value="subscriber">
+                        Inscrito
+                      </option>
+                      <option value="moderator">
+                        Moderador
+                      </option>
+                    </select>
+                  </div>
+                  <div class="form-group mt-3 mb-3 ">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Comando para audio
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="command-audio-status" type="checkbox" onchange="command_audio_status('create')"/>
+                          <label for="command-audio-status" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mt-3" id="command-audio-div" hidden>
+                    <label for="sound-command">Arquivo de audio .mp3</label>
+                    <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar" id="sound-command" onclick="getFolder('sound-command','sound')" required />
+                  </div>
+                  <button type="button" id="submit-create-command" class="btn bt-submit mt-4" onclick="commands_fun('create')">
+                    Salvar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="edit-commands-div" hidden>
+            <div class="internal-top">
+              <span>Editar comando</span>
+              <button class="btn" onclick="hide_commands_div('edit-commands-div')" data-toggle="tooltip"
+                data-bs-placement="left" title="Voltar">
+                <i class="fa-sharp fa-solid fa-chevron-left fa-xl"></i>
+              </button>
+            </div>
+            <div class="h-scroll flex-wrap flex-wrap justify-content-center">
+              <div class="internal-block">
+                <div id="command-edit-form" class="bg-dark form-block">
+                  <div class="form-group mt-3">
+                    <label for="command-select-edit">Selecione o comando</label>
+                    <div class="input-group none-flex mt-3">
+                      <select class="bg-dark" id="command-select-edit"></select>
+                      <button class="btn bt-submit" type="button" onclick="commands_fun('get_info')">
+                        Editar
+                      </button>
+                    </div>
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="edit-command">Comando</label>
+                    <input type="text" class="form-control bg-dark mt-3" id="edit-command" placeholder="Digite o comando" required pattern="[^\s]+" />
+                    <p class="text-muted text-sm-start m-0">Utilize qualquer prefixo (!,@,#,$), O comando não deve conter espaços</p>
+                  </div>
+                  <div class="form-group mt-2">
+                    <label for="edit-delay">Tempo de recarga</label>
+                    <input type="number" class="form-control bg-dark mt-3" min="5" value="5" id="edit-delay" required />
+                  </div>
+                  <div class="form-group mt-4">
+                    <label for="user-level-command-edit">Permissão</label>
+                    <select class="form-control bg-dark mt-3" id="user-level-command-edit" multiple>
+                      <option value="spec">
+                        Todos
+                      </option>
+                      <option value="follow">
+                        Seguidor
+                      </option>
+                      <option value="gifts">
+                        Presenteador
+                      </option>
+                      <option value="Likes">
+                        Curtidor (Likes)
+                      </option>
+                      <option value="shares">
+                        Compartilhador
+                      </option>
+                      <option value="subscriber">
+                        Inscrito
+                      </option>
+                      <option value="moderator">
+                        Moderador
+                      </option>
+                    </select>
+                  </div>
+                  <div class="form-group mt-3 mb-3 ">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Status do comando
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="command-simple-status" type="checkbox" />
+                          <label for="command-simple-status" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mt-3 mb-3 ">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Comando para audio
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="command-audio-status-edit" type="checkbox" onchange="command_audio_status('edit')"/>
+                          <label for="command-audio-status-edit" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mt-3" id="command-audio-div-edit" hidden>
+                    <label for="sound-command-edit">Arquivo de audio .mp3</label>
+                    <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar" id="sound-command-edit" onclick="getFolder('sound-command-edit','sound')" required />
+                  </div>
+                  <button type="button" class="btn bt-submit mt-4" onclick="commands_fun('edit')">
+                    Salvar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="del-commands-div" hidden>
+            <div class="internal-top">
+              <span>Excluir comando</span>
+              <button class="btn" onclick="hide_commands_div('del-commands-div')" data-toggle="tooltip"
+                data-bs-placement="left" title="Voltar">
+                <i class="fa-sharp fa-solid fa-chevron-left fa-xl"></i>
+              </button>
+            </div>
+            <div class="h-scroll flex-wrap flex-wrap justify-content-center">
+              <div class="internal-block">
+                <div id="command-del-form" class="bg-dark form-block">
+                  <div class="form-group mb-3 mt-2">
+                    <label for="command-select-del">Selecione o comando</label>
+                    <select class="form-control bg-dark mt-3" id="command-select-del"></select>
+                  </div>
+                  <button type="button" id="submit-del-command" class="btn bt-submit mt-4"  onclick="commands_fun('delete')">
+                    Excluir
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="player-commands-div" hidden>
+            <div class="internal-top">
+              <span>Comandos de Música</span>
+              <button type="button" class="btn" onclick="hide_commands_div('player-commands-div')"
+                data-toggle="tooltip" data-bs-placement="left" title="Voltar">
+                <i class="fa-sharp fa-solid fa-chevron-left fa-xl"></i>
+              </button>
+            </div>
+            <div class="h-scroll flex-wrap flex-wrap justify-content-center">
+              <div class="internal-block">
+                <div class="bg-dark form-block">
+                  <label for="command-player-edit">Selecione o comando para configurar.</label>
+                  <div class="input-group none-flex mt-3">
+                    <select class="form-control bg-dark" id="command-player-edit">
+                      <option value="request">
+                        Pedidos
+                      </option>
+                      <option value="volume">
+                        Volume
+                      </option>
+                      <option value="skip">
+                        Skip
+                      </option>
+                      <option value="atual">
+                        Atual
+                      </option>
+                      <option value="next">
+                        Proxima
+                      </option>
+                    </select>
+                    <button class="btn bt-submit" type="button" onclick="sr_config_js('event','get_command')">
+                      Editar
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="internal-block">
+                <div class="bg-dark form-block mt-0" id="command_player_form" hidden>
+                  <div class="form-group mt-3">
+                    <label for="command-player-command">Comando</label>
+                    <input type="text" class="form-control bg-dark mt-3" id="command-player-command" />
+                  </div>
+                  <div class="form-group mt-4">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">Status do comando</p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="command-player-status" type="checkbox" />
+                          <label for="command-player-status" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mt-2">
+                    <label for="command-player-delay">Tempo de recarga</label>
+                    <input type="number" min="5" value="5" class="form-control bg-dark mt-3" id="command-player-delay" />
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="command-player-perm">Permissão</label>
+                    <select class="form-control bg-dark mt-3" id="command-player-perm" multiple>
+                      <option value="spec">
+                        Todos
+                      </option>
+                      <option value="follow">
+                        Seguidor
+                      </option>
+                      <option value="gifts">
+                        Presenteador
+                      </option>
+                      <option value="Likes">
+                        Curtidor (Likes)
+                      </option>
+                      <option value="shares">
+                        Compartilhador
+                      </option>
+                      <option value="subscriber">
+                        Inscrito
+                      </option>
+                      <option value="moderator">
+                        Moderador
+                      </option>
+                    </select>
+                  </div>
+                  <button class="btn bt-submit mt-3" type="button" onclick="sr_config_js('event','save_command')">
+                    Salvar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="queue-commands-div" hidden>
+            <div class="internal-top">
+              <span>Comandos da Fila de espera</span>
+              <button type="button" class="btn" onclick="hide_commands_div('queue-commands-div')"
+                data-toggle="tooltip" data-bs-placement="left" title="Voltar">
+                <i class="fa-sharp fa-solid fa-chevron-left fa-xl"></i>
+              </button>
+            </div>
+            <div class="h-scroll flex-wrap flex-wrap justify-content-center">
+              <div class="internal-block">
+                <div class="bg-dark form-block">
+                  <label for="command-queue-select">Selecione o comando para configurar.</label>
+                  <div class="input-group none-flex mt-3">
+                    <select class="form-control bg-dark" id="command-queue-select">
+                      <option value="check_queue">
+                        Verificar a lista
+                      </option>
+                      <option value="rem_queue">
+                        Remove nome da lista
+                      </option>
+                      <option value="add_queue">
+                        Adiciona nome na lista
+                      </option>
+                    </select>
+                    <button class="btn bt-submit" type="button" onclick="queue_js('get_commands')">
+                      Editar
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="internal-block">
+                <div class="bg-dark form-block mt-0" id="command_queue_form" hidden>
+                  <div class="form-group mt-3">
+                    <label for="command-queue-command">Comando</label>
+                    <input type="text" class="form-control bg-dark mt-3" id="command-queue-command" />
+                  </div>
+                  <div class="form-group mt-4">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">Status do comando</p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="command-queue-status" type="checkbox" />
+                          <label for="command-queue-status" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mt-2">
+                    <label for="command-player-delay">Tempo de recarga</label>
+                    <input type="number" min="5" value="5" class="form-control bg-dark mt-3" id="command-queue-delay" />
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="command-player-perm">Permissão</label>
+                    <select class="form-control bg-dark mt-3" id="command-queue-perm" multiple>
+                      <option value="spec">
+                        Todos
+                      </option>
+                      <option value="follow">
+                        Seguidor
+                      </option>
+                      <option value="gifts">
+                        Presenteador
+                      </option>
+                      <option value="Likes">
+                        Curtidor (Likes)
+                      </option>
+                      <option value="shares">
+                        Compartilhador
+                      </option>
+                      <option value="subscriber">
+                        Inscrito
+                      </option>
+                      <option value="moderator">
+                        Moderador
+                      </option>
+                    </select>
+                  </div>
+                  <button class="btn bt-submit mt-3" type="button" onclick="queue_js('save_commands')">
+                    Salvar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="counter-commands-div" hidden>
+            <div class="internal-top">
+              <span>Comandos do Contador</span>
+              <button type="button" class="btn" onclick="hide_commands_div('counter-commands-div')"
+                data-toggle="tooltip" data-bs-placement="left" title="Voltar">
+                <i class="fa-sharp fa-solid fa-chevron-left fa-xl"></i>
+              </button>
+            </div>
+            <div class="h-scroll flex-wrap flex-wrap justify-content-center">
+              <div class="internal-block">
+                <div class="bg-dark form-block">
+                  <label for="command-counter-select">Selecione o comando para configurar.</label>
+                  <div class="input-group none-flex mt-3">
+                    <select class="form-control bg-dark" id="command-counter-select">
+                      <option value="check_counter">
+                        Verificar a contagem
+                      </option>
+                      <option value="reset_counter">
+                        Reiniciar o contador
+                      </option>
+                      <option value="set_counter">
+                        Aplicar um valor ao contador
+                      </option>
+                    </select>
+                    <button class="btn bt-submit" type="button" onclick="counter_js('get_counter_commands','event')">
+                      Editar
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="internal-block">
+                <div class="bg-dark form-block mt-0" id="command_counter_form" hidden>
+                  <div class="form-group mt-3">
+                    <label for="command-counter-command">Comando</label>
+                    <input type="text" class="form-control bg-dark mt-3" id="command-counter-command" />
+                  </div>
+                  <div class="form-group mt-4">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">Status do comando</p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="command-counter-status" type="checkbox" />
+                          <label for="command-counter-status" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mt-2">
+                    <label for="command-player-delay">Tempo de recarga</label>
+                    <input type="number" min="5" value="5" class="form-control bg-dark mt-3" id="command-counter-delay" />
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="command-player-perm">Permissão</label>
+                    <select class="form-control bg-dark mt-3" id="command-counter-perm" multiple>
+                      <option value="spec">
+                        Todos
+                      </option>
+                      <option value="follow">
+                        Seguidor
+                      </option>
+                      <option value="gifts">
+                        Presenteador
+                      </option>
+                      <option value="Likes">
+                        Curtidor (Likes)
+                      </option>
+                      <option value="shares">
+                        Compartilhador
+                      </option>
+                      <option value="subscriber">
+                        Inscrito
+                      </option>
+                      <option value="moderator">
+                        Moderador
+                      </option>
+                    </select>
+                  </div>
+                  <button class="btn bt-submit mt-3" type="button"
+                    onclick="counter_js('save_counter_commands','event')">
+                    Salvar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="giveaway-commands-div" hidden>
+            <div class="internal-top">
+              <span>Comandos de Sorteio</span>
+              <button type="button" class="btn" onclick="hide_commands_div('giveaway-commands-div')"
+                data-toggle="tooltip" data-bs-placement="left" title="Voltar">
+                <i class="fa-sharp fa-solid fa-chevron-left fa-xl"></i>
+              </button>
+            </div>
+            <div class="h-scroll flex-wrap flex-wrap justify-content-center">
+              <div class="internal-block">
+                <div class="bg-dark form-block">
+                  <label for="command-giveaway-select">Selecione o comando para configurar.</label>
+                  <div class="input-group none-flex mt-3">
+                    <select class="form-control bg-dark" id="command-giveaway-select">
+                      <option value="execute_giveaway">
+                        Executar sorteio
+                      </option>
+                      <option value="clear_giveaway">
+                        Limpar lista de sorteio
+                      </option>
+                      <option value="check_name">
+                        Verficar nome na lista
+                      </option>
+                      <option value="check_self_name">
+                        Verificar proprio nome na lista
+                      </option>
+                      <option value="add_user">
+                        Adicionar nome na lista
+                      </option>
+                    </select>
+                    <button class="btn bt-submit" type="button" onclick="giveaway_js('event','get_commands')">
+                      Editar
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="internal-block">
+                <div class="bg-dark form-block mt-0" id="command_giveaway_form" hidden>
+                  <div class="form-group mt-3">
+                    <label for="command-counter-command">Comando</label>
+                    <input type="text" class="form-control bg-dark mt-3" id="command-giveaway-command" />
+                  </div>
+                  <div class="form-group mt-4">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">Status do comando</p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="command-giveaway-status" type="checkbox" />
+                          <label for="command-giveaway-status" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mt-2">
+                    <label for="command-player-delay">Tempo de recarga</label>
+                    <input type="number" min="5" value="5" class="form-control bg-dark mt-3" id="command-giveaway-delay" />
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="command-player-perm">Permissão</label>
+                    <select class="form-control bg-dark mt-3" id="command-giveaway-perm" multiple>
+                      <option value="spec">
+                        Todos
+                      </option>
+                      <option value="follow">
+                        Seguidor
+                      </option>
+                      <option value="gifts">
+                        Presenteador
+                      </option>
+                      <option value="Likes">
+                        Curtidor (Likes)
+                      </option>
+                      <option value="shares">
+                        Compartilhador
+                      </option>
+                      <option value="subscriber">
+                        Inscrito
+                      </option>
+                      <option value="moderator">
+                        Moderador
+                      </option>
+                    </select>
+                  </div>
+                  <button class="btn bt-submit mt-3" type="button" onclick="giveaway_js('event','save_commands')">
+                    Salvar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="tts-commands-div" hidden>
+            <div class="internal-top">
+              <span>Comandos de Sorteio</span>
+              <button type="button" class="btn" onclick="hide_commands_div('tts-commands-div')"
+                data-toggle="tooltip" data-bs-placement="left" title="Voltar">
+                <i class="fa-sharp fa-solid fa-chevron-left fa-xl"></i>
+              </button>
+            </div>
+            <div class="h-scroll flex-wrap flex-wrap justify-content-center">
+              <div class="internal-block">
+                <div class="bg-dark form-block">
+                  <div class="form-group mt-3">
+                    <label for="tts-command">Comando</label>
+                    <input type="text" class="form-control bg-dark mt-3" id="tts-command" placeholder="Digite o comando" required pattern="[^\s]+" />
+                    <p class="text-muted text-sm-start m-0">Utilize qualquer prefixo (!,@,#,$), O comando não deve conter espaços</p>
+                  </div>
+                  <div class="form-group mt-2">
+                    <label for="tts-delay">Tempo de recarga</label>
+                    <input type="number" class="form-control bg-dark mt-3" min="5" value="5" id="tts-delay" required />
+                  </div>
+                  <div class="form-group mt-4">
+                    <label for="user-level-tts">Permissão</label>
+                    <select class="form-control bg-dark mt-3" id="user-level-tts" multiple>
+                      <option value="spec">
+                        Todos
+                      </option>
+                      <option value="follow">
+                        Seguidor
+                      </option>
+                      <option value="gifts">
+                        Presenteador
+                      </option>
+                      <option value="Likes">
+                        Curtidor (Likes)
+                      </option>
+                      <option value="shares">
+                        Compartilhador
+                      </option>
+                      <option value="subscriber">
+                        Inscrito
+                      </option>
+                      <option value="moderator">
+                        Moderador
+                      </option>
+                    </select>
+                  </div>
+                  <div class="form-group mt-3">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Status do comando
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="command-tts-status" type="checkbox" />
+                          <label for="command-tts-status" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <button type="button" class="btn bt-submit mt-4" onclick="tts_command('save')">
+                    Salvar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane" id="v-pills-giveaway" role="tabpanel" aria-labelledby="v-pills-giveaway-tab">
+          <div id="ger-giveaway-div">
+            <div class="internal-top">
+              <span>Sorteio</span>
+            </div>
+            <div class="h-scroll flex-wrap flex-wrap justify-content-center">
+              <div class="internal-block">
+                <div class="bg-dark form-block">
+                  <h4>Configurações</h4>
+                  <form id="giveaway-config-form" onsubmit="giveaway_js(event,'save_config')">
+                    <div class="form-group mt-4">
+                      <label for="giveaway-name">Nome do sorteio</label>
+                      <input type="text" class="form-control bg-dark mt-3" id="giveaway-name" required autocomplete="off" />
+                    </div>
+                    <div class="form-group mb-3 mt-4">
+                      <label for="user-level-giveaway">Permissão necessária.</label>
+                      <select class="form-control bg-dark mt-3" id="user-level-giveaway" multiple>
+                        <option value="spec">
+                          Todos
+                        </option>
+                        <option value="follow">
+                          Seguidor
+                        </option>
+                        <option value="gifts">
+                          Presenteador
+                        </option>
+                        <option value="Likes">
+                          Curtidor (Likes)
+                        </option>
+                        <option value="shares">
+                          Compartilhador
+                        </option>
+                        <option value="subscriber">
+                          Inscrito
+                        </option>
+                        <option value="moderator">
+                          Moderador
+                        </option>
+                      </select>
+                    </div>
+                    <div class="row mt-4">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Limpar nomes ao sortear.
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="giveaway-clear-names-end" type="checkbox" />
+                          <label for="giveaway-clear-names-end" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row mt-2">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Ativar sorteio.
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="giveaway-enable" type="checkbox" />
+                          <label for="giveaway-enable" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row mt-2">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Multiplas entradas no sorteio.
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="giveaway-mult" type="checkbox" />
+                          <label for="giveaway-mult" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                    <p class="text-muted">
+                      *Para Ativar/Desativar um sorteio configurado, desative a opção acima e salve a configuração
+                    </p>
+                    <button type="submit" id="submit-giveaway-config" class="btn bt-submit mt-4">
+                      Salvar
+                    </button>
+                  </form>
+                </div>
+                <div class="bg-dark form-block">
+                  <h5>Adicionar usuário</h5>
+                  <form id="giveaway-add-user-form" onsubmit="giveaway_js(event,'add_user')">
+                    <div class="form-group mt-4">
+                      <input type="text" class="form-control bg-dark mt-3" id="giveaway-add-user" placeholder="Nome do usuário"/>
+                    </div>
+                    <button type="submit" class="btn bt-submit mt-4">
+                      Adicionar
+                    </button>
+                  </form>
+                </div>
+                <div class="bg-dark form-block">
+                  <div>
+                    <button type="button" class="btn bt-submit btn-block w-100 " onclick="giveaway_js(event,'execute')">
+                      Executar sorteio
+                    </button>
+                    <button type="button" class="btn bt-submit btn-block w-100 mt-3" onclick="giveaway_js(event,'show_names')">
+                      Exibir lista de participantes
+                    </button>
+                    <button type="button" class="btn bt-submit btn-block w-100 mt-3" onclick="giveaway_js(event,'clear_list')">
+                      Limpar lista de participantes
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="modal" id="giveaway-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+                aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+                  <div class="modal-content bg-dark custom-border-modal h-50">
+                    <div class="modal-body m-1">
+                      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                      <table class="table" id="list_giveaway_names">
+                        <thead class="text-white">
+                          <tr>
+                            <th scope="col">Usuário</th>
+                          </tr>
+                        </thead>
+                        <tbody id="giveaway-list-body"></tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane" id="v-pills-goal" role="tabpanel" aria-labelledby="v-pills-goal-tab">
+          <div id="ger-counter-div">
+            <div class="internal-top">
+              <span>Configurar metas</span>
+            </div>
+            <div class="h-scroll flex-wrap flex-wrap justify-content-center">
+              <div class="internal-block">
+                <div class="bg-dark form-block">
+                  <div class="form-group mt-3">
+                    <label for="goal-select">Selecione o tipo de meta</label>
+                    <div class="input-group none-flex mt-3">
+                      <select class="bg-dark" id="goal-select">
+                        <option value="likes">
+                          Likes
+                        </option>
+                        <option value="follow">
+                          Follows
+                        </option>
+                        <option value="share">
+                          Compartilhamentos
+                        </option>
+                        <option value="gift">
+                          Presentes
+                        </option>
+                        <option value="diamonds">
+                          Moedas
+                        </option>
+                        <option value="max_viewer">
+                          Máximo de espectadores
+                        </option>
+                      </select>
+                      <button class="btn bt-submit" type="button" onclick="ttk_goal('get')">
+                        Editar
+                      </button>
+                    </div>
+                  </div>
+                  <div class="form-group mt-4 mb-3 ">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Status da meta
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="goal-status" type="checkbox" />
+                          <label for="goal-status" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="edit-goal-div" hidden>
+                    <div class="form-group mt-3">
+                      <label for="goal">Meta</label>
+                      <input type="number" class="form-control bg-dark mt-3" id="goal"/>
+                    </div>
+                    <div class="form-group mt-3" id="goal-gift-select" hidden>
+                      <label for="goal">Presente para meta</label>
+                      <select class="bg-dark mt-2" id="goal-gift" data-live-search="true" >
+                      </select>
+                    </div>
+                    <div class="form-group mt-3">
+                      <label for="goal-event mb-2">Ao completar a meta</label>
+                      <select class="bg-dark mt-2" id="goal-event" onchange="ttk_goal('select_event')">
+                        <option value="double">
+                          Dobrar
+                        </option>
+                        <option value="add">
+                          Adicionar Valor
+                        </option>
+                        <option value="none">
+                          Não fazer nada
+                        </option>
+                      </select>
+                    </div>
+                    <div class="form-group mt-3" id="goal-add-div">
+                      <label for="goal-add-value">Valor para adicionar</label>
+                      <input type="number" class="form-control bg-dark mt-3" id="goal-add-value"/>
+                    </div>
+                    <div class="form-group mt-4 mb-3 ">
+                      <div class="row mt-3">
+                        <div class="col">
+                          <p class="form-check-label">
+                            Excutar som ao completar a meta
+                          </p>
+                        </div>
+                        <div class="col-2">
+                          <div class="material-switch bg-white d-flex justify-content-end">
+                            <input id="goal-status-sound" type="checkbox" />
+                            <label for="goal-status-sound" class="form-check-label"></label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group mt-3">
+                      <label for="file-select-ttk-goal-sound">Arquivo de audio .mp3</label>
+                      <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar" id="file-select-ttk-goal-sound" onclick="getFolder('file-select-ttk-goal-sound','sound')" required />
+                    </div>
+                    <div class="form-group mt-3">
+                      <label for="audio-volume-ttk-goal-sound">Volume</label>
+                      <input class="w-100" type="range" min="0" max="100" value="50" id="audio-volume-ttk-goal-sound" step="1"
+                        oninput="rangevalue_ttk_goal.innerText = this.value" />
+                      <output id="rangevalue_ttk_goal">50</output>
+                    </div>
+                    <button class="btn bt-submit mt-3" type="button" onclick="ttk_goal('save')">
+                      Salvar
+                    </button>
+                  </div>
+                </div>
+                <div class="bg-dark form-block">
+
+                  <h5>Aparência da barra de progresso</h5>
+
+                  <div class="form-group mt-3">
+                    <label for="goal-html-select">Selecione o tipo de meta</label>
+                    <div class="input-group none-flex mt-3">
+                      <select class="bg-dark" id="goal-html-select">
+                        <option value="likes">
+                          Likes
+                        </option>
+                        <option value="follow">
+                          Follows
+                        </option>
+                        <option value="share">
+                          Compartilhamentos
+                        </option>
+                        <option value="gift">
+                          Presentes
+                        </option>
+                        <option value="diamonds">
+                          Moedas
+                        </option>
+                        <option value="max_viewer">
+                          Máximo de espectadores
+                        </option>
+                      </select>
+                      <button class="btn bt-submit" type="button" onclick="ttk_goal('get_html')">
+                        Editar
+                      </button>
+                    </div>
+                  </div>
+                  <div id="html_editor" hidden="true">
+                    <div class="form-group mt-3">
+                      <label for="goal-text">Texto da barra de progresso</label>
+                      <div class="input-group none-flex mt-2">
+                        <input type="text" class="form-control bg-dark mt-3" id="goal-text"/>
+                        <button type="button" class="btn bt-submit mt-3" id="goal-text-button">Salvar</button>
+                      </div>
+                    </div>
+                    <div class="form-group mt-3">
+                      <label for="goal-text-color">Cor do texto</label>
+                      <div class="input-group none-flex mt-2">
+                        <span class="color-span mt-3" id="goal-text-color-span"></span>
+                        <input type="color" id="goal-text-color"/>
+                        <input type="text" class="form-control bg-dark mt-3" id="goal-text-color-text"/>
+                        <button type="button" class="btn bt-submit mt-3" id="goal-text-color-button">Selecionar</button>
+                      </div>
+                    </div>
+                    <div class="form-group mt-3">
+                      <label for="goal-bar-color">Cor do preenchimento da barra de progresso</label>
+                      <div class="input-group none-flex mt-2">
+                        <span class="color-span mt-3" id="goal-bar-color-span"></span>
+                        <input type="color" id="goal-bar-color"/>
+                        <input type="text" class="form-control bg-dark mt-3" id="goal-bar-color-text"/>
+                        <button type="button" class="btn bt-submit mt-3" id="goal-bar-color-button">Selecionar</button>
+                      </div>
+                    </div>
+                    <div class="form-group mt-3">
+                      <label for="goal-background-bar-color">Cor de fundo da barra de progresso</label>
+                      <div class="input-group none-flex mt-2">
+                        <span class="color-span mt-3" id="goal-background-bar-color-span"></span>
+                        <input type="color" id="goal-background-bar-color"/>
+                        <input type="text" class="form-control bg-dark mt-3" id="goal-background-bar-color-text"/>
+                        <button type="button" class="btn bt-submit mt-3" id="goal-background-bar-color-button">Selecionar</button>
+                      </div>
+                    </div>
+
+                    <div class="form-group mt-3">
+                      <label for="goal-background-color">Cor do bloco de fundo</label>
+                      <div class="input-group none-flex mt-2">
+                        <span class="color-span mt-3" id="goal-background-color-span"></span>
+                        <input type="color" id="goal-background-color"/>
+                        <input type="text" class="form-control bg-dark mt-3" id="goal-background-color-text"/>
+                        <button type="button" class="btn bt-submit mt-3" id="goal-background-color-button">Selecionar</button>
+                      </div>
+                    </div>
+
+                    <iframe class="iframe-bar" id="iframe-bar" src="http://127.0.0.1:7000/src/html/goal/likes/iframe.html" frameborder="0" allowtransparency = "true"></iframe>
+  
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane" id="v-pills-alerts" role="tabpanel" aria-labelledby="v-pills-alerts-tab">
+          <div id="ger-alerts-div">
+            <div class="internal-top">
+              <span>Configurar Alertas/Notificações gerais</span>
+            </div>
+            <div class="h-scroll flex-wrap flex-wrap justify-content-center">
+              <div class="internal-block">
+                <div class="bg-dark form-block">
+                  <h5>Notificações para follow</h5>
+                  <div class="row mt-2">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Ativar notificação sonora ao receber follow
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="ttk-sound-status-follow" type="checkbox" />
+                        <label for="ttk-sound-status-follow" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="file-select-ttk-follow">Arquivo de audio .mp3</label>
+                    <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar" id="file-select-ttk-follow" onclick="getFolder('file-select-ttk-follow','sound')" required />
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="audio-volume-ttk-follow">Volume</label>
+                    <input class="w-100" type="range" min="0" max="100" value="50" id="audio-volume-ttk-follow" step="1"
+                      oninput="rangevalue_ttk_follow.innerText = this.value" />
+                    <output id="rangevalue_ttk_follow">50</output>
+                  </div>
+                  <button type="button" class="bt-submit btn bg-dark mt-5" onclick="ttk_alerts('save_sound_follow')">
+                    Salvar
+                  </button>
+                </div>
+                <div class="bg-dark form-block">
+                <h5>Notificações para likes</h5>
+                  <div class="row">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Ativar notificação sonora ao receber likes
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="ttk-sound-status-like" type="checkbox" />
+                        <label for="ttk-sound-status-like" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="file-select-ttk-like">Arquivo de audio .mp3</label>
+                    <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar" id="file-select-ttk-like" onclick="getFolder('file-select-ttk-like','sound')" required />
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="ttk-like-delay">Tempo de delay em segundos para notificações de likes (Bom para evitar flood ao chat de notificações)</label>
+                    <input type="number" class="form-control bg-dark mt-3" id="ttk-like-delay"/>
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="audio-volume-ttk-like">Volume</label>
+                    <input class="w-100" type="range" min="0" max="100" value="50" id="audio-volume-ttk-like" step="1"
+                      oninput="rangevalue_ttk_like.innerText = this.value" />
+                    <output id="rangevalue_ttk_like">50</output>
+                  </div>
+                  <button type="button" class="bt-submit btn bg-dark mt-5" onclick="ttk_alerts('save_sound_like')">
+                    Salvar
+                  </button>
+                </div>
+                <div class="bg-dark form-block">
+                  <h5>Notificações para Compartilhamentos</h5>
+                    <div class="row">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Ativar notificação sonora para Compartilhamentos
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="ttk-sound-status-share" type="checkbox" />
+                          <label for="ttk-sound-status-share" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group mt-3">
+                      <label for="file-select-ttk-share">Arquivo de audio .mp3</label>
+                      <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar" id="file-select-ttk-share" onclick="getFolder('file-select-ttk-share','sound')" required />
+                    </div>
+                    <div class="form-group mt-3">
+                      <label for="ttk-share-delay">Tempo de delay em segundos para notificações de likes (Bom para evitar flood ao chat de notificações)</label>
+                      <input type="number" class="form-control bg-dark mt-3" id="ttk-share-delay"/>
+                    </div>
+                    <div class="form-group mt-3">
+                      <label for="audio-volume-ttk-share">Volume</label>
+                      <input class="w-100" type="range" min="0" max="100" value="50" id="audio-volume-ttk-share" step="1"
+                        oninput="rangevalue_ttk_share.innerText = this.value" />
+                      <output id="rangevalue_ttk_share">50</output>
+                    </div>
+                    <button type="button" class="bt-submit btn bg-dark mt-5" onclick="ttk_alerts('save_sound_share')">
+                      Salvar
+                    </button>
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane" id="v-pills-gifts" role="tabpanel" aria-labelledby="v-pills-gifts-tab">
+          <div id="ger-gifts-div">
+            <div class="internal-top">
+              <span>Configurar Alertas/Notificações de presentes</span>
+            </div>
+            <div class="h-scroll flex-wrap flex-wrap justify-content-center">
+              <div class="internal-block">
+                  <div class="bg-dark form-block">
+                    <h5 class="mb-5">Configurar notificação para presentes</h5>
+                    <h6>Notificações por valor (em diamantes) dos presentes</h6>
+                    <div class="form-group mt-3">
+                      <label for="gift_diamond">Selecione um valor de diamantes para configurar</label>
+                      <div class="input-group none-flex mt-3">
+                        <select class="bg-dark" id="gift_diamond">
+                          <option value="1">1</option>
+                          <option value="5">5</option>
+                          <option value="10">10</option>
+                          <option value="20">20</option>
+                          <option value="30">30</option>
+                          <option value="44999">44999</option>
+                          <option value="39999">39999</option>
+                          <option value="34500">34500</option>
+                          <option value="34000">34000</option>
+                          <option value="30000">30000</option>
+                          <option value="29999">29999</option>
+                          <option value="26999">26999</option>
+                          <option value="25999">25999</option>
+                          <option value="20000">20000</option>
+                          <option value="19999">19999</option>
+                          <option value="15000">15000</option>
+                          <option value="13999">13999</option>
+                          <option value="12000">12000</option>
+                          <option value="10999">10999</option>
+                          <option value="10000">10000</option>
+                          <option value="9999">9999</option>
+                          <option value="9888">9888</option>
+                          <option value="8800">8800</option>
+                          <option value="7999">7999</option>
+                          <option value="7000">7000</option>
+                          <option value="6999">6999</option>
+                          <option value="5999">5999</option>
+                          <option value="5000">5000</option>
+                          <option value="4999">4999</option>
+                          <option value="4888">4888</option>
+                          <option value="4000">4000</option>
+                          <option value="3999">3999</option>
+                          <option value="3000">3000</option>
+                          <option value="2999">2999</option>
+                          <option value="2988">2988</option>
+                          <option value="2599">2599</option>
+                          <option value="2150">2150</option>
+                          <option value="1999">1999</option>
+                          <option value="1800">1800</option>
+                          <option value="1700">1700</option>
+                          <option value="1599">1599</option>
+                          <option value="1500">1500</option>
+                          <option value="1499">1499</option>
+                          <option value="1088">1088</option>
+                          <option value="1000">1000</option>
+                          <option value="999">999</option>
+                          <option value="899">899</option>
+                          <option value="800">800</option>
+                          <option value="699">699</option>
+                          <option value="600">600</option>
+                          <option value="599">599</option>
+                          <option value="500">500</option>
+                          <option value="499">499</option>
+                          <option value="399">399</option>
+                          <option value="388">388</option>
+                          <option value="300">300</option>
+                          <option value="299">299</option>
+                          <option value="200">200</option>
+                          <option value="199">199</option>
+                          <option value="169">169</option>
+                          <option value="150">150</option>
+                          <option value="100">100</option>
+                          <option value="99">99</option>
+                          <option value="39">39</option>
+                          <option value="9">9</option>
+                          <option value="6">6</option>
+                          <option value="41999">41999</option>
+                          <option value="34999">34999</option>
+                          <option value="1799">1799</option>
+                        </select>
+                        <button class="btn bt-submit" type="button" onclick="ttk_gift('diamond_gift_get')">
+                          Configurar
+                        </button>
+                      </div>
+                    </div>
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">Ativar Notificação</p>
+                      </div>
+                      <div class="col">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="gift-diamond-sound-status" type="checkbox" />
+                          <label for="gift-diamond-sound-status" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group mt-3">
+                      <label for="file-select-sound-gift-diamond">Arquivo de audio .mp3</label>
+                      <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar" id="file-select-sound-gift-diamond" onclick="getFolder('file-select-sound-gift-diamond','sound')" required />
+                    </div>
+                    <div class="form-group mt-3">
+                      <label for="audio-volume-ttk-gift-diamond">Volume</label>
+                      <input class="w-100" type="range" min="0" max="100" value="50" id="audio-volume-ttk-gift-diamond" step="1"
+                        oninput="rangevalue_ttk_gift_diamond.innerText = this.value" />
+                      <output id="rangevalue_ttk_gift_diamond">50</output>
+                    </div>
+                    <button type="button" class="btn bt-submit mt-4" onclick="ttk_gift('diamond_gift_save')">Salvar</button>
+                  </div>
+                  <div class="bg-dark form-block">
+
+                    <h5 class="mb-5">Notificações por presente</h5>
+                      
+                    <input type="text" class="form-control" id="ttk-gift-id" hidden/>
+                    <p class="small">Ativando a notificação por presente a notificação por Valor de diamante não irá ser reproduzida para este presente.</p>                 
+                    <table class="table table-dark table-striped w-100" id="giftlist_table" style="height: 20%;">
+                      <thead>
+                          <th>ID</th>
+                          <th>Nome</th>
+                          <th>Diamantes</th>
+                          <th>Configurar</th>
+                      </thead>
+                      <tbody></tbody>
+                    </table>
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane" id="v-pills-queue" role="tabpanel" aria-labelledby="v-pills-queue-tab">
+          <div id="ger-queue-div">
+            <div class="internal-top">
+              <span>Fila de espera</span>
+            </div>
+            <div class="h-scroll flex-wrap flex-wrap justify-content-center">
+              <div class="internal-block">
+                <div class="bg-dark form-block">
+                  <h4>Fila de espera</h4>
+                  <div id="queue-config-form">
+                    <div id="table_queue" class="w-100 mt-5">
+                      <div class="input-group mt-5">
+                        <label for="add_queue" class="w-100 mb-3">Adicionar/remover usuário</label>
+                        <input type="text" class="form-control bg-dark" placeholder="Nome de usuário"
+                          id="add_queue" />
+                        <button type="button" class="btn bt-submit" onclick="queue_js('queue_add')">
+                          Adicionar
+                        </button>
+                      </div>
+                      <p class="mt-4">Fila de espera</p>
+                      <table class="table table-dark table-striped w-100" id="queuelist_table">
+                        <thead>
+                          <tr>
+                            <th>Usuário</th>
+                            <th>Remover</th>
+                          </tr>
+                        </thead>
+                        <tbody></tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane" id="v-pills-player" role="tabpanel" aria-labelledby="v-pills-player-tab">
+          <div id="ger-player-div">
+            <div class="internal-top">
+              <span>Player</span>
+            </div>
+            <div class="h-scroll justify-content-center align-content-center">
+              <div class="w-75 bg-dark form-block" id="player-div">
+                <div id="song-img" class="d-flex flex-column song-img">
+                  <div class="m-5 text-center h-100 d-flex flex-column justify-content-center">
+                    <p id="music-name" class="music-name"></p>
+                    <p id="music-artist" class="music-artist"></p>
+                  </div>
+                  <div class="player-controlls-div text-center">
+                    <button type="button" class="audioplayer-list" title="Lista de pedidos"
+                      onclick="playlist_js('null','queue')"></button>
+                    <button type="button" class="audioplayer-playlist" title="Playlist"
+                      onclick="playlist_js('null','get')"></button>
+                    <button type="button" class="audioplayer-stop" title="Parar/Pular"
+                      onclick="player('stop','null','0')"></button>
+                    <audio controls id="player">
+                      <source src="/src/player/cache/music.webm" type="audio/webm" />
+                    </audio>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal" id="playlist-mod" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+              <div class="modal-content bg-dark custom-border-modal">
+                <div class="modal-header">
+                  <div>
+                    <h4>Gerenciar/Adicionar Playlist</h4>
+                  </div>
+                  <div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                      aria-label="Close"></button>
+                  </div>
+                </div>
+                <div class="modal-body m-1">
+                  <div class="row mt-3">
+                    <div class="col">
+                      <p class="form-check-label">Reproduzir playlist ?</p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="playlist-switch" type="checkbox" onchange="playlist_js(event,'save')" />
+                        <label for="playlist-switch" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <form id="playlist-add-form" class="mt-2" onsubmit="playlist_js(event,'add')">
+                    <div class="form-group mt-3">
+                      <label for="playlist-url">Url da playlist (YouTube)</label>
+                      <input type="url" class="form-control bg-dark mt-3" id="playlist-url" placeholder="playlist url"
+                        required />
+                    </div>
+                    <button type="submit" id="submit-playlist" class="btn bt-submit mt-4">
+                      Adicionar
+                    </button>
+                  </form>
+                  <p class="m-2 text-center" id="playlist-music-added"></p>
+                  <button class="btn bt-submit mt-4" onclick="playlist_js(event,'clear')">
+                    Limpar playlist
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal" id="list-mod" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+              <div class="modal-content bg-dark custom-border-modal h-50">
+                <div class="modal-header">
+                  <div>
+                    <h4>Músicas na fila</h4>
+                  </div>
+                  <div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                      aria-label="Close"></button>
+                  </div>
+                </div>
+                <div class="modal-body m-1">
+                  <table class="table" id="list_musics">
+                    <thead class="text-white">
+                      <tr>
+                        <th class="w-75" scope="col">Música</th>
+                        <th scope="col">Usuário</th>
+                      </tr>
+                    </thead>
+                    <tbody id="list-body"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane" id="v-pills-config" role="tabpanel" aria-labelledby="v-pills-config-tab">
+          <div id="config-div">
+            <div class="internal-top">
+              <span>Configurações</span>
+            </div>
+            <div class="internal-block w-100 grid-buttons-config ">
+              <button class="btn redeem-block-bt" type="button"
+                onclick="show_config_div('config-discord-div')">
+                <i class="fa-solid fa-bell fa-2xl"></i>
+                <p>Alertas Chat/Discord</p>
+              </button>
+              <button class="btn redeem-block-bt" type="button"
+                onclick="show_config_div('config-responses-div')">
+                <i class="fa-solid fa-reply fa-2xl"></i>
+                <p>Textos para Eventos/Erros</p>
+              </button>
+              <button class="btn redeem-block-bt" type="button"
+                onclick="show_config_div('config-music-div')">
+                <i class="fa-solid fa-music fa-2xl"></i>
+                <p>Pedidos de música</p>
+              </button>
+              <button class="btn redeem-block-bt" type="button"
+                onclick="show_config_div('chat-config-div')">
+                <i class="fa-solid fa-comments fa-2xl"></i>
+                <p>Chat</p>
+              </button>
+              <button class="btn redeem-block-bt" type="button"
+                onclick="show_config_div('events-config-div')">
+                <i class="fa-solid fa-calendar-day fa-2xl"></i>
+                <p>Registro de eventos</p>
+              </button>
+            </div>
+          </div>
+          <div id="config-discord-div" hidden>
+            <div class="internal-top">
+              <span>Notificação para eventos</span>
+              <button class="btn" onclick="hide_config_div('config-discord-div')" data-toggle="tooltip" data-bs-placement="left" title="Voltar">
+                <i class="fa-sharp fa-solid fa-chevron-left fa-xl"></i>
+              </button>
+            </div>
+            <div class="h-scroll flex-wrap flex-wrap justify-content-center">
+              <div class="internal-block">
+                <div class="form-group bg-dark form-block">
+                  <label for="select_edit_not">Selecione tipo de notificação para editar.</label>
+                  <div class="input-group none-flex mt-3">
+                    <select class="form-control bg-dark" id="select_edit_not">
+                      <option value="live_start">
+                        Inicio de lives
+                      </option>
+                      <option value="live_end">
+                        Fim de lives
+                      </option>
+                      <option value="follow">
+                        Seguidor
+                      </option>
+                      <option value="gift">
+                        Presente
+                      </option>
+                      <option value="share">
+                        Compartilhamento
+                      </option>
+                      <option value="like">
+                        Curtidas
+                      </option>
+                      <option value="subscriber">
+                        Inscrição
+                      </option>
+                      <option value="envelope">
+                        Baús
+                      </option>
+                      <option value="goal_start">
+                        Inicio de meta
+                      </option>
+                      <option value="goal_end">
+                        Fim de meta
+                      </option>
+                    </select>
+                    <button class="btn bt-submit" type="button" onclick="discord_js('event','select_edit')">
+                      Editar
+                    </button>
+                  </div>
+                  <div id="event_not_divs" class="mt-5" hidden>
+                    <h4>Configure a notificação</h4>
+                    <div id="aliases-form" >
+                      <div class="form-group mt-3">
+                        <label for="aliases-event">Pseudônimos (aliases) Úteis | (Não editável)</label>
+                        <input type="text" class="form-control bg-dark mt-3" id="aliases-event" readonly />
+                      </div>
+                    </div>
+                    <div id="discord-form" class="mt-5">
+                        <h5>Notificações no Discord</h5>
+                        <div class="row mt-3">
+                          <div class="col">
+                            <p class="form-check-label">Ativar Notificação</p>
+                          </div>
+                          <div class="col-2">
+                            <div class="material-switch bg-white d-flex justify-content-end">
+                              <input id="webhook-status" type="checkbox" />
+                              <label for="webhook-status" class="form-check-label"></label>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="form-group mt-3">
+                          <label for="url-webhook">Url Webhook</label>
+                          <input type="text" class="form-control bg-dark mt-3" id="url-webhook" />
+                        </div>
+                        <div class="form-group mt-4">
+                          <label for="embed-color">Cor</label>
+                          <input type="text" class="form-control bg-dark mt-3" id="embed-color" />
+                        </div>
+                        <div class="form-group mt-4">
+                          <label for="embed-content">Conteúdo (Aparecerá antes do bloco de embed, util para marcações) <span id="tags-webhook"></span>
+                          </label>
+                          <p>
+                            <span class="text-small">Para mencionar um cargo, usuário ou canal utilize
+                              as tags = '&lt;@ID&gt;' para usuários,'&lt;@&ID&gt;'
+                              é para cargos e '&lt;#ID&gt;' é para canais
+                            </span>
+                          </p>
+                          <input type="text" class="form-control bg-dark mt-2" id="embed-content" />
+                        </div>
+                        <div class="form-group mt-4">
+                          <label for="embed-title">Título <span id="tags-webhook-title"></span>
+                          </label>
+                          <input type="text" class="form-control bg-dark mt-3" id="embed-title" />
+                        </div>
+                        <div class="form-group mt-4">
+                          <label for="embed-description">Descrição <span id="tags-webhook-desc"></span></label>
+                          <input type="text" class="form-control bg-dark mt-3" id="embed-description" />
+                        </div>
+                    </div>
+                    <div id="chat-alert-form" class="mt-5">
+                      <h5>Notificações no Chat</h5>
+                      <div class="form-group mt-3">
+                        <div class="row">
+                          <div class="col">
+                            <p class="form-check-label">
+                              Ativar notificações
+                            </p>
+                          </div>
+                          <div class="col-2">
+                            <div class="material-switch bg-white d-flex justify-content-end">
+                              <input id="not" type="checkbox" />
+                              <label for="not" class="form-check-label"></label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="form-group mt-3">
+                        <label for="response-chat">Mensagem no Chat</label>
+                        <input type="text" class="form-control bg-dark mt-3" id="response-chat" />
+                      </div>
+                    </div>
+                    <div class="form-group mt-5 w-100">
+                      <button type="button" class="btn bt-submit mt-4" onclick="discord_js(event,'save')">
+                        Salvar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <input id="type_edit" type="text" hidden />
+                <div id="profile_discord_embed" class="bg-dark form-block mt-0">
+                  <div class="mt-5">
+                    <div class="form-group">
+                      <h5>Nome de usuário e foto de perfil para todos os blocos de notificação</h5>
+                    </div>
+                    <div class="row mt-5">
+                      <div class="col">
+                        <p class="form-check-label">Ativar Exibição de foto de perfil e nome de usuário nos blocos?</p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="profile-webhook-status" type="checkbox" />
+                          <label for="profile-webhook-status" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group mt-3">
+                      <label for="url-profile-image-webhook">Url da imagem de perfil do Bloco Webhook (Apenas url .png)</label>
+                      <input type="text" class="form-control bg-dark mt-3" id="url-profile-image-webhook">
+                    </div>
+                    <div class="form-group mt-3">
+                      <label for="profile-name-webhook">Nome de perfil para o Bloco Webhook</label>
+                      <input type="text" class="form-control bg-dark mt-3" id="profile-name-webhook">
+                    </div>
+                    <div class="form-group mt-5 w-100">
+                      <button type="button" class="btn bt-submit mt-4" onclick="discord_js(event,'save-profile')">
+                        Salvar Perfil
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+          <div id="config-responses-div" hidden>
+            <div class="internal-top">
+              <span>Mensagens para Eventos/Erros</span>
+              <button class="btn" onclick="hide_config_div('config-responses-div')" data-toggle="tooltip"
+                data-bs-placement="left" title="Voltar">
+                <i class="fa-sharp fa-solid fa-chevron-left fa-xl"></i>
+              </button>
+            </div>
+            <div class="h-scroll flex-wrap justify-content-center">
+              <div class="internal-block">
+                <form id="responses-config-form" class="bg-dark form-block" onsubmit="config_responses_js(event,'save-response')">
+                  <div class="form-group mt-3">
+                    <label for="response-select-edit">Selecione a mensagem para editar</label>
+                    <div class="input-group none-flex mt-3" id="select-message-edit-form">
+                      <select class="form-control bg-dark mt-3" id="response-select-edit">
+                        <option value="error_tts_disabled">
+                          Erro: Módulo de texto para fala desabilitado
+                        </option>
+                        <option value="error_tts_no_text">
+                          Erro: Texto ausente para conversão de fala
+                        </option>
+                        <option value="error_user_level">
+                          Erro: Permissões insuficientes para usar o comando
+                        </option>
+                        <option value="giveaway_response_win">
+                          Aviso: Anúncio de vencedor de sorteio
+                        </option>
+                        <option value="giveaway_response_user_add">
+                          Aviso: Adição de usuário ao sorteio
+                        </option>
+                        <option value="giveaway_status_enable">
+                          Aviso: Sorteio habilitado
+                        </option>
+                        <option value="giveaway_status_disable">
+                          Aviso: Sorteio desabilitado
+                        </option>
+                        <option value="giveaway_response_mult_add">
+                          Erro: Tentativa de múltipla entrada no sorteio
+                        </option>
+                        <option value="giveaway_clear">
+                          Aviso: Lista de sorteio limpa
+                        </option>
+                        <option value="giveaway_response_perm">
+                          Erro: Permissão insuficiente para entrar no sorteio
+                        </option>
+                        <option value="giveaway_status_disabled">
+                          Aviso: Nenhum sorteio ativo no momento
+                        </option>
+                        <option value="response_user_giveaway">
+                          Aviso: Usuário presente na lista de sorteio
+                        </option>
+                        <option value="response_no_user_giveaway">
+                          Aviso: Usuário ausente na lista de sorteio
+                        </option>
+                        <option value="response_giveaway_disabled">
+                          Aviso: Nenhum sorteio no momento
+                        </option>
+                        <option value="response_user_error_giveaway">
+                          Erro: Nome de usuário ausente para verificação
+                        </option>
+                        <option value="response_check_error_giveaway">
+                          Erro: Nome de usuário ausente para adição ao sorteio
+                        </option>
+                        <option value="response_delay_error">
+                          Aviso: Recarregamento, aguarde {seconds} segundos...
+                        </option>
+                        <option value="commands_disabled">
+                          Aviso: Comandos desativados
+                        </option>
+                        <option value="command_disabled">
+                          Aviso: Comando desativado
+                        </option>
+                        <option value="music_disabled">
+                          Erro: Módulo de pedido de músicas desativado
+                        </option>
+                        <option value="music_added_to_queue">
+                          Aviso: Música adicionada à fila
+                        </option>
+                        <option value="music_add_error">
+                          Erro: Erro ao adicionar a música à fila
+                        </option>
+                        <option value="music_process_error">
+                          Erro: Incapaz de processar uma música da fila
+                        </option>
+                        <option value="music_process_cache_error">
+                          Erro: Incapaz de processar a música devido ao cache
+                        </option>
+                        <option value="music_length_error">
+                          Erro: Música deve ter no máximo {max_duration} segundos
+                        </option>
+                        <option value="music_playing">
+                          Aviso: Reproduzindo {music_name} - {music_artist} | Solicitado por {username}
+                        </option>
+                        <option value="music_link_error">
+                          Erro: Link fornecido não pode ser processado
+                        </option>
+                        <option value="music_error_name">
+                          Erro: Incapaz de reproduzir música, tente com o link
+                        </option>
+                        <option value="music_stream_error">
+                          Erro: Incapaz de reproduzir a música
+                        </option>
+                        <option value="music_link_youtube">
+                          Erro: Links devem ser do YouTube
+                        </option>
+                        <option value="command_sr_error_link">
+                          Erro: Deve fornecer um nome ou link de música
+                        </option>
+                        <option value="command_volume_confirm">
+                          Aviso: Volume alterado para {volume}
+                        </option>
+                        <option value="command_volume_error">
+                          Erro: Volume deve estar entre 0 e 100
+                        </option>
+                        <option value="command_skip_confirm">
+                          Aviso: Música pulada
+                        </option>
+                        <option value="command_current_confirm">
+                          Aviso: Música atual é {music}
+                        </option>
+                        <option value="command_next_no_music">
+                          Aviso: Nenhuma música na fila
+                        </option>
+                        <option value="command_next_confirm">
+                          Aviso: Próxima música é {music}
+                        </option>
+                        <option value="command_volume_number">
+                          Erro: Volume deve ser um número
+                        </option>
+                        <option value="command_volume_response">
+                          Aviso: Volume atual é {volume}
+                        </option>
+                        <option value="command_value">
+                          Erro: Deve inserir um valor ou texto para executar este comando
+                        </option>
+                        <option value="command_string">
+                          Erro: Deve inserir um nome de usuário para executar o comando, ex. !comando usuário
+                        </option>
+                        <option value="music_blacklist">
+                          Erro: Não é possível reproduzir {music}, esta música ou partes do nome estão na lista negra
+                        </option>
+                        <option value="cmd_created">
+                          Aviso: Comando criado
+                        </option>
+                        <option value="cmd_edited">
+                          Aviso: Comando editado
+                        </option>
+                        <option value="cmd_removed">
+                          Aviso: Comando removido
+                        </option>
+                        <option value="cmd_use">
+                          Erro: Formato incorreto. Uso correto: !cmd add/edit/remove (comando) (resposta)
+                        </option>
+                        <option value="cmd_exists">
+                          Erro: Comando já existe
+                        </option>
+                        <option value="cmd_not_exists">
+                          Erro: Comando não encontrado
+                        </option>
+                        <option value="command_suffix">
+                          Erro: Deve inserir um texto após o comando, ex. !comando texto
+                        </option>
+                        <option value="response_queue">
+                          Aviso: Adicionado à fila de espera
+                        </option>
+                        <option value="response_add_queue">
+                          Aviso: Nome adicionado à fila
+                        </option>
+                        <option value="response_namein_queue">
+                          Aviso: Nome já está na fila
+                        </option>
+                        <option value="response_rem_queue">
+                          Aviso: Nome removido da fila
+                        </option>
+                        <option value="response_noname_queue">
+                          Aviso: Nome não está na fila
+                        </option>
+                        <option value="response_get_queue">
+                          Aviso: Valores na lista {queue-3}
+                        </option>
+                        <option value="skip_votes">
+                          Aviso: Voto de skip adicionado, votos necessários = {votes}/{minimum}
+                        </option>
+                        <option value="command_skip_inlist">
+                          Erro: Já votou para pular, aguarde mais votos ou termine a música
+                        </option>
+                        <option value="goal_start">
+                          Aviso: Meta para {current}/{target} {type} iniciada
+                        </option>
+                        <option value="goal_end">
+                          Aviso: Meta para {current}/{target} {type} finalizada
+                        </option>
+                        <option value="goal_progress">
+                          Aviso: Meta para {current}/{target} {type} atualizada
+                        </option>
+                        <option value="command_skip_noplaying">
+                          Erro: Nenhuma música sendo reproduzida no momento
+                        </option>
+                        <option value="event_ttk_connect">
+                          Aviso: Conectado ao chat do TikTok
+                        </option>
+                        <option value="event_ttk_envelope">
+                          Aviso: Usuário enviou um envelope para o chat
+                        </option>
+                        <option value="event_ttk_gift">
+                          Aviso: Usuário enviou {amount} {giftname} | {diamonds} Diamante(s)
+                        </option>
+                        <option value="event_ttk_join">
+                          Aviso: Usuário entrou na live do TikTok
+                        </option>
+                        <option value="event_ttk_like">
+                          Aviso: Usuário deu Like na live
+                        </option>
+                        <option value="event_ttk_share">
+                          Aviso: Usuário compartilhou a live
+                        </option>
+                        <option value="event_ttk_follow">
+                          Aviso: Usuário seguiu o canal no TikTok
+                        </option>
+                        <option value="event_ttk_disconnected">
+                          Aviso: Chat Desconectado
+                        </option>
+                      </select>
+                      <button class="btn bt-submit mt-3" type="button" onclick="config_responses_js(event,'get_response')">
+                        Carregar
+                      </button>
+                    </div>
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="aliases-responses">Pseudônimos (aliases) Úteis | (Não editável)</label>
+                    <input type="text" class="form-control bg-dark mt-3" id="aliases-responses" readonly />
+                  </div>
+                  <div class="form-group mt-4">
+                    <label for="response-message-new">Nova mensagem</label>
+                    <input type="text" class="form-control bg-dark mt-3" id="response-message-new" />
+                  </div>
+                  <button type="submit" id="submit-responses-config" class="btn bt-submit mt-4" disabled>
+                    Salvar
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div id="config-music-div" hidden>
+            <div class="internal-top">
+              <span>Pedidos de música</span>
+              <button class="btn" onclick="hide_config_div('config-music-div')" data-toggle="tooltip"
+                data-bs-placement="left" title="Voltar">
+                <i class="fa-sharp fa-solid fa-chevron-left fa-xl"></i>
+              </button>
+            </div>
+            <div class="h-scroll flex-wrap flex-wrap justify-content-center">
+              <div class="internal-block">
+                <div id="music-config-form" class="bg-dark form-block">
+                  <div class="row">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Permitir pedidos de música
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="music-enable" type="checkbox" />
+                        <label for="music-enable" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="max-duration">Duração máxima da música permitida para pedidos</label>
+                    <input type="text" class="form-control bg-dark mt-3" id="max-duration" />
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="skip-requests">Votos de !Skip necessários para pular a musica</label>
+                    <input type="text" class="form-control bg-dark mt-3" id="skip-requests" />
+                  </div>
+                  <div class="row">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Moderadores ignoram votos de skip
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="skip-ignore" type="checkbox" />
+                        <label for="skip-ignore" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="input-group mt-4">
+                    <label for="blocked-music" class="w-100 mb-3">Termos ou nomes de música bloqueados</label>
+                    <input type="text" class="form-control bg-dark" placeholder="Termos ou nomes" id="blocked-music" />
+                    <button type="button" class="btn bt-submit" onclick="sr_config_js('event','list_add')">
+                      Adicionar
+                    </button>
+                    <button type="button" class="btn bt-submit" onclick="sr_config_js('event','list_rem')">
+                      Remover
+                    </button>
+                    <button type="button" class="btn bt-submit" onclick="sr_config_js('event','list_get')">
+                      Exibir lista
+                    </button>
+                  </div>
+                  <button type="button" id="submit-music-config" class="btn bt-submit mt-4"
+                    onclick="sr_config_js('event','save')">
+                    Salvar
+                  </button>
+                </div>
+              </div>
+              <div class="modal" id="modal_list_block" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+                  <div class="modal-content bg-dark custom-border-modal h-50">
+                    <div class="modal-body m-1">
+                      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                      <table class="table" id="list_musics_block">
+                        <thead class="text-white">
+                          <tr>
+                            <th scope="col">Termos bloqueados</th>
+                          </tr>
+                        </thead>
+
+                        <tbody id="block-list-body" class="h-scroll"></tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="chat-config-div" hidden>
+            <div class="internal-top">
+              <span>Chat</span>
+              <button class="btn" onclick="hide_config_div('chat-config-div')" data-toggle="tooltip"
+                data-bs-placement="left" title="Voltar">
+                <i class="fa-sharp fa-solid fa-chevron-left fa-xl"></i>
+              </button>
+            </div>
+            <div class="h-scroll flex-wrap justify-content-center">
+              <div class="internal-block">
+                <div class="form-group bg-dark form-block">
+                  <div class="form-group">
+                    <label for="slider-font">Tamanho da letra no chat</label>
+                    <input class="mt-4" type="range" min="0" max="100" value="18" id="slider-font" step="1"
+                      oninput="slider_font()" />
+                    <output id="rangevalue_config">18px</output>
+                  </div>
+                  <div class="row">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Aplicar cor aos nomes no chat.
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="chat-color-name" type="checkbox" />
+                        <label for="chat-color-name" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mt-2">
+                    <label for="select-color-name">Cor dos nomes no chat</label>
+                    <select class="form-control bg-dark mt-3" id="select-color-name">
+                      <option value="Blue" style="color: white;">Azul</option>
+                      <option value="Coral" style="color: white;">
+                        Coral
+                      </option>
+                      <option value="DodgerBlue" style="color: white;">
+                        Azul furtivo
+                      </option>
+                      <option value="SpringGreen" style="color: white;">
+                        Verde primavera
+                      </option>
+                      <option value="YellowGreen" style="color: white;">
+                        Verde amarelado
+                      </option>
+                      <option value="Green" style="color: white;">
+                        Verde
+                      </option>
+                      <option value="OrangeRed" style="color: white;">
+                        Vermelhão
+                      </option>
+                      <option value="Red" style="color: white;">
+                        Vermelho
+                      </option>
+                      <option value="GoldenRod" style="color: white;">
+                        Dourado
+                      </option>
+                      <option value="HotPink" style="color: white;">
+                        Rosa forte
+                      </option>
+                      <option value="CadetBlue" style="color: white;">
+                        Azul cadete
+                      </option>
+                      <option value="SeaGreen" style="color: white;">
+                        Verde mar
+                      </option>
+                      <option value="Chocolate" style="color: white;">
+                        Chocolate
+                      </option>
+                      <option value="BlueViolet" style="color: white;">
+                        Azul violeta
+                      </option>
+                      <option value="Firebrick" style="color: white;">
+                        Tijolo
+                      </option>
+                    </select>
+                  </div>
+                  <div class="row">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Aplicar cor a borda no chat.
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="chat-color-border" type="checkbox" />
+                        <label for="chat-color-border" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mt-2">
+                    <label for="select-color-border">Cor dos nomes no chat</label>
+                    <select class="form-control bg-dark mt-3" id="select-color-border">
+                      <option value="Blue" style="color: white;">Azul</option>
+                      <option value="Coral" style="color: white;">
+                        Coral
+                      </option>
+                      <option value="DodgerBlue" style="color: white;">
+                        Azul furtivo
+                      </option>
+                      <option value="SpringGreen" style="color: white;">
+                        Verde primavera
+                      </option>
+                      <option value="YellowGreen" style="color: white;">
+                        Verde amarelado
+                      </option>
+                      <option value="Green" style="color: white;">
+                        Verde
+                      </option>
+                      <option value="OrangeRed" style="color: white;">
+                        Vermelhão
+                      </option>
+                      <option value="Red" style="color: white;">
+                        Vermelho
+                      </option>
+                      <option value="GoldenRod" style="color: white;">
+                        Dourado
+                      </option>
+                      <option value="HotPink" style="color: white;">
+                        Rosa forte
+                      </option>
+                      <option value="CadetBlue" style="color: white;">
+                        Azul cadete
+                      </option>
+                      <option value="SeaGreen" style="color: white;">
+                        Verde mar
+                      </option>
+                      <option value="Chocolate" style="color: white;">
+                        Chocolate
+                      </option>
+                      <option value="BlueViolet" style="color: white;">
+                        Azul violeta
+                      </option>
+                      <option value="Firebrick" style="color: white;">
+                        Tijolo
+                      </option>
+                    </select>
+                  </div>
+                  <div class="row mt-1">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Exibir as mensagens em uma linha separada do nome
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="chat-newline" type="checkbox" />
+                        <label for="chat-newline" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-5">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Exibir horário nas mensagens enviadas no chat.
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="data-show" type="checkbox" />
+                        <label for="data-show" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mb-3 mt-2">
+                    <label for="select-time-mode">Selecione tipo de tempo exibido na mensagem
+                      enviada</label>
+                    <select class="form-control bg-dark mt-3" id="select-time-mode">
+                      <option value="passed" style="color: white;">
+                        Tempo decorrido desde o envio
+                      </option>
+                      <option value="current" style="color: white;">
+                        Horário de envio
+                      </option>
+                    </select>
+                  </div>
+                  <div class="form-group mb-3 mt-2">
+                    <label for="time-format" class="w-100 mb-3">Formato de data/hora na mensagem (%d/%m/%Y
+                      %H:%M:%S)</label>
+                    <input type="text" class="form-control bg-dark" id="time-format" />
+                  </div>
+                  <div class="input-group mt-5">
+                    <label for="gift_role" class="mb-3 w-100">Presentes necessários para um usuário ter o cargo 'Presenteador'</label>
+                    <input type="text" class="form-control bg-dark" id="gift_role" />
+                  </div>
+                  <div class="input-group mt-5">
+                    <label for="share_role" class="mb-3 w-100">Compartilhamentos necessários para um usuário ter o cargo 'Compartilhou'</label>
+                    <input type="text" class="form-control bg-dark" id="share_role" />
+                  </div>
+                  <div class="input-group mt-5">
+                    <label for="like_role" class="mb-3 w-100">Likes necessários para um usuário ter o cargo 'Likes'</label>
+                    <input type="text" class="form-control bg-dark" id="like_role" />
+                  </div>
+                  <button type="button" class="bt-submit btn bg-dark mt-5" onclick="chat_config('save')">
+                    Salvar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="events-config-div" hidden>
+            <div class="internal-top">
+              <span>Registro de eventos</span>
+              <button class="btn" onclick="hide_config_div('events-config-div')" data-toggle="tooltip"
+                data-bs-placement="left" title="Voltar">
+                <i class="fa-sharp fa-solid fa-chevron-left fa-xl"></i>
+              </button>
+            </div>
+            <div class="h-scroll flex-wrap justify-content-center">
+              <div class="internal-block">
+                <div class="bg-dark form-block">
+                  <div class="form-group">
+                    <label for="slider-font-events">Tamanho da fonte no registro de eventos</label>
+                    <input class="mt-4" type="range" min="0" max="100" value="18" id="slider-font-events" step="1"
+                      oninput="slider_font_events()" />
+                    <output id="rangevalue_config_events">18px</output>
+                  </div>
+                  <div class="form-group mt-2">
+                    <label for="color-events">Cor da mensagem do registro de eventos</label>
+                    <select class="form-control bg-dark mt-3" id="color-events">
+                      <option value="Blue" style="color: white;">Azul</option>
+                      <option value="Coral" style="color: white;">
+                        Coral
+                      </option>
+                      <option value="DodgerBlue" style="color: white;">
+                        Azul furtivo
+                      </option>
+                      <option value="SpringGreen" style="color: white;">
+                        Verde primavera
+                      </option>
+                      <option value="YellowGreen" style="color: white;">
+                        Verde amarelado
+                      </option>
+                      <option value="Green" style="color: white;">
+                        Verde
+                      </option>
+                      <option value="OrangeRed" style="color: white;">
+                        Vermelhão
+                      </option>
+                      <option value="Red" style="color: white;">
+                        Vermelho
+                      </option>
+                      <option value="GoldenRod" style="color: white;">
+                        Dourado
+                      </option>
+                      <option value="HotPink" style="color: white;">
+                        Rosa forte
+                      </option>
+                      <option value="CadetBlue" style="color: white;">
+                        Azul cadete
+                      </option>
+                      <option value="SeaGreen" style="color: white;">
+                        Verde mar
+                      </option>
+                      <option value="Chocolate" style="color: white;">
+                        Chocolate
+                      </option>
+                      <option value="BlueViolet" style="color: white;">
+                        Azul violeta
+                      </option>
+                      <option value="Firebrick" style="color: white;">
+                        Tijolo
+                      </option>
+                      <option value="white" style="color: white;">
+                        Branco
+                      </option>
+                    </select>
+                  </div>
+                  <div class="row mt-5">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Exibir data e hora das mensagens.
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="data-show-events" type="checkbox" />
+                        <label for="data-show-events" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-3">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Exibir registro de utilização de comandos
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="show-commands" type="checkbox" />
+                        <label for="show-commands" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-1">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Exibir registro de utilização de comandos no chat
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="show-commands-chat" type="checkbox" />
+                        <label for="show-commands-chat" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-3">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Exibir Registro de Eventos Gerais
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="show-events" type="checkbox" />
+                        <label for="show-events" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-1">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Exibir Registro de Eventos Gerais no chat
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="show-events-chat" type="checkbox" />
+                        <label for="show-events-chat" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-3">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Exibir Follows no registro de eventos
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="show-follow" type="checkbox" />
+                        <label for="show-follow" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-1">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Exibir Follows no registro de eventos no chat
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="show-follow-chat" type="checkbox" />
+                        <label for="show-follow-chat" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-3">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Exibir Likes no registro de eventos
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="show-likes" type="checkbox" />
+                        <label for="show-likes" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-1">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Exibir Likes no registro de eventos no chat
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="show-likes-chat" type="checkbox" />
+                        <label for="show-likes-chat" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-3">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Exibir Presentes no registro de eventos
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="show-gifts" type="checkbox" />
+                        <label for="show-gifts" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-1">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Exibir Presentes no registro de eventos no chat
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="show-gifts-chat" type="checkbox" />
+                        <label for="show-gifts-chat" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-3">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Exibir Baús no registro de eventos
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="show-chest" type="checkbox" />
+                        <label for="show-chest" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-1">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Exibir Baús no registro de eventos no chat
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="show-chest-chat" type="checkbox" />
+                        <label for="show-chest-chat" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-3">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Exibir Inicio de Metas no registro de eventos
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="show-goal-start" type="checkbox" />
+                        <label for="show-goal-start" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-1">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Exibir Inicio de Metas no registro de eventos no chat
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="show-goal-start-chat" type="checkbox" />
+                        <label for="show-goal-start-chat" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-3">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Exibir Fim de Metas no registro de eventos
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="show-goal-end" type="checkbox" />
+                        <label for="show-goal-end" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-1">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Exibir Fim de Metas no registro de eventos no chat
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="show-goal-end-chat" type="checkbox" />
+                        <label for="show-goal-end-chat" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-3">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Exibir Compartilhamentos no registro de eventos
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="show-share" type="checkbox" />
+                        <label for="show-share" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-1">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Exibir Compartilhamentos no registro de eventos no chat
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="show-share-chat" type="checkbox" />
+                        <label for="show-share-chat" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-3">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Exibir Entradas no chat no registro de eventos
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="show-join" type="checkbox" />
+                        <label for="show-join" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-1">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Exibir Entradas no chat no registro de eventos do chat
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="show-join-chat" type="checkbox" />
+                        <label for="show-join-chat" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <button type="button" class="bt-submit btn bg-dark mt-5" onclick="event_log_config('save')">
+                    Salvar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane" id="v-pills-sobre" role="tabpanel" aria-labelledby="v-pills-sobre-tab">
+          <div class="internal-top">
+            <span>Sobre</span>
+          </div>
+          <div class="h-scroll flex-wrap justify-content-center">
+            <div class="d-flex card bg-dark form-block align-self-center">
+              <img src="./src/profile.png" class="rounded mx-auto d-block" width="150px" />
+              <div class="card-body text-center">
+                <h4 class="card-title m-3">VibesBot V1.0.0</h4>
+                <button class="bt-submit btn m-3" onclick="update_modal('get')">
+                  Verificar Atualização
+                </button>
+                <h6 id="no-update" class="card-text" hidden>
+                  Você está na ultima versão
+                </h6>
+              </div>
+              <div class="card-footer">
+                <div class="form-group mt-3 mb-3 ">
+                  <div class="row mt-3">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Ativar debug Visual
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="debug-status" type="checkbox" onclick="debug_status('debug-save')"/>
+                        <label for="debug-status" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card-footer text-center">
+                <button type="button" class="btn bt-submit m-3 mt-0" title="Navegar para a Wiki"
+                  onclick="window.pywebview.api.open_py('wiki','null')">
+                  <i class="fa-solid fa-circle-question"></i>
+                </button>
+                <button type="button" class="btn bt-submit m-3 mt-0 ms-0"
+                  title="Abrir pasta de arquivos de configurações" onclick="window.pywebview.api.open_py('appdata','null')">
+                  <i class="fa-solid fa-folder-open"></i>
+                </button>
+                <button type="button" class="btn bt-submit m-3 mt-0 me-0 ms-0" title="Log de erros"
+                  onclick="show_error_log('get-errorlog')">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                </button>
+                <button type="button" class="btn bt-submit m-3 mt-0" title="Suporte no discord"
+                  onclick="window.pywebview.api.open_py('discord','null')">
+                  <i class="fa-brands fa-discord"></i>
+                </button>
+                <button type="button" class="btn bt-submit ms-0 m-3 mt-0" title="Registro de usuários" onclick="userdata_js('get')">
+                  <i class="fa-sharp fa-solid fa-users"></i>
+                </button>
+              </div>
+              <div class="modal" id="errorlog-modal" data-backdrop="static" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered modal-fullscreen">
+                  <div class="modal-content bg-dark custom-border-modal">
+                    <div class="modal-header">
+                      <div>
+                        <h5>
+                          Relatório de erros
+                          <button type="button" class="btn bt-submit btn-sm"
+                            onclick="show_error_log('clear-errorlog')">
+                            Limpar Relatório<i class="fa-solid fa-brush ms-1"></i>
+                          </button>
+                        </h5>
+                      </div>
+                      <div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                          aria-label="Close"></button>
+                      </div>
+                    </div>
+                    <div class="modal-body">
+                      <div class="d-flex" style="height: 80vh;">
+                        <div class="form-group w-100">
+                          <textarea class="form-control bg-black w-100 h-100" id="errorlog-textarea"
+                            readonly></textarea>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="toast m-5 bg-dark p-0 d-none" id="notific" role="alert">
+        <div class="toast-header d-flex justify-content-between">
+          <div>
+            <i class="fa-solid fa-triangle-exclamation text-black"></i>
+            <strong class="ms-2 text-white">Notificação</strong>
+          </div>
+          <div>
+            <button type="button" class="btn-close-white btn-close" data-bs-dismiss="toast"></button>
+          </div>
+        </div>
+        <div class="toast-body" id="notific-message">Notificação</div>
+      </div>
+      <div class="modal fade" id="update-modal" data-bs-backdrop="static"  tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+          <div class="modal-content bg-dark custom-border-modal">
+            <div class="modal-header">
+              <h2>Atualização disponível!</h2>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+              aria-label="Close"></button>
+            </div>
+            <div class="modal-body m-1">
+
+              <div id="update_body">
+
+              </div>
+
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn bt-modal mt-4" data-bs-dismiss="modal"
+                onclick="update_modal('open')">
+                Ir para pagina de download
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="gift-modal" data-bs-backdrop="static"  tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+          <div class="modal-content bg-dark custom-border-modal">
+            <div class="modal-header">
+              <h4>Configure o Gift</h4>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+              aria-label="Close"></button>
+            </div>
+            <div class="modal-body m-1">
+              <div class="row mt-3">
+                <div class="col">
+                  <p class="form-check-label">Ativar Notificação</p>
+                </div>
+                <div class="col">
+                  <div class="material-switch bg-white d-flex justify-content-end">
+                    <input id="gift-sound-status" type="checkbox" />
+                    <label for="gift-sound-status" class="form-check-label"></label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group mt-3">
+                <label for="file-select-sound-gift">Arquivo de audio .mp3</label>
+                <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar"
+                  id="file-select-sound-gift" onclick="getFolder('file-select-sound-gift','sound')" required />
+              </div>
+
+              <div class="form-group mt-3">
+                <label for="audio-volume-ttk-gift">Volume</label>
+                <input class="w-100" type="range" min="0" max="100" value="50" id="audio-volume-ttk-gift" step="1"
+                  oninput="rangevalue_ttk_gift.innerText = this.value" />
+                <output id="rangevalue_ttk_gift">50</output>
+              </div>
+
+              <button type="button" class="btn bt-submit mt-2" id="save-gift-notification">Salvar</button>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="confirm-logout" data-bs-backdrop="static" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content bg-dark custom-border-modal">
+            <div class="modal-body text-center m-5">
+              <h2>Continuar ?</h2>
+              <h5>
+                Ao confirmar você irá desconectar a(s) sua(s) conta(s) e será
+                necessário efetuar o processo de autenticação novamente
+              </h5>
+              <div class="d-flex flex-column">
+                <div class="form-group">
+                  <button type="button" class="w-100 btn bt-modal mt-4" data-bs-dismiss="modal">
+                    Voltar
+                  </button>
+                </div>
+                <div class="form-group">
+                  <button type="button" class="w-100 btn bt-modal mt-1" data-bs-dismiss="modal"
+                    onclick="window.pywebview.api.logout_auth()">
+                    Confirmar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="userdata-modal" data-bs-backdrop="static" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen">
+          <div class="modal-content bg-dark custom-border-modal">
+            <div class="modal-header">
+              <div>
+                <h5>Dados de usuários</h5>
+              </div>
+              <div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                  aria-label="Close"></button>
+              </div>
+            </div>
+            <div class="modal-body p-2">
+              <div class="h-scroll">
+                <div id="table_out" class="w-100">
+                  <table class="table table-dark" id="userdata_table">
+                    <thead class="w">
+                      <tr>
+                        <th>Usuário</th>
+                        <th>Cargos</th>
+                        <th>Likes</th>
+                        <th>Compartilhamentos</th>
+                        <th>Presentes</th>
+                        <th>Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="list-comands-modal" data-backdrop="static" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen">
+          <div class="modal-content bg-dark custom-border-modal">
+            <div class="modal-header">
+              <div>
+                <h5>Lista de comandos</h5>
+              </div>
+              <div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                  aria-label="Close"></button>
+              </div>
+            </div>
+            <div class="modal-body">
+              <div class="h-scroll">
+                <div id="table_command" class="w-100">
+                  <table class="table table-dark table-striped w-100" id="commandlist_table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Comando</th>
+                        <th scope="col">Tipo</th>
+                        <th scope="col">Último uso</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Delay</th>
+                        <th scope="col">Resposta</th>
+                        <th scope="col">Permissão</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+  </div>
+  
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/audioplayer.js"></script>
+  <script src="assets/js/giveaway.js"></script>
+  <script src="assets/js/queue.js"></script>
+  <script src="assets/js/commands.js"></script>
+  <script src="assets/js/discord.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/chat.js"></script>
+  <script src="assets/js/events.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+{
+      "profile_status" : 1,
+      "profile_image" : "None",
+      "profile_name" : "None",
+      "live_start_ttk": {
+            "url": "",
+            "status": 1,
+            "color": "03b2f8",
+            "content": "",
+            "title": "O streamer iniciou uma live no TikTok",
+            "description": "{url}"
+      },
+      "goal_start": {
+            "url": "",
+            "status": 1,
+            "color": "03b2f8",
+            "content": "",
+            "title": "Uma meta para {current}/{target} {type} foi iniciada. ",
+            "description": ""
+      },
+      "goal_progress": {
+            "url": "",
+            "status": 1,
+            "color": "03b2f8",
+            "content": "",
+            "title": "Uma meta para {current}/{target} {type} foi atualizada. ",
+            "description": ""
+      },
+      "goal_end": {
+            "url": "",
+            "status": 1,
+            "color": "03b2f8",
+            "content": "",
+            "title": "A meta para {current}/{target }{type} foi finalizada.",
+            "description": ""
+      }
+}
