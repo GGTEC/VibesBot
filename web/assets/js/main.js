@@ -3,8 +3,6 @@ window.addEventListener('pywebviewready',async function() {
   const tooltipTriggerList = document.querySelectorAll('[title]')
   const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 
-  
-
   loaded = await window.pywebview.api.loaded();
 
   if (loaded){
@@ -109,7 +107,7 @@ window.addEventListener('pywebviewready',async function() {
       setTimeout(function() {
         $('#loading').addClass('d-none');
         
-        update_modal('get_start')
+        update_modal('get')
       }, 1000);
   
       start_carousel()
@@ -232,7 +230,6 @@ function start_resizable(){
   
 }
 
-
 function start_color_inputs(){
 
   $("#goal-text-button").click(function(event) {
@@ -295,7 +292,6 @@ function update_specs_tiktok(specs){
   }
 
 }
-
 
 function update_carousel_tiktok(type_id,data){
   
@@ -431,10 +427,10 @@ async function update_modal(type_id){
 
     if(status){
       
-      if (status != 'false'){
+      if (status){
 
         var repoOwner = 'GGTEC'
-        var repoName = 'RewardEvents'
+        var repoName = 'VibesBot'
 
         fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/releases/latest`)
         .then(response => response.json())
@@ -444,6 +440,8 @@ async function update_modal(type_id){
 
           if (releasesList != undefined){
             
+            releasesList.innerHTML = "";
+
             const firstRelease = data; // Obter o primeiro item da lista
             
             const converter = new showdown.Converter()
@@ -469,51 +467,6 @@ async function update_modal(type_id){
 
       } else {
         document.getElementById('no-update').hidden = false
-      }
-    }
-
-  } else if (type_id == 'get_start'){
-
-    var status = await window.pywebview.api.update_check('check');
-
-    if(status){
-      
-      if (status != 'false'){
-
-        var repoOwner = 'GGTEC'
-        var repoName = 'RewardEvents'
-
-        fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/releases/latest`)
-        .then(response => response.json())
-        .then(data => {
-
-          let releasesList = document.querySelector("#update_body");
-
-          if (releasesList != undefined){
-            
-            const firstRelease = data; // Obter o primeiro item da lista
-            
-            const converter = new showdown.Converter()
-
-            var html_release = converter.makeHtml(firstRelease.body);
-
-            let releaseEl = document.createElement("div");
-
-            releaseEl.classList.add('version_block')
-            releaseEl.innerHTML = `
-              <p>Versão: ${firstRelease.tag_name}</p>
-              <p class='version_text'>${html_release}</p>
-            `;
-
-            releasesList.appendChild(releaseEl);
-          }
-          
-        })
-        .catch(error => console.error(error));
-
-
-        $("#update-modal").modal("show");
-
       }
     }
 
@@ -557,19 +510,6 @@ async function updateTimeDiff() {
 
       await sleep(5000)
   }
-}
-
-function update_div_redeem(data_redem_parse) {
-
-    var image_redeem = document.getElementById("image_redeem");
-    var name_redeem = document.getElementById("name_redeem");
-    var user_redeem = document.getElementById("user_redeem");
-
-    if (data_redem_parse.redeem_image != 'None'){
-      image_redeem.src = data_redem_parse.redeem_image
-    }
-    name_redeem.innerText = data_redem_parse.redeem_name
-    user_redeem.innerText = data_redem_parse.redeem_user
 }
 
 async function getFolder(id,type_id) {

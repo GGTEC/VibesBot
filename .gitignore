@@ -6,3 +6,7 @@ ffmpeg/ffplay.exe
 .vscode/settings.json
 dist/RewardEvents.exe
 file_version_info.txt
+requirements.txt
+requirements.in
+web/src/player/images/album.png
+web/src/player/images/album.png

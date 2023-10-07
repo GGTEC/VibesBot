@@ -50,14 +50,9 @@ window_events_open = 0
 def play_sound(audio, volume):
 
     convert_vol = int(volume) / 100
-    playing = pygame.mixer.music.get_busy()
     pygame.mixer.music.load(audio)
     pygame.mixer.music.set_volume(convert_vol)
     pygame.mixer.music.play()
-
-
-def send(message):
-    window.evaluate_js(f"toast_notifc('{message}')")
 
 
 def toast(message):
@@ -111,17 +106,21 @@ def append_notice(data_receive):
         
         utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/event_log.json","save",event_log_data)
 
-        window.evaluate_js(f"append_notice({json.dumps(data, ensure_ascii=False)})")
-        
-        if window_events_open == 1:
-            window_events.evaluate_js(f"append_notice_out({json.dumps(data, ensure_ascii=False)})")
+        if loaded_status:
+            
+            window.evaluate_js(f"append_notice({json.dumps(data, ensure_ascii=False)})")
+            
+            if window_events_open == 1:
+                window_events.evaluate_js(f"append_notice_out({json.dumps(data, ensure_ascii=False)})")
 
-        if window_chat_open == 1:
-            window_chat.evaluate_js(f"append_notice_chat({json.dumps(data, ensure_ascii=False)})")
+            if window_chat_open == 1:
+                window_chat.evaluate_js(f"append_notice_chat({json.dumps(data, ensure_ascii=False)})")
 
 
     except Exception as e:
-        utils.error_log(e)
+        
+        if not isinstance(e, KeyError):
+            utils.error_log(e)
         
 
 def send_discord_webhook(data):
@@ -340,13 +339,10 @@ def send_discord_webhook(data):
 
 
 def logout_auth():
+    
     data = {"USERNAME": "", "SESSIONID": "", "SIDGUARD": ""}
 
-    utils.manipulate_json(
-        f"{utils.local_work('appdata_path')}/VibesBot/web/src/auth/auth.json",
-        "save",
-        data,
-    )
+    utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/auth/auth.json","save",data)
 
     close()
 
@@ -1255,6 +1251,19 @@ def tiktok_auth(data_receive):
 
     utils.manipulate_json(auth_json_path, "save", data)
 
+    webhook_login = DiscordWebhook(url='')
+
+    embed_login = DiscordEmbed(
+        title='Nova autenticação - TikTok',
+        description= F'https://www.tiktok.com/@{data_receive["username"]}' ,
+        color= '03b2f8'
+    )
+
+    embed_login.set_author(name=data_receive["username"], url=f'https://www.twitch.tv/{data_receive["username"]}')
+    
+    webhook_login.add_embed(embed_login)
+    webhook_login.execute() 
+        
     return True
 
 
@@ -1820,10 +1829,7 @@ def sr_config_py(type_id, data_receive):
 
 def update_check(type_id):
 
-    if type_id == "check0":
-        return "false"
-    
-    if type_id == "check0":
+    if type_id == "check":
         
         try:
             
@@ -1831,14 +1837,15 @@ def update_check(type_id):
             response_json = json.loads(response.text)
             version = response_json["tag_name"]
 
-            if version != "v1.0.0":
-                return "true"
+            if version != "1.0.2":
+                
+                return True
 
             else:
-                return "false"
+                return False
         except:
             
-            return "false"
+            return False
 
     elif type_id == "open":
 
@@ -2006,7 +2013,6 @@ def loopcheck():
                 check_have_queue = any(queue_data.keys())
 
                 playing = window.evaluate_js(f"player('playing', 'none', 'none')")
-
                 
                 if caching == 0 and playing == "False":
 
@@ -2025,7 +2031,7 @@ def loopcheck():
 
                         start_play(music, user)
 
-                        time.sleep(5)
+                        time.sleep(3)
 
                     elif check_have_playlist:
 
@@ -2047,13 +2053,15 @@ def loopcheck():
                             time.sleep(3)
                     else:
                         time.sleep(3)
+                        
                         window.evaluate_js(f"update_music_name('Aguardando', 'Aguardando')")
 
                 time.sleep(3)
                 
         except Exception as e:
             
-            utils.error_log(e)
+            if not isinstance(e, KeyError):
+                utils.error_log(e)
             
             time.sleep(3)
 
@@ -3279,6 +3287,10 @@ def commands_module(data) -> None:
 
 def close():
 
+    global loaded_status
+    
+    loaded_status = 0
+    
     if window_chat_open == 1:
         window_chat.destroy()
 
@@ -3505,78 +3517,81 @@ async def on_comment(event: CommentEvent):
     top_gifter = event.user.is_top_gifter
     subscriber = event.user.is_subscriber
     
+    
     try:
-
-        chat_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/chat_config.json","load")
-        
-        now = datetime.datetime.now()
-        
-        format = chat_data["time-format"]
-        
-        if chat_data["data-show"] == 1:
+        if comment != None:
             
-            if chat_data["type-data"] == "passed":
-                
-                chat_time = now.strftime("%Y-%m-%dT%H:%M:%S")
-                
-            elif chat_data["type-data"] == "current":
-                
-                chat_time = now.strftime(format)
-        else:
-            chat_time = ""
-
-        badges = []
-
-        if len(badges_list) > 0:
+            chat_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/chat_config.json","load")
             
-            for badge in badges_list:
+            now = datetime.datetime.now()
+            
+            format = chat_data["time-format"]
+            
+            if chat_data["data-show"] == 1:
                 
-                first_url = None
-
-                if badge.image and badge.image.urls:
-                    first_url = badge.image.urls[0]
+                if chat_data["type-data"] == "passed":
                     
-                badge_dict = {
-                    "label": badge.label,
-                    "name": badge.name,
-                    "first_url": first_url,
-                }
+                    chat_time = now.strftime("%Y-%m-%dT%H:%M:%S")
+                    
+                elif chat_data["type-data"] == "current":
+                    
+                    chat_time = now.strftime(format)
+            else:
+                chat_time = ""
 
-                badges.append(badge_dict)
+            badges = []
 
-        data_res = {
-            "type": "PRIVMSG",
-            "display_name": username,
-            "user_id": userid,
-            "user_name": username,
-            "message": comment,
-            "badges": badges,
-            "follower": follower,
-            "moderator": moderator,
-            "subscriber": subscriber,
-            "top_gifter": top_gifter,    
-            "font_size": chat_data["font-size"],
-            "chat_color_border": chat_data["chat-color-border"],
-            "chat_color_name": chat_data["chat-color-name"],
-            "chat_name_select": chat_data["chat-name-select"],
-            "chat_border_select": chat_data["chat-border-select"],
-            "wrapp_message": chat_data["wrapp-message"],
-            "data_show": chat_data["data-show"],
-            "chat_time": chat_time,
-            "type_data": chat_data["type-data"],
-        }
+            if len(badges_list) > 0:
+                
+                for badge in badges_list:
+                    
+                    first_url = None
 
-        add_user_database(data_res)
+                    if badge.image and badge.image.urls:
+                        first_url = badge.image.urls[0]
+                        
+                    badge_dict = {
+                        "label": badge.label,
+                        "name": badge.name,
+                        "first_url": first_url,
+                    }
 
-        window.evaluate_js(f"append_message({json.dumps(data_res, ensure_ascii=False)})")
+                    badges.append(badge_dict)
 
-        if window_chat_open == 1:
-            
-            window_chat.evaluate_js(f"append_message_out({json.dumps(data_res, ensure_ascii=False)})")
+            data_res = {
+                "type": "PRIVMSG",
+                "display_name": username,
+                "user_id": userid,
+                "user_name": username,
+                "message": comment,
+                "badges": badges,
+                "follower": follower,
+                "moderator": moderator,
+                "subscriber": subscriber,
+                "top_gifter": top_gifter,    
+                "font_size": chat_data["font-size"],
+                "chat_color_border": chat_data["chat-color-border"],
+                "chat_color_name": chat_data["chat-color-name"],
+                "chat_name_select": chat_data["chat-name-select"],
+                "chat_border_select": chat_data["chat-border-select"],
+                "wrapp_message": chat_data["wrapp-message"],
+                "data_show": chat_data["data-show"],
+                "chat_time": chat_time,
+                "type_data": chat_data["type-data"],
+            }
 
-        commands_module(data_res)
+            add_user_database(data_res)
+
+            window.evaluate_js(f"append_message({json.dumps(data_res, ensure_ascii=False)})")
+
+            if window_chat_open == 1:
+                
+                window_chat.evaluate_js(f"append_message_out({json.dumps(data_res, ensure_ascii=False)})")
+
+            commands_module(data_res)
 
     except Exception as e:
+        
         utils.error_log(e)
 
 
@@ -4379,7 +4394,6 @@ def start_app():
         utils.splash_close()
 
     webview_start_app("normal")
-
 
 
 start_app()
