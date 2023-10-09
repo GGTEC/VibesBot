@@ -1,2 +1,2 @@
 # VibesBot
-Um programa não oficial para receber notificações, executar comandos, exibir objetivos, definir comandos para fazer solicitações sonoras de eventos/comentários em um stream do TikTok
+An unofficial program to receive notifications, execute commands, display goals, set commands to make sound requests for events/comments in a TikTok stream
