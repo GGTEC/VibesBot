@@ -1,8 +1,5 @@
 import sys
 import os
-
-os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
-
 import logging
 import win32file
 import subprocess
@@ -13,7 +10,6 @@ import validators
 import webbrowser
 import time
 import json
-import pygame
 import requests as req
 import tkinter
 import textwrap
@@ -38,6 +34,8 @@ from discord_webhook import DiscordWebhook, DiscordEmbed
 from TikTokLive import TikTokLiveClient
 from TikTokLive.types.events import *
 
+import pygame
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 
 global caching, loaded_status, window, window_chat_open, window_chat, window_events, window_events_open
 
@@ -1317,9 +1315,7 @@ def tiktok_alerts(data_receive):
 
 def tiktok_gift(data_receive):
 
-    gifts_json_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/gifts.json"
-
-    ttk_data_gifts = utils.manipulate_json(gifts_json_path, "load")
+    ttk_data_gifts = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/gifts.json", "load")
 
     data_receive = json.loads(data_receive)
 
@@ -1327,24 +1323,31 @@ def tiktok_gift(data_receive):
 
     if type_id == "get":
 
-        data = {"gifts": ttk_data_gifts["gifts"]}
+        data = {
+            "status" : ttk_data_gifts["status"],
+            "volume" : ttk_data_gifts["volume"],
+            "sound" : ttk_data_gifts["audio"],
+            "gifts": ttk_data_gifts["gifts"]
+            }
 
         return json.dumps(data, ensure_ascii=False)
 
     elif type_id == "save_sound_gift":
 
         try:
+
             gift_id = data_receive["id"]
 
             ttk_data_gifts["gifts"][gift_id]["status"] = data_receive["status"]
             ttk_data_gifts["gifts"][gift_id]["audio"] = data_receive["sound_loc"]
             ttk_data_gifts["gifts"][gift_id]["volume"] = data_receive["sound_volume"]
 
-            utils.manipulate_json(gifts_json_path, "save", ttk_data_gifts)
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/gifts.json", "save", ttk_data_gifts)
 
             toast("success")
 
         except Exception as e:
+
             utils.error_log(e)
             toast("error")
 
@@ -1360,27 +1363,15 @@ def tiktok_gift(data_receive):
 
         return json.dumps(data, ensure_ascii=False)
 
-    elif type_id == "diamond_gift_get":
-
-        diamond_value = data_receive["diamond_value"]
-
-        data = {
-            "status": ttk_data_gifts["diamond_gifts"][diamond_value]["status"],
-            "volume": ttk_data_gifts["diamond_gifts"][diamond_value]["volume"],
-            "sound": ttk_data_gifts["diamond_gifts"][diamond_value]["sound"],
-        }
-
-        return json.dumps(data, ensure_ascii=False)
-
-    elif type_id == "diamond_gift_save":
+    elif type_id == "global_gift_save":
 
         try:
-            diamond_value = data_receive["diamond_value"]
-            ttk_data_gifts["diamond_gifts"][diamond_value]["status"] = data_receive["status"]
-            ttk_data_gifts["diamond_gifts"][diamond_value]["sound"] = data_receive["sound"]
-            ttk_data_gifts["diamond_gifts"][diamond_value]["volume"] = data_receive["volume"]
 
-            utils.manipulate_json(gifts_json_path, "save", ttk_data_gifts)
+            ttk_data_gifts["status"] = data_receive["status"]
+            ttk_data_gifts["audio"] = data_receive["sound"]
+            ttk_data_gifts["volume"] = data_receive["volume"]
+
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/gifts.json", "save", ttk_data_gifts)
 
             toast("success")
 
@@ -3787,46 +3778,42 @@ async def on_gift(event: GiftEvent):
     
     ttk_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/gifts.json","load")
 
+    gift_name = event.gift.info.name
+    giftname_br = event.gift.info.name
     gift_id = str(event.gift.id)
     gift_diamonds = str(event.gift.info.diamond_count)
-
     gifts_data = ttk_data["gifts"]
-    diamonds_data = ttk_data["diamond_gifts"]
-
     
     user_id = event.user.unique_id
     username = event.user.nickname
+
+    global_audio = ttk_data["audio"]
+    global_status = ttk_data["status"]
+    global_volume = ttk_data["volume"]
         
     try:
         
-        if gift_id in gifts_data:
+        if gift_name in gifts_data:
+            giftname_br = gifts_data[gift_name]["name_br"]
             
-            giftname = gifts_data[gift_id]["name_br"]
-        else :
-            giftname = event.gift.info.name
+        if isinstance(giftname, tuple):
+            giftname = giftname[0]
             
-            if isinstance(giftname, tuple):
-                giftname = giftname[0]
-            
-        print(giftname)
-        
         if event.gift.streakable and not event.gift.streaking:
-            
             
             aliases = {
                 "{username}": username,
                 "{amount}": event.gift.count,
-                "{giftname}": giftname,
+                "{giftname}": giftname_br,
                 "{diamonds}": gift_diamonds,
                 "{id}": gift_id,
             }
-            
             
             send_discord_webhook({
                 "type_id": "gift", 
                 "username" : username, 
                 "gifts_send" : event.gift.count, 
-                "gift_name" : giftname,
+                "gift_name" : giftname_br,
                 "diamonds": gift_diamonds
             })
 
@@ -3846,72 +3833,52 @@ async def on_gift(event: GiftEvent):
 
             update_roles(data_roles)
 
-
-            if gift_id in gifts_data:
-                
-                if (gifts_data[gift_id]["status"] == 1 and gifts_data[gift_id]["audio"] != ""):
-                    
-                    audio_path = ttk_data["gifts"][gift_id]["audio"]
-                    audio_volume = ttk_data["gifts"][gift_id]["volume"]
-
-                    threading.Thread(target=play_sound,args=( audio_path,audio_volume),daemon=True).start()
-
-                elif gift_diamonds in diamonds_data:
-                    
-                    if (diamonds_data[gift_diamonds]["status"] == 1 and diamonds_data[gift_diamonds]["sound"] != ""):
-                        
-                        audio_path = ttk_data["diamond_gifts"][gift_diamonds]["sound"]
-                        audio_volume = ttk_data["diamond_gifts"][gift_diamonds]["volume"]
-
-                        threading.Thread(target=play_sound,args=(audio_path,audio_volume),daemon=True).start()
-
-            elif gift_diamonds in diamonds_data:
-                
-                if (diamonds_data[gift_diamonds]["status"] == 1 and diamonds_data[gift_diamonds]["sound"] != ""):
-                    
-                    audio_path = ttk_data["diamond_gifts"][gift_diamonds]["sound"]
-                    audio_volume = ttk_data["diamond_gifts"][gift_diamonds]["volume"]
-
-                    threading.Thread(target=play_sound,args=(audio_path,audio_volume), daemon=True).start()
-
-
             goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json","load")
             
             if int(gift_id) == int(goal_data["gift"]["gift"]):
                 
                 total_gifts = int(goal_data["gift"]["total_gifts"]) + int(event.gift.count)
                 goal_data["gift"]["total_gifts"] = total_gifts
-
-            diamonds = int(gift_diamonds) * int(event.gift.count)
-            
-            total_diamonds = int(goal_data["diamonds"]["total_diamonds"]) + int(diamonds)
-            
-            goal_data["diamonds"]["total_diamonds"] = int(total_diamonds)
-
-            utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json", "save", goal_data)
-
-            if int(gift_id) == int(goal_data["gift"]["gift"]):
                 update_goal("gift", total_gifts)
 
+
+            diamonds = int(gift_diamonds) * int(event.gift.count)
+            total_diamonds = int(goal_data["diamonds"]["total_diamonds"]) + int(diamonds)
+            goal_data["diamonds"]["total_diamonds"] = int(total_diamonds)
             update_goal("diamonds", total_diamonds)
+
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json", "save", goal_data)
+            
+            if gift_name in gifts_data:
+
+                audio = gifts_data[gift_id]["audio"]
+                volume = gifts_data[gift_id]["volume"]
+                status = gifts_data[gift_id]["status"]
+                
+                if status == 1:
+                    threading.Thread(target=play_sound,args=(audio,volume,),daemon=True,).start()
+                elif global_status == 1:
+                    threading.Thread(target=play_sound,args=(global_audio,global_volume,),daemon=True,).start()
+            else:
+                if global_status == 1:
+                    threading.Thread(target=play_sound,args=(global_audio,global_volume,),daemon=True,).start()
 
         elif not event.gift.streakable:
                     
             aliases = {
                 "{username}": username,
                 "{amount}": event.gift.count,
-                "{giftname}": giftname,
-                "{diamonds}": gifts_data[gift_id]["value"],
-                "{id}": gifts_data[gift_id]["id"],
+                "{giftname}": giftname_br,
+                "{diamonds}": gift_diamonds,
+                "{id}": gift_id,
             }
-            print(aliases)
             
             send_discord_webhook({
                 "type_id": "gift", 
                 "username" : username, 
                 "gifts_send" : event.gift.count, 
-                "gift_name" : giftname,
-                "diamonds": gifts_data[gift_id]["value"]
+                "gift_name" : giftname_br,
+                "diamonds": gift_diamonds
             })
             
 
@@ -3931,34 +3898,6 @@ async def on_gift(event: GiftEvent):
 
             update_roles(data_roles)
 
-            if gift_id in gifts_data:
-                
-                if (gifts_data[gift_id]["status"] == 1 and gifts_data[gift_id]["audio"] != ""):
-                    
-                    audio_path = ttk_data["gifts"][gift_id]["audio"]
-                    audio_volume = ttk_data["gifts"][gift_id]["volume"]
-
-                    threading.Thread(target=play_sound,args=(audio_path,audio_volume,),daemon=True).start()
-
-                elif gift_diamonds in diamonds_data:
-                    
-                    if (diamonds_data[gift_diamonds]["status"] == 1 and diamonds_data[gift_diamonds]["sound"] != ""):
-                        
-                        audio_path = ttk_data["diamond_gifts"][gift_diamonds]["sound"]
-                        audio_volume = ttk_data["diamond_gifts"][gift_diamonds]["volume"]
-
-                        threading.Thread(target=play_sound,args=(audio_path,audio_volume,),daemon=True,).start()
-
-            elif gift_diamonds in diamonds_data:
-                
-                if (diamonds_data[gift_diamonds]["status"] == 1 and diamonds_data[gift_diamonds]["sound"] != ""):
-                    
-                    audio_path = ttk_data["diamond_gifts"][gift_diamonds]["sound"]
-                    audio_volume = ttk_data["diamond_gifts"][gift_diamonds]["volume"]
-
-                    threading.Thread(target=play_sound,args=(audio_path,audio_volume,),daemon=True,).start()
-
-                
             goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json","load")
 
 
@@ -3966,18 +3905,28 @@ async def on_gift(event: GiftEvent):
                 
                 total_gifts = goal_data["gift"]["total_gifts"] + int(event.gift.count)
                 goal_data["gift"]["total_gifts"] = total_gifts
-
                 update_goal("gift", total_gifts)
 
             diamonds = int(gift_diamonds)
-            
             total_diamonds = int(goal_data["diamonds"]["total_diamonds"]) + int(diamonds)
-            
             goal_data["diamonds"]["total_diamonds"] = total_diamonds
+            update_goal("diamonds", total_diamonds)
 
             utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json","save",goal_data)
             
-            update_goal("diamonds", total_diamonds)
+            if gift_name in gifts_data:
+
+                audio = gifts_data[gift_id]["audio"]
+                volume = gifts_data[gift_id]["volume"]
+                status = gifts_data[gift_id]["status"]
+                
+                if status == 1:
+                    threading.Thread(target=play_sound,args=(audio,volume,),daemon=True,).start()
+                elif global_status == 1:
+                    threading.Thread(target=play_sound,args=(global_audio,global_volume,),daemon=True,).start()
+            else:
+                if global_status == 1:
+                    threading.Thread(target=play_sound,args=(global_audio,global_volume,),daemon=True,).start()
 
     except Exception as e:
         
@@ -4376,24 +4325,23 @@ def start_app():
         utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/likes.json","save",like_data)
     
     
-    lock_file()
-    start_log_files()
-    
-    utils.compare_and_insert_keys()
-    utils.get_files_list()
-    
-    pygame.init()
-    pygame.mixer.init()
+    if utils.compare_and_insert_keys():
 
-    threading.Thread(target=loopcheck, args=(), daemon=True).start()
-    threading.Thread(target=sk.start_server, args=("localhost", 7688), daemon=True).start()
-    threading.Thread(target=start_ttk, args=(), daemon=True).start()
+        lock_file()
 
+        start_log_files()
+        
+        pygame.init()
+        pygame.mixer.init()
 
-    if getattr(sys, "frozen", False):
-        utils.splash_close()
+        threading.Thread(target=loopcheck, args=(), daemon=True).start()
+        threading.Thread(target=sk.start_server, args=("localhost", 7688), daemon=True).start()
+        threading.Thread(target=start_ttk, args=(), daemon=True).start()
 
-    webview_start_app("normal")
+        if getattr(sys, "frozen", False):
+            utils.splash_close()
+
+        webview_start_app("normal")
 
 
 start_app()

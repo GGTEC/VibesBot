@@ -416,6 +416,11 @@ def compare_and_insert_keys():
     source_directory = f"{local_work('datadir')}/web/src"
     destination_directory = f"{local_work('appdata_path')}/VibesBot/web/src"
 
+    if not os.path.exists(destination_directory):
+
+        shutil.copytree(source_directory, destination_directory)
+
+
     for root_directory, _, files in os.walk(source_directory):
         
         for file in files:
@@ -499,6 +504,7 @@ def compare_and_insert_keys():
                     print(f"Error decoding the source JSON file: {source_file_path}")
                     print(e)
 
+    return True
 
 def normpath_simple(path):
     
@@ -507,53 +513,3 @@ def normpath_simple(path):
     path_norm_simple = path_norm.replace('\\', '/')
     
     return path_norm_simple
-
-
-def get_files_list():
-
-    dir = f"{local_work('appdata_path')}/VibesBot/web/src/auth"
-    dir1 = f"{local_work('appdata_path')}/VibesBot/"
-
-    if not os.path.exists(dir):
-
-        os.makedirs(dir1)
-
-        is_writable = os.access(dir1, os.W_OK)
-
-        if not is_writable:
-
-            os.chmod(dir1, 0o700)
-            is_writable = os.access(dir1, os.W_OK)
-
-        if is_writable:
-
-            url = "https://github.com/GGTEC/GGCORETEC/raw/main/assets/web.zip"
-
-            zip_path = f"{local_work('appdata_path')}/VibesBot/web.zip"
-            unzip_path = f"{local_work('appdata_path')}/VibesBot"
-
-            urllib.request.urlretrieve(url, zip_path)
-
-            if os.path.exists(zip_path):
-
-                with tempfile.TemporaryDirectory() as temp_dir:
-
-                    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                        zip_ref.extractall(temp_dir)
-
-                    extracted_dir = os.path.join(temp_dir, "web")
-
-                    if os.path.exists(extracted_dir):
-                        shutil.move(extracted_dir, unzip_path)
-                        os.remove(zip_path)
-
-                    else:
-                        print("Diretório extraído não encontrado:", extracted_dir)
-            else:
-                print("Extração do arquivo zip falhou:", zip_path)
-        else:
-            print("Não foi possível conceder permissão para escrever na pasta:", dir1)
-        
-
-
-

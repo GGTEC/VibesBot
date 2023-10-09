@@ -37,6 +37,7 @@
   
 </head>
 <body id="body-pd">
+  
   <div  id="loading" class="loading">
     <div class="container">
         <div class="row vh-100">
@@ -1428,127 +1429,47 @@
             </div>
             <div class="h-scroll flex-wrap flex-wrap justify-content-center">
               <div class="internal-block">
-                  <div class="bg-dark form-block">
-                    <h5 class="mb-5">Configurar notificação para presentes</h5>
-                    <h6>Notificações por valor (em diamantes) dos presentes</h6>
-                    <div class="form-group mt-3">
-                      <label for="gift_diamond">Selecione um valor de diamantes para configurar</label>
-                      <div class="input-group none-flex mt-3">
-                        <select class="bg-dark" id="gift_diamond">
-                          <option value="1">1</option>
-                          <option value="5">5</option>
-                          <option value="10">10</option>
-                          <option value="20">20</option>
-                          <option value="30">30</option>
-                          <option value="44999">44999</option>
-                          <option value="39999">39999</option>
-                          <option value="34500">34500</option>
-                          <option value="34000">34000</option>
-                          <option value="30000">30000</option>
-                          <option value="29999">29999</option>
-                          <option value="26999">26999</option>
-                          <option value="25999">25999</option>
-                          <option value="20000">20000</option>
-                          <option value="19999">19999</option>
-                          <option value="15000">15000</option>
-                          <option value="13999">13999</option>
-                          <option value="12000">12000</option>
-                          <option value="10999">10999</option>
-                          <option value="10000">10000</option>
-                          <option value="9999">9999</option>
-                          <option value="9888">9888</option>
-                          <option value="8800">8800</option>
-                          <option value="7999">7999</option>
-                          <option value="7000">7000</option>
-                          <option value="6999">6999</option>
-                          <option value="5999">5999</option>
-                          <option value="5000">5000</option>
-                          <option value="4999">4999</option>
-                          <option value="4888">4888</option>
-                          <option value="4000">4000</option>
-                          <option value="3999">3999</option>
-                          <option value="3000">3000</option>
-                          <option value="2999">2999</option>
-                          <option value="2988">2988</option>
-                          <option value="2599">2599</option>
-                          <option value="2150">2150</option>
-                          <option value="1999">1999</option>
-                          <option value="1800">1800</option>
-                          <option value="1700">1700</option>
-                          <option value="1599">1599</option>
-                          <option value="1500">1500</option>
-                          <option value="1499">1499</option>
-                          <option value="1088">1088</option>
-                          <option value="1000">1000</option>
-                          <option value="999">999</option>
-                          <option value="899">899</option>
-                          <option value="800">800</option>
-                          <option value="699">699</option>
-                          <option value="600">600</option>
-                          <option value="599">599</option>
-                          <option value="500">500</option>
-                          <option value="499">499</option>
-                          <option value="399">399</option>
-                          <option value="388">388</option>
-                          <option value="300">300</option>
-                          <option value="299">299</option>
-                          <option value="200">200</option>
-                          <option value="199">199</option>
-                          <option value="169">169</option>
-                          <option value="150">150</option>
-                          <option value="100">100</option>
-                          <option value="99">99</option>
-                          <option value="39">39</option>
-                          <option value="9">9</option>
-                          <option value="6">6</option>
-                          <option value="41999">41999</option>
-                          <option value="34999">34999</option>
-                          <option value="1799">1799</option>
-                        </select>
-                        <button class="btn bt-submit" type="button" onclick="ttk_gift('diamond_gift_get')">
-                          Configurar
-                        </button>
+                <div class="bg-dark form-block">
+                  <h5 class="mb-5">Configurar notificação para presentes</h5>
+                  <h6>Notificações Globais</h6>
+                  <p class="small">Executado se não ouver nenhuma notificação para o presente recebido ou o presente não for encontrado na lista de presentes</p>
+                  <div class="row mt-3">
+                    <div class="col">
+                      <p class="form-check-label">Ativar Notificação</p>
+                    </div>
+                    <div class="col">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="global-gift-status" type="checkbox" />
+                        <label for="global-gift-status" class="form-check-label"></label>
                       </div>
                     </div>
-                    <div class="row mt-3">
-                      <div class="col">
-                        <p class="form-check-label">Ativar Notificação</p>
-                      </div>
-                      <div class="col">
-                        <div class="material-switch bg-white d-flex justify-content-end">
-                          <input id="gift-diamond-sound-status" type="checkbox" />
-                          <label for="gift-diamond-sound-status" class="form-check-label"></label>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="form-group mt-3">
-                      <label for="file-select-sound-gift-diamond">Arquivo de audio .mp3</label>
-                      <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar" id="file-select-sound-gift-diamond" onclick="getFolder('file-select-sound-gift-diamond','sound')" required />
-                    </div>
-                    <div class="form-group mt-3">
-                      <label for="audio-volume-ttk-gift-diamond">Volume</label>
-                      <input class="w-100" type="range" min="0" max="100" value="50" id="audio-volume-ttk-gift-diamond" step="1"
-                        oninput="rangevalue_ttk_gift_diamond.innerText = this.value" />
-                      <output id="rangevalue_ttk_gift_diamond">50</output>
-                    </div>
-                    <button type="button" class="btn bt-submit mt-4" onclick="ttk_gift('diamond_gift_save')">Salvar</button>
                   </div>
-                  <div class="bg-dark form-block">
-
-                    <h5 class="mb-5">Notificações por presente</h5>
-                      
-                    <input type="text" class="form-control" id="ttk-gift-id" hidden/>
-                    <p class="small">Ativando a notificação por presente a notificação por Valor de diamante não irá ser reproduzida para este presente.</p>                 
-                    <table class="table table-dark table-striped w-100" id="giftlist_table" style="height: 20%;">
-                      <thead>
-                          <th>ID</th>
-                          <th>Nome</th>
-                          <th>Diamantes</th>
-                          <th>Configurar</th>
-                      </thead>
-                      <tbody></tbody>
-                    </table>
+                  <div class="form-group mt-3">
+                    <label for="global-gift-sound">Arquivo de audio .mp3</label>
+                    <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar" id="global-gift-sound" onclick="getFolder('global-gift-sound','sound')" required />
                   </div>
+                  <div class="form-group mt-3">
+                    <label for="global-gift-volume">Volume</label>
+                    <input class="w-100" type="range" min="0" max="100" value="50" id="global-gift-volume" step="1"
+                      oninput="rangevalue_global_gift_volume.innerText = this.value" />
+                    <output id="rangevalue_global_gift_volume">50</output>
+                  </div>
+                  <button type="button" class="btn bt-submit mt-4" onclick="ttk_gift('global_gift_save')">Salvar</button>
+                </div>
+                <div class="bg-dark form-block">
+                  <h5 class="mb-5">Notificações por presente</h5>
+                  <input type="text" class="form-control" id="ttk-gift-id" hidden/>
+                  <p class="small">Ativando a notificação por presente a notificação por Valor de diamante não irá ser reproduzida para este presente.</p>                 
+                  <table class="table table-dark table-striped w-100" id="giftlist_table" style="height: 20%;">
+                    <thead>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Diamantes</th>
+                        <th>Configurar</th>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>

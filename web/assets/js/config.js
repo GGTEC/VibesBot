@@ -578,21 +578,20 @@ async function ttk_gift(type_id){
 
                     const item = gift_data[key];
                     
-                    var gift_id = item.id
-                    var gift_name = item.name_br
+                    var gift_name = item.name
+                    var gift_name_br = item.name_br
                     var diamonds = item.value
                     
                     var button_config = document.createElement("button");
 
                     button_config.innerText = "Configurar";
                     button_config.classList.add('bnt','bt-submit')
-                    button_config.setAttribute('data-id', `${gift_id}`)
+                    button_config.setAttribute('data-id', `${gift_name}`)
                     button_config.setAttribute('onclick', `ttk_modal(this)`)
 
-
                     dataTableData.push([
-                        gift_id,
                         gift_name,
+                        gift_name_br,
                         diamonds,
                         button_config.outerHTML
                     ]);
@@ -620,19 +619,24 @@ async function ttk_gift(type_id){
                     url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/pt-BR.json'
                 },
                 columns: [
-                    { title: 'ID',"searchable": false },
+                    { title: 'ID',"searchable": true },
                     { title: 'Nome' },
                     { title: 'Diamantes' },
                     { title: 'Ação' }
                 ]
             } );
 
-            // adicionar as linhas à tabela
             for (var i = 0; i < dataTableData.length; i++) {
                 table.row.add(dataTableData[i]).draw();
             }
 
-    
+            var global_gift_status = document.getElementById('global-gift-status');
+            var global_gift_volume = document.getElementById('global-gift-volume');
+            var global_gift_sound = document.getElementById('global-gift-sound');
+
+            global_gift_status.checked = rec_data.status == 1 ? true : false;
+            global_gift_sound.value = rec_data.sound;
+            global_gift_volume.value = rec_data.volume;
         }
         
     } else if (type_id == "modal"){
@@ -641,7 +645,6 @@ async function ttk_gift(type_id){
         var gift_status = document.getElementById('gift-sound-status');
         var gift_volume_sound = document.getElementById('audio-volume-ttk-gift');
         var gift_id_inp = document.getElementById('ttk-gift-id');
-        
 
         data = {
             type_id : "get_gift_info",
@@ -690,49 +693,22 @@ async function ttk_gift(type_id){
         window.pywebview.api.tiktok_gift(data)
         gift_id_inp.value = ''
 
-    } else if (type_id == "diamond_gift_save"){
+    } else if (type_id == "global_gift_save"){
 
-        var diamond_gift_value = document.getElementById('gift_diamond');
-        var diamond_gift_status = document.getElementById('gift-diamond-sound-status');
-        var diamond_gift_volume = document.getElementById('audio-volume-ttk-gift-diamond');
-        var diamond_gift_sound = document.getElementById('file-select-sound-gift-diamond');
+        var global_gift_status = document.getElementById('global-gift-status');
+        var global_gift_volume = document.getElementById('global-gift-volume');
+        var global_gift_sound = document.getElementById('global-gift-sound');
 
         data = {
-            type_id : "diamond_gift_save",
-            diamond_value : diamond_gift_value.value,
-            status : diamond_gift_status.checked ? 1 : 0,
-            volume : diamond_gift_volume.value,
-            sound : diamond_gift_sound.value,
+            type_id : "global_gift_save",
+            status : global_gift_status.checked ? 1 : 0,
+            volume : global_gift_volume.value,
+            sound : global_gift_sound.value,
         }
 
         var data = JSON.stringify(data);
         window.pywebview.api.tiktok_gift(data)
         
-    } else if (type_id == "diamond_gift_get"){
-
-        var diamond_gift_value = document.getElementById('gift_diamond');
-        var diamond_gift_status = document.getElementById('gift-diamond-sound-status');
-        var diamond_gift_volume = document.getElementById('audio-volume-ttk-gift-diamond');
-        var diamond_gift_sound = document.getElementById('file-select-sound-gift-diamond');
-
-        data = {
-            type_id : "diamond_gift_get",
-            diamond_value : diamond_gift_value.value
-        }
-
-        var data = JSON.stringify(data);
-
-        var diamond_gift_data = await window.pywebview.api.tiktok_gift(data)
-
-        if (diamond_gift_data){
-
-            gift_rec_data = JSON.parse(diamond_gift_data)
-
-            diamond_gift_status.checked = gift_rec_data.status == 1 ? true : false;
-            diamond_gift_sound.value = gift_rec_data.sound;
-            diamond_gift_volume.value = gift_rec_data.volume;
-
-        }
     } 
     
 }

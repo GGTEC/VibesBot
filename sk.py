@@ -14,23 +14,33 @@ ping_interval = 5
 appdata_path = os.getenv('APPDATA')
 
 def error_log(ex):
+
     now = datetime.now()
     time_error = now.strftime("%d/%m/%Y %H:%M:%S")
 
     trace = []
-    tb = ex.__traceback__
+    error_type = "Unknown"
+    error_message = ""
 
-    while tb is not None:
-        trace.append({
-            "filename": tb.tb_frame.f_code.co_filename,
-            "name": tb.tb_frame.f_code.co_name,
-            "lineno": tb.tb_lineno
-        })
-        tb = tb.tb_next
+    if isinstance(ex, BaseException):  # Verifica se ex é uma exceção
+        tb = ex.__traceback__
 
-    error = str(f'Erro = type: {type(ex).__name__} | message: {str(ex)} | trace: {trace} | time: {time_error} \n')
+        while tb is not None:
+            trace.append({
+                "filename": tb.tb_frame.f_code.co_filename,
+                "name": tb.tb_frame.f_code.co_name,
+                "lineno": tb.tb_lineno
+            })
+            tb = tb.tb_next
 
-    with open(f"{appdata_path}/rewardevents/web/src/error_log.txt", "a+", encoding='utf-8') as log_file_r:
+        error_type = type(ex).__name__
+        error_message = str(ex)
+    else:
+        error_message = ex
+
+    error = str(f'Erro = type: {error_type} | message: {error_message} | trace: {trace} | time: {time_error} \n\n')
+
+    with open(f"{appdata_path}/VibesBot/web/src/error_log.txt", "a+", encoding='utf-8') as log_file_r:
         log_file_r.write(error)
 
 def handshake(client_socket):
@@ -112,10 +122,12 @@ def decode_websocket_frame(data):
         for i in range(payload_start, len(data)):
             decoded.append(data[i] ^ mask[(i - payload_start) % 4])
 
-        return decoded.decode()
+        return decoded.decode('utf-8','ignore')
+    
     except Exception as e:
-        error_log(e)
-        return ''
+        if not isinstance(e, UnicodeDecodeError):
+            error_log(e)
+            return ''
 
 def encode_websocket_frame(data):
     try:
