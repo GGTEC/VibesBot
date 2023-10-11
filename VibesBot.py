@@ -1828,7 +1828,7 @@ def update_check(type_id):
             response_json = json.loads(response.text)
             version = response_json["tag_name"]
 
-            if version != "1.0.2":
+            if version != "1.0.4":
                 
                 return True
 
@@ -3792,13 +3792,13 @@ async def on_gift(event: GiftEvent):
     global_volume = ttk_data["volume"]
         
     try:
+
+        if isinstance(gift_name, tuple):
+            gift_name = gift_name[0]
         
         if gift_name in gifts_data:
             giftname_br = gifts_data[gift_name]["name_br"]
-            
-        if isinstance(giftname, tuple):
-            giftname = giftname[0]
-            
+              
         if event.gift.streakable and not event.gift.streaking:
             
             aliases = {
@@ -3851,9 +3851,9 @@ async def on_gift(event: GiftEvent):
             
             if gift_name in gifts_data:
 
-                audio = gifts_data[gift_id]["audio"]
-                volume = gifts_data[gift_id]["volume"]
-                status = gifts_data[gift_id]["status"]
+                audio = gifts_data[gift_name]["audio"]
+                volume = gifts_data[gift_name]["volume"]
+                status = gifts_data[gift_name]["status"]
                 
                 if status == 1:
                     threading.Thread(target=play_sound,args=(audio,volume,),daemon=True,).start()
@@ -3916,9 +3916,9 @@ async def on_gift(event: GiftEvent):
             
             if gift_name in gifts_data:
 
-                audio = gifts_data[gift_id]["audio"]
-                volume = gifts_data[gift_id]["volume"]
-                status = gifts_data[gift_id]["status"]
+                audio = gifts_data[gift_name]["audio"]
+                volume = gifts_data[gift_name]["volume"]
+                status = gifts_data[gift_name]["status"]
                 
                 if status == 1:
                     threading.Thread(target=play_sound,args=(audio,volume,),daemon=True,).start()
