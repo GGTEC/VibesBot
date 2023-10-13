@@ -1009,6 +1009,9 @@ async function tts_command(type_id){
             command.value = rec_parse.command;
             delay.value = rec_parse.delay;
             status.checked = rec_parse.status == 1 ? true : false;
+
+            $("#user-level-tts").selectpicker('val', rec_parse.user_level);
+            $("#user-level-tts").selectpicker("refresh");
     
         }
 

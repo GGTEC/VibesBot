@@ -1,7 +1,7 @@
 
 function update_image(){
     var player_img = document.getElementById('song-img');
-    player_img.style.backgroundImage = `linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7483368347338936) 89%, rgba(0,0,0,1) 100%),url('/src/player/images/album.png?noCache=` + Math.floor(Math.random() * 1000000)+")";
+    player_img.style.backgroundImage = `linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7483368347338936) 89%, rgba(0,0,0,1) 100%),url('http://localhost:7000/src/player/images/album.png?noCache=` + Math.floor(Math.random() * 1000000)+")";
 }
 
 function update_music_name(name,artist){

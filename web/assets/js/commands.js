@@ -52,7 +52,6 @@ async function commands_fun(type_id){
 
         document.getElementById('new-command').value = '';
         document.getElementById('new-delay').value = '';
-        document.getElementById('user-level-command').value = '';
         document.getElementById('sound-command').value = '';
         div.hidden = true
         seletor.checked = false
@@ -62,7 +61,6 @@ async function commands_fun(type_id){
         var status_command = document.getElementById('command-simple-status');
         var command = document.getElementById('command-select-edit').value
         var sound = document.getElementById('sound-command-edit').value;
-
         var seletor_edit = document.getElementById('command-audio-status-edit');
         var div_edit = document.getElementById('command-audio-div-edit');
 
@@ -184,6 +182,7 @@ async function commands_fun(type_id){
             var command_edit = command_info_parse.edit_command;
             var delay_edit = command_info_parse.edit_delay;
             var sound_edit = command_info_parse.sound;
+            var edit_level = command_info_parse.edit_level;
 
             if (status_command == 1){
                 document.getElementById("command-simple-status").checked = true;
@@ -203,6 +202,10 @@ async function commands_fun(type_id){
             document.getElementById('sound-command-edit').value = sound_edit;
             document.getElementById("edit-command").value = command_edit;
             document.getElementById("edit-delay").value = delay_edit;
+
+            $("#user-level-command-edit").selectpicker('val', edit_level);
+            $("#user-level-command-edit").selectpicker("refresh");
+
 
         }
     } else if (type_id == 'command-list'){

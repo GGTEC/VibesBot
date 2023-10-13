@@ -77,7 +77,9 @@ def generate_accept_key(key):
         return ''
 
 def send_ping(client_socket):
+    
     try:
+
         while True:
             client_socket.send(encode_websocket_frame('ping'))
             time.sleep(ping_interval)
@@ -90,23 +92,30 @@ def send_ping(client_socket):
                 continue
 
     except Exception as e:
-        error_log(e)
+        if not isinstance(e, ConnectionAbortedError):
+            error_log(e)
 
-    # Encerra a conexão com o cliente
     client_socket.close()
     clients.remove(client_socket)
 
 def handle_client(client_socket):
+
     try:
+
         handshake(client_socket)
         clients.append(client_socket)
 
         threading.Thread(target=send_ping, args=(client_socket,)).start()
+
     except Exception as e:
-        error_log(e)
+        if not isinstance(e, ConnectionAbortedError):
+            error_log(e)
 
 def decode_websocket_frame(data):
     try:
+        if len(data) < 2:
+            return ''
+    
         payload_length = data[1] & 127
         if payload_length <= 125:
             payload_start = 2
@@ -125,7 +134,7 @@ def decode_websocket_frame(data):
         return decoded.decode('utf-8','ignore')
     
     except Exception as e:
-        if not isinstance(e, UnicodeDecodeError):
+        if not isinstance(e, UnicodeDecodeError) or not isinstance(e, ConnectionAbortedError):
             error_log(e)
             return ''
 
@@ -149,9 +158,10 @@ def encode_websocket_frame(data):
 
         encoded.extend(payload)
         return encoded
+    
     except Exception as e:
-        error_log(e)
-        return b''
+        if not isinstance(e, ConnectionAbortedError):
+            error_log(e)
 
 def broadcast_message(message):
     for client in clients:
@@ -249,7 +259,8 @@ def receive_message(client_socket):
                     broadcast_message(json.dumps(data_goal))
                      
     except Exception as e:
-        error_log(e)
+        if not isinstance(e, ConnectionAbortedError):
+            error_log(e)
     
 def start_server(host, port):
 

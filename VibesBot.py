@@ -20,8 +20,9 @@ import datetime
 import re
 import tkinter.messagebox as messagebox
 import sk
-from io import BytesIO
 
+from yt_dlp import DownloadError
+from io import BytesIO
 from collections import namedtuple
 from auth import auth_data
 from io import BytesIO
@@ -31,19 +32,21 @@ from tkinter import filedialog as fd
 from random import randint
 from discord_webhook import DiscordWebhook, DiscordEmbed
 
-from TikTokLive import TikTokLiveClient
-from TikTokLive.types.events import *
+from tiktokcon import TikTokLiveThread
+
 
 import pygame
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 
-global caching, loaded_status, window, window_chat_open, window_chat, window_events, window_events_open
+global caching, loaded_status, window, window_chat_open, window_chat, window_events, window_events_open, reconn
 
-caching = 0
-loaded_status = 0
-window_chat_open = 0
-tiktok_conn = 0
-window_events_open = 0
+reconn = False
+caching = False
+loaded_status = False
+window_chat_open = False
+window_events_open = False
+
+
 
 def play_sound(audio, volume):
 
@@ -108,10 +111,10 @@ def append_notice(data_receive):
             
             window.evaluate_js(f"append_notice({json.dumps(data, ensure_ascii=False)})")
             
-            if window_events_open == 1:
+            if window_events_open:
                 window_events.evaluate_js(f"append_notice_out({json.dumps(data, ensure_ascii=False)})")
 
-            if window_chat_open == 1:
+            if window_chat_open:
                 window_chat.evaluate_js(f"append_notice_chat({json.dumps(data, ensure_ascii=False)})")
 
 
@@ -662,6 +665,7 @@ def tts_command(data_receive):
                 "command": tts_command_data["command"],
                 "status": tts_command_data["status"],
                 "delay": tts_command_data["delay"],
+                "user_level" : tts_command_data["user_level"]
             }
 
             data_dump = json.dumps(data, ensure_ascii=False)
@@ -1524,50 +1528,56 @@ def disclosure_py(type_id, data_receive):
 
 def get_video_info(title):
     
-    def remove_string(value):
-        try:
-            symbols = [["[", "]"], ["(", ")"], ['"', '"']]
-            for symbol in symbols:
-                if value.find(symbol[0]) and value.find(symbol[1]):
-                    value = value.replace(
-                        value[
-                            (index := value.find(symbol[0])) : value.find(
-                                symbol[1], index + 1
-                            )
-                            + 1
-                        ],
-                        "",
-                    ).strip()
-            return value
-        except:
-            return value
 
-    ydl_opts = {"skip_download": True, "quiet": True}
+        def remove_string(value):
+            try:
+                symbols = [["[", "]"], ["(", ")"], ['"', '"']]
+                for symbol in symbols:
+                    if value.find(symbol[0]) and value.find(symbol[1]):
+                        value = value.replace(
+                            value[
+                                (index := value.find(symbol[0])) : value.find(
+                                    symbol[1], index + 1
+                                )
+                                + 1
+                            ],
+                            "",
+                        ).strip()
+                return value
+            except:
+                return value
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl_opts = {"skip_download": True, "quiet": True}
 
-        if validators.url(title):
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
 
-            video_info = ydl.extract_info(title, download=False)
-        else:
-            video_info = ydl.extract_info(f"ytsearch:{title}", download=False)["entries"][0]
+            try:
+                if validators.url(title):
 
-        video_id = video_info.get("id", None)
-        video_url = f"https://www.youtube.com/watch?v={video_id}"
-        video_title = video_info.get("title", None)
-        video_length = video_info.get("duration", None)
-        video_thumb = video_info.get("thumbnail", None)
+                    video_info = ydl.extract_info(title, download=False)
+                else:
+                    video_info = ydl.extract_info(f"ytsearch:{title}", download=False)["entries"][0]
+                
+                video_id = video_info.get("id", None)
+                video_url = f"https://www.youtube.com/watch?v={video_id}"
+                video_title = video_info.get("title", None)
+                video_length = video_info.get("duration", None)
+                video_thumb = video_info.get("thumbnail", None)
 
-        data = {
-            "url": video_url,
-            "title": remove_string(video_title),
-            "thumb": video_thumb,
-            "length": video_length,
-        }
+                data = {
+                    "url": video_url,
+                    "title": remove_string(video_title),
+                    "thumb": video_thumb,
+                    "length": video_length,
+                }
 
-        result = namedtuple("result", data.keys())(*data.values())
+                result = namedtuple("result", data.keys())(*data.values())
 
-        return result
+                return result
+            
+            except Exception as e:
+                if isinstance(e, DownloadError):
+                    return '404'
 
 
 def playlist_py(type_id, data):
@@ -1828,7 +1838,7 @@ def update_check(type_id):
             response_json = json.loads(response.text)
             version = response_json["tag_name"]
 
-            if version != "1.0.4":
+            if version != "1.0.5":
                 
                 return True
 
@@ -1881,90 +1891,94 @@ def start_play(link, user):
             return False
 
     try:
+
+        caching = True
+
         response = get_video_info(link)
-        media_name = response.title
-        music_link = response.url
-        music_thumb = response.thumb
 
-        title_split = media_name.split(" - ")
-        music_name = title_split[0]
-        music_artist = title_split[1] if len(title_split) > 1 else ""
-
-        img_data = req.get(music_thumb).content
-
-        album_art_dir = f"{utils.local_work('datadir')}/web/src/player/images/album.png"
-        with open(album_art_dir, "wb") as album_art_local:
-            album_art_local.write(img_data)
-
-        appdata_album_art_dir = f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/images/album.png"
-        with open(appdata_album_art_dir, "wb") as album_art_file:
-            album_art_file.write(img_data)
-
-        window.evaluate_js(f"update_image()")
-        caching = 1
-
-        if download_music(music_link):
-
-            with open(f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/list_files/currentsong.txt", "w", encoding="utf-8") as file_object:
-                file_object.write(f"{media_name}")
-
-            music_name_short = textwrap.shorten(media_name, width=30, placeholder="...")
-
-            music_data = {
-                "redeem_user": user,
-                "music": music_name_short,
-                "artist": music_artist,
-            }
-
-
-            data = {"type": "music", "html": utils.update_music(music_data)}
-            
-            data_dump = json.dumps(data)
-            
-            sk.broadcast_message(data_dump)
-
-            window.evaluate_js(f"update_music_name('{music_name}', '{music_artist}')")
-
-            aliases = {
-                "{music_name}": music_name,
-                "{music_name_short}": music_name_short,
-                "{music_artist}": music_artist,
-                "{username}": user,
-            }
-
-            music_webm_path = f"http://localhost:7000/src/player/cache/music.webm"
-            window.evaluate_js(f"player('play', '{music_webm_path}', '1')")
-            toast(f"Reproduzindo {music_name_short} - {music_artist}")
+        if response == "404":
 
             data_append = {
                 "type": "event",
-                "message": utils.replace_all(utils.messages_file_load("music_playing"), aliases),
+                "message": utils.replace_all(utils.messages_file_load("music_process_error"), aliases),
                 "user_input": "",
             }
 
             append_notice(data_append)
 
-            config_file_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/config.json"
-
-            config_data_player = utils.manipulate_json(config_file_path, "load")
-
-            config_data_player["skip_requests"] = 0
-
-            utils.manipulate_json(config_file_path, "save", config_data_player)
-
-            caching = 0
-            
         else:
-            
-            toast(f"Erro ao processar música {link} - {user}")
 
-            data_append = {
-                "type": "event",
-                "message": utils.replace_all(utils.messages_file_load("music_process_cache_error"), aliases),
-                "user_input": "",
-            }
+            media_name = response.title
+            music_link = response.url
+            music_thumb = response.thumb
 
-            append_notice(data_append)
+            title_split = media_name.split(" - ")
+            music_name = title_split[0]
+            music_artist = title_split[1] if len(title_split) > 1 else ""
+
+            with open(f"{utils.local_work('datadir')}/web/src/player/images/album.png", "wb") as album_art_local:
+                album_art_local.write(req.get(music_thumb).content)
+
+            window.evaluate_js(f"update_image()")
+
+            if download_music(music_link):
+
+                with open(f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/list_files/currentsong.txt", "w", encoding="utf-8") as file_object:
+                    file_object.write(f"{media_name}")
+
+                music_name_short = textwrap.shorten(media_name, width=30, placeholder="...")
+
+                music_data = {
+                    "redeem_user": user,
+                    "music": music_name_short,
+                    "artist": music_artist,
+                }
+
+                sk.broadcast_message(json.dumps({"type": "music", "html": utils.update_music(music_data)}))
+
+                window.evaluate_js(f"update_music_name('{music_name}', '{music_artist}')")
+
+                aliases = {
+                    "{music_name}": music_name,
+                    "{music_name_short}": music_name_short,
+                    "{music_artist}": music_artist,
+                    "{username}": user,
+                }
+
+                window.evaluate_js(f"player('play', 'http://localhost:7000/src/player/cache/music.webm', '1')")
+
+                toast(f"Reproduzindo {music_name_short} - {music_artist}")
+
+                data_append = {
+                    "type": "event",
+                    "message": utils.replace_all(utils.messages_file_load("music_playing"), aliases),
+                    "user_input": "",
+                }
+
+                append_notice(data_append)
+
+
+                config_data_player = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/config.json", "load")
+
+                config_data_player["skip_requests"] = 0
+
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/config.json", "save", config_data_player)
+
+                caching = False
+                
+            else:
+                
+                caching = False
+                
+                toast(f"Erro ao processar música {link} - {user}")
+
+                data_append = {
+                    "type": "event",
+                    "message": utils.replace_all(utils.messages_file_load("music_process_cache_error"), aliases),
+                    "user_input": "",
+                }
+
+                append_notice(data_append)
 
     except Exception as e:
         
@@ -1972,13 +1986,16 @@ def start_play(link, user):
 
         toast(f"Erro ao processar música {link} - {user}")
 
+        
         data_append = {
             "type": "event",
-            "message": utils.replace_all(utils.messages_file_load("music_process_cache_error"), aliases),
+            "message": utils.replace_all(utils.messages_file_load("music_process_cache_error"), {"{username}": user}),
             "user_input": "",
         }
 
         append_notice(data_append)
+
+        caching = False
 
 
 def loopcheck():
@@ -1991,7 +2008,7 @@ def loopcheck():
             queue_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/list_files/queue.json"
             config_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/config.json"
             
-            if loaded_status == 1:
+            if loaded_status:
                 
                 playlist_data = utils.manipulate_json(playlist_path, "load")
                 playlist_execute_data = utils.manipulate_json(config_path, "load")
@@ -2005,7 +2022,7 @@ def loopcheck():
 
                 playing = window.evaluate_js(f"player('playing', 'none', 'none')")
                 
-                if caching == 0 and playing == "False":
+                if not caching and playing == "False":
 
                     
                     if check_have_queue:
@@ -3276,21 +3293,6 @@ def commands_module(data) -> None:
         append_notice(data_append)
 
 
-def close():
-
-    global loaded_status
-    
-    loaded_status = 0
-    
-    if window_chat_open == 1:
-        window_chat.destroy()
-
-    if window_events_open == 1:
-        window_events.destroy()
-
-    sys.exit(0)
-
-
 def on_resize(width, height):
 
     min_width = 1200
@@ -3304,7 +3306,7 @@ def loaded():
     
     global loaded_status
 
-    loaded_status = 1
+    loaded_status = True
 
     authdata = auth_data(f"{utils.local_work('appdata_path')}/VibesBot/web/src/auth/auth.json")
 
@@ -3444,8 +3446,21 @@ def update_roles(data):
         utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/user_info/users_database.json","save",user_data_load)
 
 
-async def on_comment(event: CommentEvent):
+def activity():
+
+    current_time = int(time.time())
+
+    activity_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/debug.json","load")
+
+    activity_data["activity"] = current_time
+
+    utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/debug.json","save", activity_data)
+
+
+async def on_comment(event):
     
+    activity()
+
     def add_user_database(data):
         
         try:
@@ -3575,7 +3590,7 @@ async def on_comment(event: CommentEvent):
 
             window.evaluate_js(f"append_message({json.dumps(data_res, ensure_ascii=False)})")
 
-            if window_chat_open == 1:
+            if window_chat_open:
                 
                 window_chat.evaluate_js(f"append_message_out({json.dumps(data_res, ensure_ascii=False)})")
 
@@ -3586,43 +3601,47 @@ async def on_comment(event: CommentEvent):
         utils.error_log(e)
 
 
-async def on_connect(_: ConnectEvent):
+async def on_connect(event):
 
+    activity()
 
-    like_list = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/likes.json","load")
-    
-    like_list = {
-        "likes" : {
-            
+    if not reconn:
+
+        like_list = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/likes.json","load")
+        
+        like_list = {
+            "likes" : {
+                
+            }
         }
-    }
-    
-    utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/likes.json","save",like_list)
-    
-    join_list = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/joins.json","load")
-    
-    join_list = [] 
-    
-    utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/joins.json","save",join_list)
+        
+        utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/likes.json","save",like_list)
+        
+        join_list = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/joins.json","load")
+        
+        join_list = [] 
+        
+        utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/joins.json","save",join_list)
 
-    data_append = {
-        "type": "event",
-        "message": utils.messages_file_load(f"event_ttk_connect"),
-        "user_input": "",
-    }
+        data_append = {
+            "type": "event",
+            "message": utils.messages_file_load(f"event_ttk_connect"),
+            "user_input": "",
+        }
+        
+        append_notice(data_append)
+
+        toast("Conectado ao chat do TikTok.")
+        
+        send_discord_webhook({"type_id": "live_start"})
+
+    else:
+        toast("Reconectado.")
+
+
+async def on_disconnect(event):
     
-    append_notice(data_append)
-
-    toast("Conectado ao chat do TikTok.")
-    
-    send_discord_webhook({"type_id": "live_start"})
-
-    tiktok_conn = 1
-
-
-async def on_disconnect(event: DisconnectEvent):
-    
-    tiktok_conn = 0
+    activity()
 
     message_event = utils.messages_file_load("event_ttk_disconected")
 
@@ -3648,8 +3667,10 @@ async def on_disconnect(event: DisconnectEvent):
     send_discord_webhook({"type_id": "live_end"})
 
 
-async def on_like(event: LikeEvent):
+async def on_like(event):
     
+    activity()
+
     event_config_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/event_not.json", "load")
     like_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/likes.json","load")
     goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json","load")
@@ -3748,9 +3769,12 @@ async def on_like(event: LikeEvent):
         utils.error_log(e)
 
 
-async def on_join(event: JoinEvent):
+async def on_join(event):
     
+    activity()
+
     join_list = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/joins.json","load")
+
 
     if event.user != None:
         
@@ -3774,8 +3798,10 @@ async def on_join(event: JoinEvent):
             append_notice(data_append)
 
 
-async def on_gift(event: GiftEvent):
+async def on_gift(event):
     
+    activity()
+
     ttk_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/gifts.json","load")
 
     gift_name = event.gift.info.name
@@ -3933,8 +3959,10 @@ async def on_gift(event: GiftEvent):
         utils.error_log(e)
 
 
-async def on_follow(event: FollowEvent):
+async def on_follow(event):
     
+    activity()
+
     event_config_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/event_not.json", "load")
     goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json","load")
     ttk_follows = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/follow.json","load")
@@ -3987,8 +4015,10 @@ async def on_follow(event: FollowEvent):
         utils.error_log(e)
 
 
-async def on_share(event: ShareEvent):
+async def on_share(event):
     
+    activity()
+
     try:
         user_id = event.user.unique_id
         
@@ -4030,8 +4060,10 @@ async def on_share(event: ShareEvent):
         utils.error_log(e)
 
 
-async def on_viewer_update(event: ViewerUpdateEvent):
-    
+async def on_viewer_update(event):
+
+    activity()
+
     if event.viewer_count != None:
         
         if int(event.viewer_count) > int(1):
@@ -4074,8 +4106,10 @@ async def on_viewer_update(event: ViewerUpdateEvent):
                     window.evaluate_js(f"update_carousel_tiktok('update_topspecs',{data_dump})")
 
 
-async def on_envelope(event: EnvelopeEvent):
+async def on_envelope(event):
     
+    activity()
+
     user = event.treasure_box_user.nickname
 
     aliases = {"{username}": user}
@@ -4091,7 +4125,7 @@ async def on_envelope(event: EnvelopeEvent):
     send_discord_webhook({"type_id": "envelope", "username" : event.user.nickname})
 
 
-async def on_unknownevent(event: UnknownEvent):
+async def on_unknownevent(event):
     
     type_mess = event.type
     binary_mess = event.binary
@@ -4117,6 +4151,46 @@ async def on_error(error: Exception):
     append_notice(data_append)
 
 
+listener_callbacks = {
+    "comment": on_comment,
+    "connect": on_connect,
+    "like": on_like,
+    "join": on_join,
+    "gift": on_gift,
+    "follow": on_follow,
+    "share": on_share,
+    "viewer_update": on_viewer_update,
+    "envelope": on_envelope,
+    "error": on_error,
+    #"disconnect" : on_disconnect
+}
+
+
+tiktok_thread = TikTokLiveThread(listener_callbacks=listener_callbacks)
+
+
+def check_activity():
+
+    while True:
+
+        if loaded_status:
+
+            activity_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/debug.json","load")
+
+            activity_time = activity_data["activity"]
+
+            message_delay, check_time, current = utils.check_delay('5', activity_time)
+
+            if check_time:
+
+                reconn = True
+
+                tiktok_thread.stop_ttk()
+
+
+        time.sleep(10)
+
+        
 def webview_start_app(app_mode):
     
     global window, window_chat, window_events, window_chat_open
@@ -4124,22 +4198,22 @@ def webview_start_app(app_mode):
     def set_window_chat_open():
         global window_chat_open
 
-        window_chat_open = 1
+        window_chat_open = True
 
     def set_window_chat_close():
         global window_chat_open
 
-        window_chat_open = 0
+        window_chat_open = False
 
     def set_window_events_open():
         global window_events_open
 
-        window_events_open = 1
+        window_events_open = True
 
     def set_window_events_close():
         global window_events_open
 
-        window_events_open = 0
+        window_events_open = False
 
     debug_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/debug.json","load")
 
@@ -4209,55 +4283,26 @@ def webview_start_app(app_mode):
         window_events.expose(event_log)
 
 
-def start_ttk():
+def close():
+
+    global loaded_status
     
-    while True:
-        
-        authdata = auth_data(f"{utils.local_work('appdata_path')}/VibesBot/web/src/auth/auth.json")
+    loaded_status = False
+    
+    if window_chat_open:
+        window_chat.destroy()
 
-        username = authdata.USERNAME()
+    if window_events_open:
+        window_events.destroy()
 
-        if tiktok_conn == 0 and username != "":
-            
-            try:
-                
-                cookie_data = {
-                    "sessionid": authdata.SESSIONID(),
-                    "sid_guard": authdata.SIDGUARD(),
-                }
+    tiktok_thread.close()
+    tiktok_thread.join()
 
-                client_ttk: TikTokLiveClient = TikTokLiveClient(
-                    unique_id=username,
-                    enable_detailed_gifts=True,
-                    additional_cookies=cookie_data,
-                )
-
-                client_ttk.add_listener("comment", on_comment)
-                client_ttk.add_listener("connect", on_connect)
-                client_ttk.add_listener("like", on_like)
-                client_ttk.add_listener("join", on_join)
-                client_ttk.add_listener("gift", on_gift)
-                client_ttk.add_listener("follow", on_follow)
-                client_ttk.add_listener("share", on_share)
-                client_ttk.add_listener("viewer_update", on_viewer_update)
-                client_ttk.add_listener("envelope", on_envelope)
-                client_ttk.add_listener("disconnect", on_disconnect)
-                client_ttk.add_listener("error", on_error)
-
-                client_ttk.run()
-
-                time.sleep(10)
-
-            except Exception as e:
-                
-                if type(e).__name__ != "LiveNotFound":
-                    utils.error_log(e)
-
-                time.sleep(10)
+    sys.exit(0)
 
 
 def start_app():
-    
+
 
     def lock_file():
         
@@ -4336,7 +4381,9 @@ def start_app():
 
         threading.Thread(target=loopcheck, args=(), daemon=True).start()
         threading.Thread(target=sk.start_server, args=("localhost", 7688), daemon=True).start()
-        threading.Thread(target=start_ttk, args=(), daemon=True).start()
+        threading.Thread(target=check_activity, args=(), daemon=True).start()
+
+        tiktok_thread.start()
 
         if getattr(sys, "frozen", False):
             utils.splash_close()
