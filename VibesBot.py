@@ -4171,6 +4171,7 @@ tiktok_thread = TikTokLiveThread(listener_callbacks=listener_callbacks)
 
 def check_activity():
 
+    global reconn 
     while True:
 
         if loaded_status:
@@ -4179,7 +4180,7 @@ def check_activity():
 
             activity_time = activity_data["activity"]
 
-            message_delay, check_time, current = utils.check_delay('5', activity_time)
+            message_delay, check_time, current = utils.check_delay('60', activity_time)
 
             if check_time:
 
