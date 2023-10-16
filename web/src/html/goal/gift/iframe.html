@@ -29,17 +29,19 @@
         
             socket.onmessage = function(event) {
                 if (event.data === 'ping') {
+                  
                     socket.send('pong');
-                } else {
-                  var data_parse = JSON.parse(event.data);
 
+                } else {
+
+                  var data_parse = JSON.parse(event.data);
 
                   if (data_parse.type === 'save_html') {
 
                     iframe.contentDocument.documentElement.innerHTML = data_parse.html;
 
                   } else if (data_parse.type === 'update_goal'){
-
+  
                     if (data_parse.type_goal == 'gift'){
 
                         var iframeDocument = iframe.contentDocument;

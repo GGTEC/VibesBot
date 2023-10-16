@@ -22,16 +22,9 @@
         
             socket.onopen = function(event) {
               console.log("Conectado ao servidor");
+              socket.send('music');
             };
         
-            socket.onmessage = function(event) {
-                var data_parse = JSON.parse(event.data);
-                if (data_parse.type === 'high') {
-                  console.log(data_parse.html);
-                  iframe.contentDocument.documentElement.innerHTML = data_parse.html;
-                }
-            };
-
             socket.onmessage = function(event) {
                 if (event.data === 'ping') {
                     socket.send('pong');

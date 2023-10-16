@@ -4162,7 +4162,6 @@ listener_callbacks = {
     "viewer_update": on_viewer_update,
     "envelope": on_envelope,
     "error": on_error,
-    #"disconnect" : on_disconnect
 }
 
 
@@ -4186,7 +4185,7 @@ def check_activity():
 
                 reconn = True
 
-                tiktok_thread.stop_ttk()
+                tiktok_thread.stop()
 
 
         time.sleep(10)
@@ -4297,7 +4296,6 @@ def close():
         window_events.destroy()
 
     tiktok_thread.close()
-    tiktok_thread.join()
 
     sys.exit(0)
 
@@ -4382,9 +4380,8 @@ def start_app():
 
         threading.Thread(target=loopcheck, args=(), daemon=True).start()
         threading.Thread(target=sk.start_server, args=("localhost", 7688), daemon=True).start()
-        threading.Thread(target=check_activity, args=(), daemon=True).start()
 
-        tiktok_thread.start()
+        tiktok_thread.run()
 
         if getattr(sys, "frozen", False):
             utils.splash_close()

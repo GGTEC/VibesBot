@@ -52,18 +52,26 @@ def error_log(ex):
     time_error = now.strftime("%d/%m/%Y %H:%M:%S")
 
     trace = []
-    tb = ex.__traceback__
+    error_type = "Unknown"
+    error_message = ""
 
-    while tb is not None:
-        trace.append({
-            "filename": tb.tb_frame.f_code.co_filename,
-            "name": tb.tb_frame.f_code.co_name,
-            "lineno": tb.tb_lineno
-        })
-        tb = tb.tb_next
+    if isinstance(ex, BaseException):  # Verifica se ex é uma exceção
+        tb = ex.__traceback__
 
-    error = str(
-        f'Erro = type: {type(ex).__name__} | message: {str(ex)} | trace: {trace} | time: {time_error} \n')
+        while tb is not None:
+            trace.append({
+                "filename": tb.tb_frame.f_code.co_filename,
+                "name": tb.tb_frame.f_code.co_name,
+                "lineno": tb.tb_lineno
+            })
+            tb = tb.tb_next
+
+        error_type = type(ex).__name__
+        error_message = str(ex)
+    else:
+        error_message = ex
+
+    error = str(f'Erro = type: {error_type} | message: {error_message} | trace: {trace} | time: {time_error} \n\n')
 
     with open(f"{local_work('appdata_path')}/VibesBot/web/src/error_log.txt", "a+", encoding='utf-8') as log_file_r:
         log_file_r.write(error)

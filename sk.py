@@ -1,278 +1,164 @@
-import socket
-import threading
-import hashlib
-import base64
-import os
+from websocket_server import WebsocketServer
 import time
-from datetime import datetime
-import utils
+import threading
 import json
+import utils
+from datetime import datetime
 
-clients = []
-ping_interval = 5
 
-appdata_path = os.getenv('APPDATA')
+connections_by_type = {
+    'music': {},
+    'likes': {},
+    'gift': {},
+    'share': {},
+    'diamonds': {},
+    'max_viewer': {},
+    'follow': {},
+}
 
-def error_log(ex):
+last_pong_times = {}
 
-    now = datetime.now()
-    time_error = now.strftime("%d/%m/%Y %H:%M:%S")
 
-    trace = []
-    error_type = "Unknown"
-    error_message = ""
+def on_client_connected(client, server):
+    print(f'Cliente conectado: {client["address"]}')
 
-    if isinstance(ex, BaseException):  # Verifica se ex é uma exceção
-        tb = ex.__traceback__
-
-        while tb is not None:
-            trace.append({
-                "filename": tb.tb_frame.f_code.co_filename,
-                "name": tb.tb_frame.f_code.co_name,
-                "lineno": tb.tb_lineno
-            })
-            tb = tb.tb_next
-
-        error_type = type(ex).__name__
-        error_message = str(ex)
-    else:
-        error_message = ex
-
-    error = str(f'Erro = type: {error_type} | message: {error_message} | trace: {trace} | time: {time_error} \n\n')
-
-    with open(f"{appdata_path}/VibesBot/web/src/error_log.txt", "a+", encoding='utf-8') as log_file_r:
-        log_file_r.write(error)
-
-def handshake(client_socket):
-    try:
-        data = client_socket.recv(1024).decode()
-
-        key = ''
-        for line in data.split('\r\n'):
-            if 'Sec-WebSocket-Key:' in line:
-                key = line.split(':')[1].strip()
-
-        response = (
-            'HTTP/1.1 101 Switching Protocols\r\n'
-            'Upgrade: websocket\r\n'
-            'Connection: Upgrade\r\n'
-            'Sec-WebSocket-Accept: {accept_key}\r\n'
-            'Access-Control-Allow-Origin: *\r\n'
-            '\r\n'
-        ).format(accept_key=generate_accept_key(key))
-
-        client_socket.send(response.encode())
-    except Exception as e:
-        error_log(e)
-
-def generate_accept_key(key):
-    try:
-        magic_string = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
-        concatenated = key + magic_string
-        sha1 = hashlib.sha1(concatenated.encode())
-        encoded = base64.b64encode(sha1.digest()).strip()
-        return encoded.decode()
-    except Exception as e:
-        error_log(e)
-        return ''
-
-def send_ping(client_socket):
-    
-    try:
-
-        while True:
-            client_socket.send(encode_websocket_frame('ping'))
-            time.sleep(ping_interval)
-
-            response = client_socket.recv(4048)
-
-            decoded_response = decode_websocket_frame(response)
-
-            if str('pong') in str(decoded_response):
-                continue
-
-    except Exception as e:
-        if not isinstance(e, ConnectionAbortedError):
-            error_log(e)
-
-    client_socket.close()
-    clients.remove(client_socket)
-
-def handle_client(client_socket):
-
-    try:
-
-        handshake(client_socket)
-        clients.append(client_socket)
-
-        threading.Thread(target=send_ping, args=(client_socket,)).start()
-
-    except Exception as e:
-        if not isinstance(e, ConnectionAbortedError):
-            error_log(e)
-
-def decode_websocket_frame(data):
-    try:
-        if len(data) < 2:
-            return ''
-    
-        payload_length = data[1] & 127
-        if payload_length <= 125:
-            payload_start = 2
-            mask = data[2:6]
-        elif payload_length == 126:
-            payload_start = 4
-            mask = data[4:8]
-        elif payload_length == 127:
-            payload_start = 10
-            mask = data[10:14]
-
-        decoded = bytearray()
-        for i in range(payload_start, len(data)):
-            decoded.append(data[i] ^ mask[(i - payload_start) % 4])
-
-        return decoded.decode('utf-8','ignore')
-    
-    except Exception as e:
-        if not isinstance(e, UnicodeDecodeError) or not isinstance(e, ConnectionAbortedError):
-            error_log(e)
-            return ''
-
-def encode_websocket_frame(data):
-    try:
-        payload = data.encode()
-        length = len(payload)
-        encoded = bytearray()
-
-        if length <= 125:
-            encoded.append(129)
-            encoded.append(length)
-        elif length >= 126 and length <= 65535:
-            encoded.append(129)
-            encoded.append(126)
-            encoded.extend(length.to_bytes(2, byteorder='big'))
-        else:
-            encoded.append(129)
-            encoded.append(127)
-            encoded.extend(length.to_bytes(8, byteorder='big'))
-
-        encoded.extend(payload)
-        return encoded
-    
-    except Exception as e:
-        if not isinstance(e, ConnectionAbortedError):
-            error_log(e)
+def on_client_disconnected(client, server):
+    client_id = client['id']
+    print(f'Cliente desconectado: {client["address"]}')
+    for connection_type in connections_by_type:
+        if client_id in connections_by_type[connection_type]:
+            del connections_by_type[connection_type][client_id]
 
 def broadcast_message(message):
-    for client in clients:
-        try:
-            client.send(encode_websocket_frame(message))
-        except Exception as e:
-            error_log(e)
+    message_loads = json.loads(message) 
+    if 'type_goal' in message_loads:
+        connection_type = message_loads['type_goal']
+    else:
+        connection_type = 'music'
+    if connection_type in connections_by_type:
+        for client in connections_by_type[connection_type].values():
+            client_handler = client['handler']
+            try:
+                client_handler.send_message(message)
+            except Exception as e:
+                utils.error_log(e)
 
-def receive_message(client_socket):
+def add_client_to_type(connection_type, client):
+    client_id = client['id']
+    connections_by_type[connection_type][client_id] = {
+        "handler": client['handler'],
+        "addr": client['address'][0]
+    }
 
-    try:
-        while True:
+def create_goal_data(type_goal, current_value, goal_value):
 
-            data = client_socket.recv(4048)
+    data_goal = {
+        'type': 'update_goal',
+        'type_goal': type_goal,
+        'html': utils.update_goal({'type_id': 'update_goal', 'type_goal': type_goal}),
+        'current': current_value,
+        'goal': goal_value
+    }
 
-            if not data:
-                break
-            message = decode_websocket_frame(data)
+    return data_goal
 
-            if message:
-                
-                if 'likes' in message:
+def message_received(client, server, message):
 
-                    
-                    data_goal = {
-                        'type' : 'update_goal',
-                        'type_goal' : 'likes',
-                        'html' : utils.update_goal({'type_id' : 'update_goal','type_goal' :'likes'}),
-                        'current' : int(0),
-                        'goal' : 1000
-                    }
+    if 'likes' in message:
 
-                    broadcast_message(json.dumps(data_goal))
+        add_client_to_type('likes', client)
 
-                if 'gift' in message:
+        data_goal = create_goal_data('likes', 0, 1000)
 
-                    data_goal = {
-                        'type' : 'update_goal',
-                        'type_goal' : 'gift',
-                        'html' : utils.update_goal({'type_id' : 'update_goal','type_goal' :'gift'}),
-                        'current' : int(0),
-                        'goal' : 1000
-                    }
+        broadcast_message(json.dumps(data_goal))
+        
+    elif 'gift' in message:
 
-                    broadcast_message(json.dumps(data_goal))
+        add_client_to_type('gift', client)
 
-                if 'share' in message:
+        data_goal = create_goal_data('gift', 0, 1000)
 
-                    data_goal = {
-                        'type' : 'update_goal',
-                        'type_goal' : 'share',
-                        'html' : utils.update_goal({'type_id' : 'update_goal','type_goal' :'share'}),
-                        'current' : int(0),
-                        'goal' : 1000
-                    }
+        broadcast_message(json.dumps(data_goal))
+        
+    elif 'share' in message:
 
-                    broadcast_message(json.dumps(data_goal))
+        add_client_to_type('share', client)
 
-                if 'diamonds' in message:
+        data_goal = create_goal_data('likes', 0, 1000)
 
-                    print(f'Mensagem recebida: {message}')
+        broadcast_message(json.dumps(data_goal))
+        
+    elif 'diamonds' in message:
 
-                    data_goal = {
-                        'type' : 'update_goal',
-                        'type_goal' : 'diamonds',
-                        'html' : utils.update_goal({'type_id' : 'update_goal','type_goal' :'diamonds'}),
-                        'current' : int(0),
-                        'goal' : 1000
-                    }
+        add_client_to_type('diamonds', client)
 
-                    broadcast_message(json.dumps(data_goal))
+        data_goal = create_goal_data('diamonds', 0, 1000)
 
-                if 'max_viewer' in message:
+        broadcast_message(json.dumps(data_goal))
 
-                    data_goal = {
-                        'type' : 'update_goal',
-                        'type_goal' : 'max_viewer',
-                        'html' : utils.update_goal({'type_id' : 'update_goal','type_goal' :'max_viewer'}),
-                        'current' : int(0),
-                        'goal' : 1000
-                    }
+    elif 'max_viewer' in message:
 
-                    broadcast_message(json.dumps(data_goal))
+        add_client_to_type('max_viewer', client)
 
-                if 'follow' in message:
+        data_goal = create_goal_data('max_viewer', 0, 1000)
 
-                    data_goal = {
-                        'type' : 'update_goal',
-                        'type_goal' : 'follow',
-                        'html' : utils.update_goal({'type_id' : 'update_goal','type_goal' :'follow'}),
-                        'current' : int(0),
-                        'goal' : 1000
-                    }
+        broadcast_message(json.dumps(data_goal))
 
-                    broadcast_message(json.dumps(data_goal))
-                     
-    except Exception as e:
-        if not isinstance(e, ConnectionAbortedError):
-            error_log(e)
-    
-def start_server(host, port):
+    elif 'follow' in message:
 
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind((host, port))
-    server_socket.listen(5)
+        add_client_to_type('follow', client)
+
+        data_goal = create_goal_data('follow', 0, 1000)
+
+        broadcast_message(json.dumps(data_goal))
+
+    elif 'music' in message:
+
+        add_client_to_type('music', client)
+
+def ping_clients():
 
     while True:
-        try:
-            client_socket, address = server_socket.accept()
-            print('Novo cliente conectado:', address)
-            threading.Thread(target=handle_client, args=(client_socket,)).start()
-            threading.Thread(target=receive_message, args=(client_socket,)).start()
-        except Exception as e:
-            error_log(e)
+
+        for connection_type, clients in connections_by_type.items():
+            for client_id, client_info in clients.items():
+                client_handler = client_info["handler"]
+                try:
+                    client_handler.send_message('ping')
+                    last_pong_times[client_id] = time.time()
+                except Exception as e:
+                    utils.error_log(e)
+
+        time.sleep(5)
+
+def check_pong():
+    while True:
+
+        current_time = time.time()
+        
+        for client_id, last_pong_time in list(last_pong_times.items()):
+            if current_time - last_pong_time > 5:
+                for connection_type, clients in connections_by_type.items():
+                    if client_id in clients:
+                        try:
+                            del clients[client_id]
+                        except KeyError:
+                            pass
+                try:
+                    del last_pong_times[client_id]
+                except KeyError:
+                    pass
+        time.sleep(1)
+
+def start_server(host, port):
+
+    threading.Thread(target=ping_clients).start()
+    threading.Thread(target=check_pong).start()
+
+    server = WebsocketServer(port=port, host=host)
+    server.set_fn_new_client(on_client_connected)
+    server.set_fn_message_received(message_received)
+    server.set_fn_client_left(on_client_disconnected)
+
+    server.run_forever()
+

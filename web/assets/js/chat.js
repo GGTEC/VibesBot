@@ -280,6 +280,8 @@ function append_message(message_data_parse){
 
 function append_message_out(message_data_parse){
 
+
+
     var div_chat_out = document.getElementById('chat-block-out');
 
     var type_message = message_data_parse.type

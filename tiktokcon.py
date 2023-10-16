@@ -8,7 +8,7 @@ import time
 import utils
 from auth import auth_data
 
-class TikTokLiveThread(threading.Thread):
+class TikTokLiveThread():
     def __init__(self, listener_callbacks):
         super().__init__()
 
@@ -24,8 +24,9 @@ class TikTokLiveThread(threading.Thread):
         self.listener_callbacks = listener_callbacks
         self.client = None
         self.running = True
+        self.client_thread = None
 
-    def run(self):
+    def run_client_thread(self):
         while self.running:
             try:
                 self.client = TikTokLiveClient(
@@ -36,23 +37,23 @@ class TikTokLiveThread(threading.Thread):
 
                 for event, callback in self.listener_callbacks.items():
                     self.client.add_listener(event, callback)
-
-
+                    
                 self.client.run()
+
             except Exception as e:
+
                 print(f"Error in TikTokLiveClient: {e}")
                 time.sleep(10)
 
-            time.sleep(10)
+    def run(self):
+        self.client_thread = threading.Thread(target=self.run_client_thread)
+        self.client_thread.start()
     
     def is_running(self):
         return self.running
     
-    def stop_ttk(self):
-        if self.client:
-               self.client.stop()
-
     def close(self):
         self.running = False
         if self.client:
-               self.client.stop()
+                self.client.stop()
+                self.client_thread.join()
