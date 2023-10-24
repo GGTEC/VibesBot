@@ -24,7 +24,7 @@
         
             socket.onopen = function(event) {
               console.log("Conectado ao servidor");
-              socket.send('follows');
+              socket.send('event');
             };
         
             socket.onmessage = function(event) {
@@ -32,32 +32,18 @@
                     socket.send('pong');
                 } else {
                   var data_parse = JSON.parse(event.data);
-
-                  console.log(data_parse)
-
                   if (data_parse.type === 'save_html') {
 
                     iframe.contentDocument.documentElement.innerHTML = data_parse.html;
 
                   } else if (data_parse.type === 'update_goal'){
 
-                    if (data_parse.type_goal == 'follow'){
-                      
+                    if (data_parse.type_goal == 'event'){
+
                         var iframeDocument = iframe.contentDocument;
 
                         iframeDocument.documentElement.innerHTML = data_parse.html;
 
-                        var bar = iframeDocument.querySelector('#progress-bar');
-                        var value = iframeDocument.querySelector("#progress-value");
-
-                        var value1 = data_parse.current
-                        var value2 = data_parse.goal
-
-                        var percent = (value1 / value2) * 100;
-
-                        bar.style.width = percent + "%";
-
-                        value.textContent = `${value1}/${value2}`
                       }
 
                     }

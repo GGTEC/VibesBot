@@ -10,3 +10,4 @@ requirements.txt
 requirements.in
 web/src/player/images/album.png
 web/src/player/images/album.png
+dist/VibesBot.exe

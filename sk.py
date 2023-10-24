@@ -14,37 +14,45 @@ connections_by_type = {
     'diamonds': {},
     'max_viewer': {},
     'follow': {},
+    'event': {},
 }
 
 last_pong_times = {}
 
 
-def on_client_connected(client, server):
-    print(f'Cliente conectado: {client["address"]}')
-
 def on_client_disconnected(client, server):
+
     client_id = client['id']
-    print(f'Cliente desconectado: {client["address"]}')
+
     for connection_type in connections_by_type:
         if client_id in connections_by_type[connection_type]:
             del connections_by_type[connection_type][client_id]
 
 def broadcast_message(message):
+
     message_loads = json.loads(message) 
+
     if 'type_goal' in message_loads:
         connection_type = message_loads['type_goal']
-    else:
-        connection_type = 'music'
+
+    elif 'type' in message_loads:
+        connection_type = message_loads['type']
+
+
     if connection_type in connections_by_type:
+
         for client in connections_by_type[connection_type].values():
             client_handler = client['handler']
             try:
                 client_handler.send_message(message)
+
             except Exception as e:
                 utils.error_log(e)
 
 def add_client_to_type(connection_type, client):
+
     client_id = client['id']
+
     connections_by_type[connection_type][client_id] = {
         "handler": client['handler'],
         "addr": client['address'][0]
@@ -116,12 +124,16 @@ def message_received(client, server, message):
 
         add_client_to_type('music', client)
 
+    elif 'event' in message:
+
+        add_client_to_type('event', client)
+
 def ping_clients():
 
     while True:
 
         for connection_type, clients in connections_by_type.items():
-            for client_id, client_info in clients.items():
+            for client_id, client_info in list(clients.items()):
                 client_handler = client_info["handler"]
                 try:
                     client_handler.send_message('ping')
@@ -132,8 +144,9 @@ def ping_clients():
         time.sleep(5)
 
 def check_pong():
-    while True:
 
+    while True:
+        
         current_time = time.time()
         
         for client_id, last_pong_time in list(last_pong_times.items()):
@@ -156,7 +169,6 @@ def start_server(host, port):
     threading.Thread(target=check_pong).start()
 
     server = WebsocketServer(port=port, host=host)
-    server.set_fn_new_client(on_client_connected)
     server.set_fn_message_received(message_received)
     server.set_fn_client_left(on_client_disconnected)
 

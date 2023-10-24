@@ -225,17 +225,34 @@ async function commands_fun(type_id){
             function processCommandList(commandList, type) {
 
               const dataTableData = [];
-          
+                
               for (const key in commandList) {
 
                 if (commandList.hasOwnProperty(key)) {
 
-                    const item = key;
+                    const item = commandList[key];
+
                     const lastUse = item.last_use != "" ? new Date(item.last_use * 1000).toLocaleString() : "Nunca";
-                    const status = item.status != "" ? (item.status === 1 ? "Sim" : "Não") : "Não";
+                    const status = item.status != "" ? (item.status === 1 ? "Ativado" : "Desativado") : "Desativado";
                     const delay = item.delay != "" ? item.delay : "Null";
-                    const response = item.response != "" ? item.response : "Sem resposta";
-                    const userLevel = item.user_level != "" ? item.user_level : "Null";
+                    
+                    const userLevel = item.user_level;
+
+                    let userLevelstring = '';
+
+                    if (Array.isArray(userLevel)) {
+                        userLevel.forEach((level, index) => {
+                            // Adicione o elemento atual à string
+                            userLevelstring += level;
+                            
+                            // Adicione uma vírgula se não for o último elemento
+                            if (index < userLevel.length - 1) {
+                                userLevelstring += ', ';
+                            }
+                        });
+                    } else {
+                        userLevelstring = item.user_level;;
+                    }
 
                     dataTableData.push([
                         key,
@@ -243,8 +260,7 @@ async function commands_fun(type_id){
                         lastUse,
                         status,
                         delay,
-                        response,
-                        userLevel
+                        userLevelstring
                     ]);
                 }
               }
@@ -283,7 +299,6 @@ async function commands_fun(type_id){
                 { title: 'Último uso' },
                 { title: 'Status' },
                 { title: 'Delay' },
-                { title: 'Resposta' },
                 { title: 'Nível do usuário' }
               ]
             });
@@ -291,7 +306,6 @@ async function commands_fun(type_id){
             // Adicionar as linhas à tabela
             [commandData, queueData, giveawayData, playerData].forEach(data => {
               data.forEach(row => {
-                console.log(data)
                 table.row.add(row).draw();
               });
             });

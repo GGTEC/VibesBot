@@ -1,7 +1,6 @@
 import sys
 import os
 import logging
-import win32file
 import subprocess
 import utils
 import webview
@@ -21,6 +20,7 @@ import re
 import tkinter.messagebox as messagebox
 import sk
 
+from lockfile import LockManager
 from yt_dlp import DownloadError
 from io import BytesIO
 from collections import namedtuple
@@ -46,7 +46,8 @@ loaded_status = False
 window_chat_open = False
 window_events_open = False
 
-
+lock_manager = LockManager('VibesBot')
+lock_manager.lock()
 
 def play_sound(audio, volume):
 
@@ -64,8 +65,8 @@ def append_notice(data_receive):
 
     try:
         
-        event_log_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/event_log.json","load")
-        chat_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/chat_config.json","load")
+        event_log_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","load")
+        chat_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/chat_config.json","load")
 
         now = datetime.datetime.now()
 
@@ -105,7 +106,7 @@ def append_notice(data_receive):
             f"{now} | {data_receive['type']} | {data_receive['message']} | {data_receive['user_input']}"
         )
         
-        utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/event_log.json","save",event_log_data)
+        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","save",event_log_data)
 
         if loaded_status:
             
@@ -116,6 +117,33 @@ def append_notice(data_receive):
 
             if window_chat_open:
                 window_chat.evaluate_js(f"append_notice_chat({json.dumps(data, ensure_ascii=False)})")
+
+            variableMappings = {
+                "command": event_log_data["show-commands-html"],
+                "event": event_log_data["show-events-html"],
+                "follow": event_log_data["show-follow-html"],
+                "like": event_log_data["show-likes-html"],
+                "gift": event_log_data["show-gifts-html"],
+                "chest": event_log_data["show-chest-html"],
+                "share": event_log_data["show-share-html"],
+                "join": event_log_data["show-join-html"],
+                "goal_start": event_log_data["show-goal-start-html"],
+                "goal_end": event_log_data["show-goal-end-html"]
+            }
+
+            if variableMappings[data_receive["type"]]:
+
+                data_update = {
+                    "message": data_receive["message"]
+                }
+
+                data_goal = {
+                    "type": "update_event",
+                    "html": utils.update_notif(data_update)
+                }
+
+                sk.broadcast_message(json.dumps(data_goal))
+
 
 
     except Exception as e:
@@ -138,11 +166,11 @@ def send_discord_webhook(data):
     """
 
     try:
-        authdata = auth_data(f"{utils.local_work('appdata_path')}/VibesBot/web/src/auth/auth.json")
+        authdata = auth_data(f"{utils.local_work('appdata_path')}/auth/auth.json")
                 
         type_id = data["type_id"]
 
-        discord_config_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/discord.json","load")
+        discord_config_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/discord.json","load")
 
         webhook_status = discord_config_data[type_id]["status"]
         webhook_color = discord_config_data[type_id]["color"]
@@ -343,7 +371,7 @@ def logout_auth():
     
     data = {"USERNAME": "", "SESSIONID": "", "SIDGUARD": ""}
 
-    utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/auth/auth.json","save",data)
+    utils.manipulate_json(f"{utils.local_work('appdata_path')}/auth/auth.json","save",data)
 
     close()
 
@@ -355,36 +383,14 @@ def event_log(data_save):
     
     if type_id == "get":
         
-        event_log_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/event_log.json","load")
+        event_log_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","load")
 
         if event_log_data is not None:
-            
+
             data = {
                 "slider-font-events" : event_log_data["slider-font-events"],
                 "color-events" : event_log_data["color-events"],
                 "data-show-events" : event_log_data["data-show-events"], 
-                "show-commands" : event_log_data["show-commands"],
-                "show-commands-chat" : event_log_data["show-commands-chat"],
-                "show-events" : event_log_data["show-events"],
-                "show-events-chat" : event_log_data["show-events-chat"],
-                "show-follow" : event_log_data["show-follow"],
-                "show-follow-chat" : event_log_data["show-follow-chat"],
-                "show-likes" : event_log_data["show-likes"],
-                "show-likes-chat" : event_log_data["show-likes-chat"],
-                "show-gifts" : event_log_data["show-gifts"],
-                "show-gifts-chat" : event_log_data["show-gifts-chat"],
-                "show-chest" : event_log_data["show-chest"],
-                "show-chest-chat" : event_log_data["show-chest-chat"],
-                "show-goal-start" : event_log_data["show-goal-start"],
-                "show-goal-start-chat" : event_log_data["show-goal-start-chat"],
-                "show-goal-end" : event_log_data["show-goal-end"],
-                "show-goal-end-chat" : event_log_data["show-goal-end-chat"],
-                "show-share" : event_log_data["show-share"],
-                "show-share-chat" : event_log_data["show-share-chat"],
-                "show-join" : event_log_data["show-join"],
-                "show-join-chat" : event_log_data["show-join-chat"],
-                "show-events" : event_log_data["show-events"],
-                "show-events-chat" : event_log_data["show-events-chat"],
                 "event-list" : event_log_data["event-list"],
             }
             
@@ -394,35 +400,15 @@ def event_log(data_save):
         
         try:
             
-            event_log_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/event_log.json","load")
+            event_log_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","load")
 
             if event_log_data is not None:
                 
                 event_log_data["slider-font-events"] = data_save["slider-font-events"]
                 event_log_data["color-events"] = data_save["color-events"]
                 event_log_data["data-show-events"] = data_save["data-show-events"] 
-                event_log_data["show-events"] = data_save["show-events"]
-                event_log_data["show-events-chat"] = data_save["show-events-chat"]
-                event_log_data["show-commands"] = data_save["show-commands"]
-                event_log_data["show-commands-chat"] = data_save["show-commands-chat"]
-                event_log_data["show-follow"] = data_save["show-follow"]
-                event_log_data["show-follow-chat"] = data_save["show-follow-chat"]
-                event_log_data["show-likes"] = data_save["show-likes"]
-                event_log_data["show-likes-chat"] =data_save["show-likes-chat"]
-                event_log_data["show-gifts"] = data_save["show-gifts"]
-                event_log_data["show-gifts-chat"] = data_save["show-gifts-chat"]
-                event_log_data["show-chest"] = data_save["show-chest"]
-                event_log_data["show-chest-chat"] = data_save["show-chest-chat"]
-                event_log_data["show-share"] = data_save["show-share"]
-                event_log_data["show-share-chat"] = data_save["show-share-chat"]
-                event_log_data["show-join"] = data_save["show-join"]
-                event_log_data["show-join-chat"] = data_save["show-join-chat"]
-                event_log_data["show-goal-end"] = data_save["show-goal-end"]
-                event_log_data["show-goal-end-chat"] = data_save["show-goal-end-chat"]
-                event_log_data["show-goal-start"] = data_save["show-goal-start"]
-                event_log_data["show-goal-start-chat"] = data_save["show-goal-start-chat"]
 
-                utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/event_log.json","save",event_log_data)
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","save",event_log_data)
                 
                 toast("Salvo")
 
@@ -431,6 +417,37 @@ def event_log(data_save):
             utils.error_log(e)
             toast("error")
 
+    elif type_id == "get_state":
+        
+        event_log_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","load")
+
+        event_type =  data_save['type']
+
+        data = {
+            "show-event" : event_log_data[f"show-{event_type}"],
+            "show-event-html" : event_log_data[f"show-{event_type}-html"],
+            "show-event-chat" : event_log_data[f"show-{event_type}-chat"]
+        }
+
+        return  json.dumps(data, ensure_ascii=False)
+    
+    elif type_id == "save_state":
+        
+        event_log_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","load")
+
+        try:
+            event_type = data_save['type']
+
+            event_log_data[f"show-{event_type}"] = data_save["show-event"]
+            event_log_data[f"show-{event_type}-html"] = data_save["show-event-html"]
+            event_log_data[f"show-{event_type}-chat"] = data_save["show-event-chat"]
+
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","save",event_log_data)
+
+        except Exception as e:
+            
+            utils.error_log(e)
+            toast("error")
 
 def select_file_py(type_id):
     
@@ -452,7 +469,7 @@ def select_file_py(type_id):
     root.wm_attributes("-topmost", 1)
 
     folder = fd.askopenfilename(
-        initialdir=f"{utils.local_work('appdata_path')}/VibesBot/web/src",
+        initialdir=f"{utils.local_work('appdata_path')}",
         filetypes=filetypes,
     )
 
@@ -463,22 +480,22 @@ def select_file_py(type_id):
 
 def get_command_list():
     command_simple_data = utils.manipulate_json(
-        f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/simple_commands.json",
+        f"{utils.local_work('appdata_path')}/config/simple_commands.json",
         "load",
         None,
     )
     command_counter_data = utils.manipulate_json(
-        f"{utils.local_work('appdata_path')}/VibesBot/web/src/counter/commands.json",
+        f"{utils.local_work('appdata_path')}/counter/commands.json",
         "load",
         None,
     )
     command_giveaway_data = utils.manipulate_json(
-        f"{utils.local_work('appdata_path')}/VibesBot/web/src/giveaway/commands.json",
+        f"{utils.local_work('appdata_path')}/giveaway/commands.json",
         "load",
         None,
     )
     command_player_data = utils.manipulate_json(
-        f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/commands.json",
+        f"{utils.local_work('appdata_path')}/player/config/commands.json",
         "load",
         None,
     )
@@ -500,7 +517,7 @@ def commands_py(data_receive):
     data = json.loads(data_receive)
     type_rec = data["type_id"]
 
-    command_json_path = (f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/commands.json")
+    command_json_path = (f"{utils.local_work('appdata_path')}/config/commands.json")
 
     if type_rec == "create":
         
@@ -622,17 +639,17 @@ def commands_py(data_receive):
 
             if commands is not None:
                 command_data_queue = utils.manipulate_json(
-                    f"{utils.local_work('appdata_path')}/VibesBot/web/src/queue/commands.json",
+                    f"{utils.local_work('appdata_path')}/queue/commands.json",
                     "load",
                     None,
                 )
                 command_data_giveaway = utils.manipulate_json(
-                    f"{utils.local_work('appdata_path')}/VibesBot/web/src/giveaway/commands.json",
+                    f"{utils.local_work('appdata_path')}/giveaway/commands.json",
                     "load",
                     None,
                 )
                 command_data_player = utils.manipulate_json(
-                    f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/commands.json",
+                    f"{utils.local_work('appdata_path')}/player/config/commands.json",
                     "load",
                     None,
                 )
@@ -652,7 +669,7 @@ def tts_command(data_receive):
     
     data = json.loads(data_receive)
     type_id = data["type_id"]
-    tts_json_path = (f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/tts.json")
+    tts_json_path = (f"{utils.local_work('appdata_path')}/config/tts.json")
 
     if type_id == "get":
         
@@ -691,10 +708,10 @@ def tts_command(data_receive):
 
 def giveaway_py(type_id, data_receive):
 
-    giveaway_config_path = (f"{utils.local_work('appdata_path')}/VibesBot/web/src/giveaway/config.json")
-    giveaway_names_path = (f"{utils.local_work('appdata_path')}/VibesBot/web/src/giveaway/names.json")
-    giveaway_backup_path = (f"{utils.local_work('appdata_path')}/VibesBot/web/src/giveaway/backup.json")
-    giveaway_result_path = ( f"{utils.local_work('appdata_path')}/VibesBot/web/src/giveaway/result.json")
+    giveaway_config_path = (f"{utils.local_work('appdata_path')}/giveaway/config.json")
+    giveaway_names_path = (f"{utils.local_work('appdata_path')}/giveaway/names.json")
+    giveaway_backup_path = (f"{utils.local_work('appdata_path')}/giveaway/backup.json")
+    giveaway_result_path = ( f"{utils.local_work('appdata_path')}/giveaway/result.json")
 
     if type_id == "get_config":
 
@@ -937,7 +954,7 @@ def giveaway_py(type_id, data_receive):
 
 def queue(type_id, data_receive):
 
-    json_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/queue/queue.json"
+    json_path = f"{utils.local_work('appdata_path')}/queue/queue.json"
 
     if type_id == "get":
 
@@ -1016,7 +1033,7 @@ def queue(type_id, data_receive):
     elif type_id == "get_commands":
 
         try:
-            json_commands_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/queue/commands.json"
+            json_commands_path = f"{utils.local_work('appdata_path')}/queue/commands.json"
             command_queue_data = utils.manipulate_json(json_commands_path, "load")
 
             data = {
@@ -1039,7 +1056,7 @@ def queue(type_id, data_receive):
 
         try:
 
-            json_commands_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/queue/commands.json"
+            json_commands_path = f"{utils.local_work('appdata_path')}/queue/commands.json"
             command_queue_data = utils.manipulate_json(json_commands_path, "load")
 
             type_command = data_received["type_command"]
@@ -1064,7 +1081,7 @@ def queue(type_id, data_receive):
 
 def not_config_py(data_receive, type_id, type_not):
 
-    json_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/event_not.json"
+    json_path = f"{utils.local_work('appdata_path')}/config/event_not.json"
     event_config_data = utils.manipulate_json(json_path, "load")
 
     if type_id == "get":
@@ -1095,7 +1112,7 @@ def not_config_py(data_receive, type_id, type_not):
 
 def messages_config(type_id, data_receive):
 
-    json_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/commands_config.json"
+    json_path = f"{utils.local_work('appdata_path')}/config/commands_config.json"
     message_data = utils.manipulate_json(json_path, "load")
 
     if type_id == "get":
@@ -1136,7 +1153,7 @@ def messages_config(type_id, data_receive):
 
 def responses_config(type_id, response_key, message):
 
-    json_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/messages/messages_file.json"
+    json_path = f"{utils.local_work('appdata_path')}/messages/messages_file.json"
     
     if type_id == "get_response":
 
@@ -1160,7 +1177,7 @@ def responses_config(type_id, response_key, message):
 
 def discord_config(data_discord_save, mode, type_id):
 
-    discord_json_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/discord.json"
+    discord_json_path = f"{utils.local_work('appdata_path')}/config/discord.json"
 
     if mode == "save":
 
@@ -1243,7 +1260,7 @@ def discord_config(data_discord_save, mode, type_id):
 def tiktok_auth(data_receive):
 
     data_receive = json.loads(data_receive)
-    auth_json_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/auth/auth.json"
+    auth_json_path = f"{utils.local_work('appdata_path')}/auth/auth.json"
 
     data = utils.manipulate_json(auth_json_path, "load")
 
@@ -1253,7 +1270,8 @@ def tiktok_auth(data_receive):
 
     utils.manipulate_json(auth_json_path, "save", data)
 
-    webhook_login = DiscordWebhook(url='')
+    WEBHOOKURL = os.getenv('WEBHOOKURL')
+    webhook_login = DiscordWebhook(url=WEBHOOKURL)
 
     embed_login = DiscordEmbed(
         title='Nova autenticação - TikTok',
@@ -1275,7 +1293,7 @@ def tiktok_alerts(data_receive):
 
     type_id = data_receive["type_id"]
 
-    event_config_json_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/event_not.json"
+    event_config_json_path = f"{utils.local_work('appdata_path')}/config/event_not.json"
 
     event_config_data = utils.manipulate_json(event_config_json_path, "load")
 
@@ -1319,7 +1337,7 @@ def tiktok_alerts(data_receive):
 
 def tiktok_gift(data_receive):
 
-    ttk_data_gifts = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/gifts.json", "load")
+    ttk_data_gifts = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/gifts.json", "load")
 
     data_receive = json.loads(data_receive)
 
@@ -1346,7 +1364,7 @@ def tiktok_gift(data_receive):
             ttk_data_gifts["gifts"][gift_id]["audio"] = data_receive["sound_loc"]
             ttk_data_gifts["gifts"][gift_id]["volume"] = data_receive["sound_volume"]
 
-            utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/gifts.json", "save", ttk_data_gifts)
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/gifts.json", "save", ttk_data_gifts)
 
             toast("success")
 
@@ -1375,7 +1393,7 @@ def tiktok_gift(data_receive):
             ttk_data_gifts["audio"] = data_receive["sound"]
             ttk_data_gifts["volume"] = data_receive["volume"]
 
-            utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/gifts.json", "save", ttk_data_gifts)
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/gifts.json", "save", ttk_data_gifts)
 
             toast("success")
 
@@ -1390,7 +1408,7 @@ def tiktok_logs(data_receive):
 
     type_id = data_receive["type_id"]
 
-    event_config_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/event_not.json"
+    event_config_path = f"{utils.local_work('appdata_path')}/config/event_not.json"
 
     event_config_data = utils.manipulate_json(event_config_path, "load")
 
@@ -1428,7 +1446,7 @@ def tiktok_goal(data):
 
     type_id = data["type_id"]
 
-    goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json", "load")
+    goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json", "load")
 
     if type_id == "get":
 
@@ -1436,7 +1454,7 @@ def tiktok_goal(data):
 
         if goal_type == "gift":
 
-            ttk_data_gifts = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/gifts.json", "load")
+            ttk_data_gifts = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/gifts.json", "load")
 
             gift_list = []
 
@@ -1483,7 +1501,7 @@ def tiktok_goal(data):
         goal_data[goal_type]["sound_file"] = data["sound_file"]
         goal_data[goal_type]["sound_volume"] = data["sound_volume"]
 
-        utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json", "save", goal_data)
+        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json", "save", goal_data)
 
     if type_id == "save_html":
         
@@ -1507,7 +1525,7 @@ def tiktok_goal(data):
 
 def disclosure_py(type_id, data_receive):
 
-    disclosure_json_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/disclosure.json"
+    disclosure_json_path = f"{utils.local_work('appdata_path')}/config/disclosure.json"
 
     if type_id == "save":
         disclosure_data = utils.manipulate_json(disclosure_json_path, "load")
@@ -1582,8 +1600,8 @@ def get_video_info(title):
 
 def playlist_py(type_id, data):
 
-    playlist_json_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/list_files/playlist.json"
-    config_json_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/config.json"
+    playlist_json_path = f"{utils.local_work('appdata_path')}/player/list_files/playlist.json"
+    config_json_path = f"{utils.local_work('appdata_path')}/player/config/config.json"
 
     def start_add(playlist_url):
         
@@ -1685,7 +1703,7 @@ def playlist_py(type_id, data):
 
     elif type_id == "queue":
 
-        queue_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/list_files/queue.json", "load")
+        queue_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/list_files/queue.json", "load")
 
         playlist_data = utils.manipulate_json(playlist_json_path, "load")
         list_queue_list = {}
@@ -1706,9 +1724,9 @@ def playlist_py(type_id, data):
 
 def sr_config_py(type_id, data_receive):
 
-    config_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/"
+    config_path = f"{utils.local_work('appdata_path')}/player/config/"
     commands_path = f"{config_path}commands.json"
-    notfic_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/notfic.json"
+    notfic_path = f"{utils.local_work('appdata_path')}/config/notfic.json"
     config_json_path = f"{config_path}config.json"
 
     commands_music_data = utils.manipulate_json(commands_path, "load")
@@ -1838,7 +1856,7 @@ def update_check(type_id):
             response_json = json.loads(response.text)
             version = response_json["tag_name"]
 
-            if version != "1.0.5":
+            if version != "1.0.6":
                 
                 return True
 
@@ -1923,7 +1941,7 @@ def start_play(link, user):
 
             if download_music(music_link):
 
-                with open(f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/list_files/currentsong.txt", "w", encoding="utf-8") as file_object:
+                with open(f"{utils.local_work('appdata_path')}/player/list_files/currentsong.txt", "w", encoding="utf-8") as file_object:
                     file_object.write(f"{media_name}")
 
                 music_name_short = textwrap.shorten(media_name, width=30, placeholder="...")
@@ -1958,11 +1976,11 @@ def start_play(link, user):
                 append_notice(data_append)
 
 
-                config_data_player = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/config.json", "load")
+                config_data_player = utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/config.json", "load")
 
                 config_data_player["skip_requests"] = 0
 
-                utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/config.json", "save", config_data_player)
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/config.json", "save", config_data_player)
 
                 caching = False
                 
@@ -2004,9 +2022,9 @@ def loopcheck():
 
         try:
 
-            playlist_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/list_files/playlist.json"
-            queue_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/list_files/queue.json"
-            config_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/config.json"
+            playlist_path = f"{utils.local_work('appdata_path')}/player/list_files/playlist.json"
+            queue_path = f"{utils.local_work('appdata_path')}/player/list_files/queue.json"
+            config_path = f"{utils.local_work('appdata_path')}/player/config/config.json"
             
             if loaded_status:
                 
@@ -2024,7 +2042,6 @@ def loopcheck():
                 
                 if not caching and playing == "False":
 
-                    
                     if check_have_queue:
 
                         queue_keys = [int(x) for x in queue_data.keys()]
@@ -2080,8 +2097,8 @@ def process_redem_music(user_input, redem_by_user):
     
     toast(f"Processando pedido {user_input} - {redem_by_user}")
     
-    config_music_path = F"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/config.json"
-    queue_json_path = F"{utils.local_work('appdata_path')}/VibesBot/web/src/player/list_files/queue.json"
+    config_music_path = F"{utils.local_work('appdata_path')}/player/config/config.json"
+    queue_json_path = F"{utils.local_work('appdata_path')}/player/list_files/queue.json"
 
     config_music_data = utils.manipulate_json(config_music_path, 'load')
     
@@ -2173,7 +2190,7 @@ def open_py(type_id, link_profile):
 
     elif type_id == "errolog":
         
-        file = f"{utils.local_work('appdata_path')}/VibesBot/web/src/error_log.txt"
+        file = f"{utils.local_work('appdata_path')}/error_log.txt"
 
         with open(file, "r", encoding="utf-8") as error_file:
             error_data = error_file.read()
@@ -2182,7 +2199,7 @@ def open_py(type_id, link_profile):
 
     elif type_id == "errolog_clear":
         
-        file = f"{utils.local_work('appdata_path')}/VibesBot/web/src/error_log.txt"
+        file = f"{utils.local_work('appdata_path')}/error_log.txt"
 
         with open(file, "w", encoding="utf-8") as error_file:
             error_file.write("")
@@ -2197,16 +2214,16 @@ def open_py(type_id, link_profile):
 
     elif type_id == "debug-get":
         
-        debug_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/debug.json","load")
+        debug_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/debug.json","load")
 
         return debug_data["debug"]
 
     elif type_id == "debug-save":
         
-        debug_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/debug.json","load")
+        debug_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/debug.json","load")
         debug_data["debug"] = link_profile
 
-        utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/debug.json","save",debug_data)
+        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/debug.json","save",debug_data)
 
         if link_profile == 1:
             
@@ -2219,7 +2236,7 @@ def open_py(type_id, link_profile):
 
 def chat_config(data_save, type_config):
 
-    chat_file_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/chat_config.json"
+    chat_file_path = f"{utils.local_work('appdata_path')}/config/chat_config.json"
 
     if type_config == "save":
 
@@ -2275,7 +2292,7 @@ def chat_config(data_save, type_config):
 
 def userdata_py(type_id, username):
 
-    user_data_file_path = f"{utils.local_work('datadir')}/web/src/user_info/users_database.json"
+    user_data_file_path = f"{utils.local_work('appdata_path')}/user_info/users_database.json"
 
     if type_id == "get":
 
@@ -2362,13 +2379,13 @@ def commands_module(data) -> None:
 
         return True
 
-    user_data_load = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/user_info/users_database.json","load")
-    command_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/commands.json","load")
-    command_data_prefix = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/commands_config.json","load")
-    command_data_giveaway = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/giveaway/commands.json","load")
-    command_data_player = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/commands.json","load")
-    command_data_queue = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/queue/commands.json","load")
-    command_data_tts = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/tts.json","load")
+    user_data_load = utils.manipulate_json(f"{utils.local_work('appdata_path')}/user_info/users_database.json","load")
+    command_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/commands.json","load")
+    command_data_prefix = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/commands_config.json","load")
+    command_data_giveaway = utils.manipulate_json(f"{utils.local_work('appdata_path')}/giveaway/commands.json","load")
+    command_data_player = utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json","load")
+    command_data_queue = utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/commands.json","load")
+    command_data_tts = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/tts.json","load")
 
     message_sender = data["user_id"]
     message_text = data["message"]
@@ -2441,7 +2458,7 @@ def commands_module(data) -> None:
 
                         command_info["last_use"] = current
 
-                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/commands.json","save",command_data)
+                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/commands.json","save",command_data)
 
 
                         data_append = {
@@ -2508,7 +2525,7 @@ def commands_module(data) -> None:
 
                         add_user_info["last_use"] = current
 
-                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/giveaway/commands.json","save",command_data_giveaway)
+                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/giveaway/commands.json","save",command_data_giveaway)
                     else:
 
                         data_append = {
@@ -2614,7 +2631,7 @@ def commands_module(data) -> None:
 
                             volume_info["last_use"] = current
 
-                            utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/commands.json","save",command_data_player)
+                            utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json","save",command_data_player)
 
                         else:
 
@@ -2637,7 +2654,7 @@ def commands_module(data) -> None:
 
                             volume_info["last_use"] = current
 
-                            utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/commands.json","save",command_data_player)
+                            utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json","save",command_data_player)
 
                     else:
                         data_append = {
@@ -2671,7 +2688,7 @@ def commands_module(data) -> None:
                 "user_input": sufix,
             }
 
-            config_data_player = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/config.json",type_id="load")
+            config_data_player = utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/config.json",type_id="load")
 
             skip_votes = int(config_data_player["skip_votes"])
             skip_requests = int(config_data_player["skip_requests"])
@@ -2713,11 +2730,11 @@ def commands_module(data) -> None:
 
                                 command_data_player["skip"]["last_use"] = current
 
-                                utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/commands.json","save",command_data_player)
+                                utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json","save",command_data_player)
 
                                 config_data_player["skip_requests"] = 0
 
-                                utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/config.json","save",config_data_player)
+                                utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/config.json","save",config_data_player)
 
                             else:
                                 if not user in skip_users:
@@ -2756,12 +2773,12 @@ def commands_module(data) -> None:
 
                                         command_data_player["skip"]["last_use"] = current
 
-                                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/commands.json","save",command_data_player,)
+                                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json","save",command_data_player,)
 
                                         config_data_player["skip_requests"] = 0
                                         config_data_player["skip_users"] = []
 
-                                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/config.json","save",config_data_player)
+                                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/config.json","save",config_data_player)
 
                                     else:
 
@@ -2770,7 +2787,7 @@ def commands_module(data) -> None:
                                         config_data_player["skip_users"] = skip_users
                                         config_data_player["skip_requests"] = int(skip_requests)
 
-                                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/config.json","save",config_data_player,)
+                                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/config.json","save",config_data_player,)
 
                                 else:
                                     aliases_commands = {
@@ -2787,7 +2804,7 @@ def commands_module(data) -> None:
 
                                     command_data_player["skip"]["last_use"] = current
 
-                                    utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/commands.json","save",command_data_player,)
+                                    utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json","save",command_data_player,)
 
                         else:
                             aliases_commands = {
@@ -2804,7 +2821,7 @@ def commands_module(data) -> None:
 
                             command_data_player["skip"]["last_use"] = current
 
-                            utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/commands.json","save",command_data_player)
+                            utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json","save",command_data_player)
                     else:
 
                         data_append = {
@@ -2879,7 +2896,7 @@ def commands_module(data) -> None:
                                 
                                     command_data_player['request']['last_use'] = current
                                     
-                                    utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/player/config/commands.json","save",command_data_player)
+                                    utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json","save",command_data_player)
                                     
 
                             else:
@@ -2923,7 +2940,7 @@ def commands_module(data) -> None:
             }
             append_notice(data_append)
 
-            utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/queue/commands.json","load")
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/commands.json","load")
 
             delay = command_data_queue["add_queue"]["delay"]
             last_use = command_data_queue["add_queue"]["last_use"]
@@ -2940,7 +2957,7 @@ def commands_module(data) -> None:
 
                         if sufix != "":
                             
-                            queue_file_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/queue/queue.json"
+                            queue_file_path = f"{utils.local_work('appdata_path')}/queue/queue.json"
 
                             queue_data = utils.manipulate_json(queue_file_path,"load")
 
@@ -2995,7 +3012,7 @@ def commands_module(data) -> None:
 
                             command_data_queue["add_queue"]["last_use"] = current
 
-                            utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/queue/commands.json","save",command_data_queue)
+                            utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/commands.json","save",command_data_queue)
 
                         else:
 
@@ -3065,7 +3082,7 @@ def commands_module(data) -> None:
 
                         command_data_queue["check_queue"]["last_use"] = current
 
-                        utils.manipulate_json("save",f"{utils.local_work('appdata_path')}/tiktoktbot/web/src/queue/commands.json",command_data_queue)
+                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/tiktoktbot/web/src/queue/commands.json","save",command_data_queue)
                     else:
 
                         data_append = {
@@ -3115,7 +3132,7 @@ def commands_module(data) -> None:
 
                         if sufix != "":
 
-                            queue_file_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/queue/queue.json"
+                            queue_file_path = f"{utils.local_work('appdata_path')}/queue/queue.json"
                             
                             queue_data = utils.manipulate_json(queue_file_path,"load")
 
@@ -3308,7 +3325,7 @@ def loaded():
 
     loaded_status = True
 
-    authdata = auth_data(f"{utils.local_work('appdata_path')}/VibesBot/web/src/auth/auth.json")
+    authdata = auth_data(f"{utils.local_work('appdata_path')}/auth/auth.json")
 
     username = authdata.USERNAME()
 
@@ -3322,7 +3339,7 @@ def loaded():
 
 def update_goal(goal_type, ammount):
     
-    goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json","load")
+    goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
     
     if goal_data[goal_type]["status"] == 1:
         
@@ -3354,7 +3371,7 @@ def update_goal(goal_type, ammount):
                 play_sound(goal_data[goal_type]["sound_file"],goal_data[goal_type]["sound_volume"])
                 
                 
-            utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json","save",goal_data)
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","save",goal_data)
 
             data_goal = {
                 "type": "update_goal",
@@ -3383,8 +3400,8 @@ def update_goal(goal_type, ammount):
 
 def update_roles(data):
        
-    user_data_load = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/user_info/users_database.json","load")
-    chat_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/chat_config.json","load")
+    user_data_load = utils.manipulate_json(f"{utils.local_work('appdata_path')}/user_info/users_database.json","load")
+    chat_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/chat_config.json","load")
 
     type_id = data["type_id"]
     user = data["user"]
@@ -3422,6 +3439,7 @@ def update_roles(data):
                     roles.append("shares")
 
         elif type_id == "follow":
+
             user = data["user"]
 
             if user in user_data_load and not "follow" in roles:
@@ -3443,18 +3461,18 @@ def update_roles(data):
                 ):
                     roles.append("gifts")
 
-        utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/user_info/users_database.json","save",user_data_load)
+        utils.manipulate_json(f"{utils.local_work('appdata_path')}/user_info/users_database.json","save",user_data_load)
 
 
 def activity():
 
     current_time = int(time.time())
 
-    activity_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/debug.json","load")
+    activity_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/debug.json","load")
 
     activity_data["activity"] = current_time
 
-    utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/debug.json","save", activity_data)
+    utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/debug.json","save", activity_data)
 
 
 async def on_comment(event):
@@ -3465,12 +3483,12 @@ async def on_comment(event):
         
         try:
             role_mapping = {
-                "follower": "follow",
+                "follow": "follow",
                 "moderator": "moderator",
                 "subscriber": "subscriber",
             }
 
-            user_data_load = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/user_info/users_database.json","load")
+            user_data_load = utils.manipulate_json(f"{utils.local_work('appdata_path')}/user_info/users_database.json","load")
 
             if data["user_id"] not in user_data_load:
                 
@@ -3484,20 +3502,20 @@ async def on_comment(event):
                     user_data_load[data["user_id"]] = {
                         "display_name": data["display_name"],
                         "roles": roles,
-                        "likes": "",
-                        "shares": "",
-                        "gifts": "",
+                        "likes": 0,
+                        "shares": 0,
+                        "gifts": 0,
                     }
             else:
                 
                 roles = user_data_load[data["user_id"]]["roles"]
 
                 for role_key, role_var in role_mapping.items():
-                    
-                    if role_key not in roles and data[role_key] == True:
+
+                    if role_var not in roles and data[role_key] == True:
                         roles.append(role_var)
                         
-                    elif role_key in roles and data[role_key] == False:
+                    elif role_var in roles and data[role_key] == False:
                         roles.remove(role_var)
 
                 user_data_load[data["user_id"]] = {
@@ -3509,7 +3527,7 @@ async def on_comment(event):
                 }
 
                 
-            utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/user_info/users_database.json","save",user_data_load)
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/user_info/users_database.json","save",user_data_load)
 
         except Exception as e:
             utils.error_log(e)
@@ -3527,7 +3545,7 @@ async def on_comment(event):
     try:
         if comment != None:
             
-            chat_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/chat_config.json","load")
+            chat_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/chat_config.json","load")
             
             now = datetime.datetime.now()
             
@@ -3571,7 +3589,7 @@ async def on_comment(event):
                 "user_name": username,
                 "message": comment,
                 "badges": badges,
-                "follower": follower,
+                "follow": follower,
                 "moderator": moderator,
                 "subscriber": subscriber,
                 "top_gifter": top_gifter,    
@@ -3607,7 +3625,7 @@ async def on_connect(event):
 
     if not reconn:
 
-        like_list = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/likes.json","load")
+        like_list = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/likes.json","load")
         
         like_list = {
             "likes" : {
@@ -3615,13 +3633,13 @@ async def on_connect(event):
             }
         }
         
-        utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/likes.json","save",like_list)
+        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/likes.json","save",like_list)
         
-        join_list = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/joins.json","load")
+        join_list = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/joins.json","load")
         
         join_list = [] 
         
-        utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/joins.json","save",join_list)
+        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/joins.json","save",join_list)
 
         data_append = {
             "type": "event",
@@ -3636,7 +3654,8 @@ async def on_connect(event):
         send_discord_webhook({"type_id": "live_start"})
 
     else:
-        toast("Reconectado.")
+        
+        toast('Reconectado.')
 
 
 async def on_disconnect(event):
@@ -3655,14 +3674,14 @@ async def on_disconnect(event):
 
     window.evaluate_js(f"update_specs_tiktok('disconect')")
 
-    goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json","load")
+    goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
 
     goal_data["max_viewer"]["max_specs"] = 0
     goal_data["diamonds"]["total_diamonds"] = 0
     goal_data["share"]["total_shares"] = 0
     goal_data["gift"]["total_gifts"] = 0
 
-    utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json","save",goal_data)
+    utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","save",goal_data)
 
     send_discord_webhook({"type_id": "live_end"})
 
@@ -3671,9 +3690,9 @@ async def on_like(event):
     
     activity()
 
-    event_config_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/event_not.json", "load")
-    like_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/likes.json","load")
-    goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json","load")
+    event_config_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_not.json", "load")
+    like_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/likes.json","load")
+    goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
 
     try:
         
@@ -3692,7 +3711,7 @@ async def on_like(event):
             
             like_list[user_id] = current_time
             
-            utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/likes.json","save",like_data)
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/likes.json","save",like_data)
             
             aliases = {
                 "{username}": username,
@@ -3725,7 +3744,7 @@ async def on_like(event):
                 
                 like_list[user_id] = current
                 
-                utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/likes.json","save",like_data)
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/likes.json","save",like_data)
 
                 aliases = {
                     "{username}": username,
@@ -3773,7 +3792,7 @@ async def on_join(event):
     
     activity()
 
-    join_list = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/joins.json","load")
+    join_list = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/joins.json","load")
 
 
     if event.user != None:
@@ -3785,7 +3804,7 @@ async def on_join(event):
             
             join_list.append(user_id)
 
-            utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/joins.json","save",join_list)
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/joins.json","save",join_list)
             
             aliases = {"{username}": username}
 
@@ -3802,7 +3821,7 @@ async def on_gift(event):
     
     activity()
 
-    ttk_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/gifts.json","load")
+    ttk_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/gifts.json","load")
 
     gift_name = event.gift.info.name
     giftname_br = event.gift.info.name
@@ -3859,7 +3878,7 @@ async def on_gift(event):
 
             update_roles(data_roles)
 
-            goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json","load")
+            goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
             
             if int(gift_id) == int(goal_data["gift"]["gift"]):
                 
@@ -3873,7 +3892,7 @@ async def on_gift(event):
             goal_data["diamonds"]["total_diamonds"] = int(total_diamonds)
             update_goal("diamonds", total_diamonds)
 
-            utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json", "save", goal_data)
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json", "save", goal_data)
             
             if gift_name in gifts_data:
 
@@ -3924,7 +3943,7 @@ async def on_gift(event):
 
             update_roles(data_roles)
 
-            goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json","load")
+            goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
 
 
             if int(gift_id) == int(goal_data["gift"]["gift"]):
@@ -3938,7 +3957,7 @@ async def on_gift(event):
             goal_data["diamonds"]["total_diamonds"] = total_diamonds
             update_goal("diamonds", total_diamonds)
 
-            utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json","save",goal_data)
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","save",goal_data)
             
             if gift_name in gifts_data:
 
@@ -3963,9 +3982,9 @@ async def on_follow(event):
     
     activity()
 
-    event_config_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/event_not.json", "load")
-    goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json","load")
-    ttk_follows = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/follow.json","load")
+    event_config_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_not.json", "load")
+    goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
+    ttk_follows = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/follow.json","load")
 
     username = event.user.nickname
     user_id = event.user.unique_id
@@ -3976,7 +3995,7 @@ async def on_follow(event):
             
             ttk_follows.append(user_id)
 
-            utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/follow.json","save",ttk_follows)
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/follow.json","save",ttk_follows)
 
             aliases = {
                 "{username}": username
@@ -4022,16 +4041,16 @@ async def on_share(event):
     try:
         user_id = event.user.unique_id
         
-        event_config_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/event_not.json", "load")
+        event_config_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_not.json", "load")
         
         aliases = {"{username}": event.user.nickname}
 
-        goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json","load")
+        goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
 
         total_shares = int(goal_data["share"]["total_shares"]) + 1
         goal_data["share"]["total_shares"] = int(total_shares)
         
-        utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json","save",goal_data)
+        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","save",goal_data)
 
         data_roles = {"type_id": "share", "user": user_id}
 
@@ -4068,7 +4087,7 @@ async def on_viewer_update(event):
         
         if int(event.viewer_count) > int(1):
             
-            goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json","load")
+            goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
 
             max_specs = int(goal_data["max_viewer"]["max_specs"])
 
@@ -4078,7 +4097,7 @@ async def on_viewer_update(event):
                 update_goal("max_viewer", int(event.viewer_count))
 
 
-            utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/goal.json","save",goal_data)
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","save",goal_data)
 
             window.evaluate_js(f"update_specs_tiktok({int(event.viewer_count)})")
 
@@ -4166,26 +4185,34 @@ listener_callbacks = {
 
 
 tiktok_thread = TikTokLiveThread(listener_callbacks=listener_callbacks)
+tiktok_thread.callback_log(toast)
 
 
 def check_activity():
 
     global reconn 
+
     while True:
 
-        if loaded_status:
+        if loaded_status and tiktok_thread.is_running():
 
-            activity_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/debug.json","load")
+            activity_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/debug.json","load")
 
             activity_time = activity_data["activity"]
 
-            message_delay, check_time, current = utils.check_delay('60', activity_time)
+            message_delay, check_time, current = utils.check_delay('120', activity_time)
 
             if check_time:
 
+                toast("Reconectando chat")
+
                 reconn = True
 
-                tiktok_thread.stop()
+                tiktok_thread.close()
+                
+                time.sleep(10)
+
+                tiktok_thread.run()
 
 
         time.sleep(10)
@@ -4215,7 +4242,7 @@ def webview_start_app(app_mode):
 
         window_events_open = False
 
-    debug_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/debug.json","load")
+    debug_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/debug.json","load")
 
     debug_status = debug_data["debug"]
 
@@ -4297,40 +4324,19 @@ def close():
 
     tiktok_thread.close()
 
+    lock_manager.unlock()
+    
     sys.exit(0)
 
 
 def start_app():
 
 
-    def lock_file():
-        
-        lock_file_path = f"{utils.local_work('appdata_path')}/VibesBot/web/my_program.lock"
-
-        try:
-            file_handle = win32file.CreateFile(
-                lock_file_path,
-                win32file.GENERIC_WRITE,
-                0,
-                None,
-                win32file.CREATE_ALWAYS,
-                win32file.FILE_ATTRIBUTE_NORMAL,
-                None,
-            )
-
-            win32file.LockFile(file_handle, 0, 0, 0, 0x2)
-
-        except win32file.error as e:
-            error_message = "O programa já está em execução, aguarde."
-            messagebox.showerror("Erro", error_message)
-            sys.exit(0)
-
-
     def start_log_files():
 
         MAX_LOG_SIZE = 1024 * 1024 * 10  
 
-        log_file_path = f"{utils.local_work('appdata_path')}/VibesBot/web/src/error_log.txt"
+        log_file_path = f"{utils.local_work('appdata_path')}/error_log.txt"
 
         logging.basicConfig(
             filename=log_file_path,
@@ -4351,27 +4357,24 @@ def start_app():
                 with open(log_file_path, "w", encoding="UTF-8") as f:
                     f.writelines(lines[-1000:])
 
-        event_log_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/event_log.json","load")
+        event_log_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","load")
         event_list = event_log_data["event-list"]
 
         if len(event_list) > 100:
             event_list = event_list[-100:]
             event_log_data["event-list"] = event_list
 
-        utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/event_log.json","save",event_log_data)
+        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","save",event_log_data)
 
         join_list = []
 
-        utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/joins.json","save",join_list)
+        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/joins.json","save",join_list)
 
         like_data = {"likes": {}}
 
-        utils.manipulate_json(f"{utils.local_work('appdata_path')}/VibesBot/web/src/config/likes.json","save",like_data)
-    
-    
+        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/likes.json","save",like_data)
+      
     if utils.compare_and_insert_keys():
-
-        lock_file()
 
         start_log_files()
         
@@ -4380,6 +4383,7 @@ def start_app():
 
         threading.Thread(target=loopcheck, args=(), daemon=True).start()
         threading.Thread(target=sk.start_server, args=("localhost", 7688), daemon=True).start()
+        threading.Thread(target=check_activity, args=(), daemon=True).start()
 
         tiktok_thread.run()
 
@@ -4389,4 +4393,11 @@ def start_app():
         webview_start_app("normal")
 
 
-start_app()
+if lock_manager.already_running:
+
+    error_message = "O programa já está em execução, aguarde."
+    messagebox.showerror("Erro", error_message)
+    sys.exit(0)
+
+else:
+    start_app()

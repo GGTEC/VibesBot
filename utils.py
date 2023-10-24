@@ -3,23 +3,17 @@ import os
 import shutil
 import sys
 import time
-from datetime import datetime
 import pytz
+import importlib
+
+from dotenv import load_dotenv
 from random import randint
 from bs4 import BeautifulSoup as bs
-import urllib.request
-import zipfile
-import tempfile
-import importlib
-from dotenv import load_dotenv
+from datetime import datetime
 
-extDataDir = os.getcwd()
-
-if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-    if getattr(sys, 'frozen', False):
-        if '_PYIBoot_SPLASH' in os.environ and importlib.util.find_spec("pyi_splash"):
-            import pyi_splash
-        extDataDir = sys._MEIPASS
+if getattr(sys, 'frozen', False):
+    if '_PYIBoot_SPLASH' in os.environ and importlib.util.find_spec("pyi_splash"):
+        import pyi_splash
 
 
 def local_work(type_id):
@@ -28,15 +22,18 @@ def local_work(type_id):
 
         extDataDir = os.getcwd()
 
-        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-            if getattr(sys, 'frozen', False):
-                if '_PYIBoot_SPLASH' in os.environ and importlib.util.find_spec("pyi_splash"):
-                    import pyi_splash
-                extDataDir = sys._MEIPASS
+        if getattr(sys, 'frozen', False):
+            extDataDir = f"{sys._MEIPASS}"
 
         return extDataDir
-    
+
     elif type_id == 'appdata_path':
+
+        appdata_path = f"{os.getenv('APPDATA')}/VibesBot/web/src"
+
+        return appdata_path
+    
+    elif type_id == 'tempdir':
 
         appdata_path = os.getenv('APPDATA')
 
@@ -73,7 +70,7 @@ def error_log(ex):
 
     error = str(f'Erro = type: {error_type} | message: {error_message} | trace: {trace} | time: {time_error} \n\n')
 
-    with open(f"{local_work('appdata_path')}/VibesBot/web/src/error_log.txt", "a+", encoding='utf-8') as log_file_r:
+    with open(f"{local_work('appdata_path')}/error_log.txt", "a+", encoding='utf-8') as log_file_r:
         log_file_r.write(error)
 
 
@@ -82,10 +79,12 @@ def manipulate_json(custom_path, type_id, data=None):
     try:
 
         if type_id == 'load':
+
             with open(custom_path, 'r',encoding='utf-8') as file:
                 loaded_data = json.load(file)
             return loaded_data
         elif type_id == 'save':
+
             with open(custom_path, 'w',encoding='utf-8') as file:
                 json.dump(data, file, indent=4, ensure_ascii=False)
 
@@ -93,7 +92,7 @@ def manipulate_json(custom_path, type_id, data=None):
         print(f'The file {custom_path} was not found.')
 
     except Exception as e:
-
+        error_log(custom_path)
         error_log(e)
 
 
@@ -150,7 +149,7 @@ def send_message(type_message):
 def splash_close():
     pyi_splash.close()
 
-
+ 
 def find_between(s, first, last):
 
     try:
@@ -198,7 +197,7 @@ def calculate_time(started):
 
 def check_delay(delay_command, last_use):
 
-    with open(f"{local_work('appdata_path')}/VibesBot/web/src/messages/messages_file.json", "r", encoding='utf-8') as messages_file:
+    with open(f"{local_work('appdata_path')}/messages/messages_file.json", "r", encoding='utf-8') as messages_file:
         messages_data = json.load(messages_file)
 
     message_error = messages_data['response_delay_error']
@@ -245,34 +244,25 @@ def copy_file(source, dest):
 
 def update_notif(data):
 
-    with open(f"{local_work('appdata_path')}/VibesBot/web/src/config/notfic.json", 'r', encoding='utf-8') as notifc_config_file:
-        notifc_config_Data = json.load(notifc_config_file)
+    notifc_config_Data = manipulate_json(f"{local_work('appdata_path')}/config/notfic.json", "load")
 
     duration = notifc_config_Data['HTML_REDEEM_TIME']
 
-    redeem = data['redeem_name']
-    user = data['redeem_user']
-    image = data['redeem_image']
+    message = data['message']
 
-    html_file = f"{local_work('appdata_path')}/VibesBot/web/src/html/redeem/redeem.html"
+    html_file = f"{local_work('appdata_path')}/html/events/events.html"
 
     try:
 
         with open(html_file, "r") as html:
             soup = bs(html, 'html.parser')
 
-        redeem_src = image
-
-        main_div = soup.find("div", {"id": f"main-block"})
+        main_div = soup.find("div", {"id": f"enter"})
         main_div['style'] = f'animation-duration: {duration}s'
 
-        image_redeem = soup.find("img", {"class": "img-responsive"})
-        redeem_name_tag = soup.find("span", {"class": "redem_name"})
-        redeem_user_tag = soup.find("span", {"class": "redem_user"})
+        messsage_tag = soup.find("span", {"class": "message"})
 
-        image_redeem['src'] = redeem_src
-        redeem_name_tag.string = redeem
-        redeem_user_tag.string = user
+        messsage_tag.string = message
 
         return str(soup)
 
@@ -284,8 +274,7 @@ def update_notif(data):
 
 def update_music(data):
 
-
-    notifc_config_Data = manipulate_json(f"{local_work('appdata_path')}/VibesBot/web/src/config/notfic.json", "load")
+    notifc_config_Data = manipulate_json(f"{local_work('appdata_path')}/config/notfic.json", "load")
     
     duration = notifc_config_Data['HTML_MUSIC_TIME']
 
@@ -293,7 +282,7 @@ def update_music(data):
     artist = data['artist']
     music = data['music']
 
-    html_file = f"{local_work('appdata_path')}/VibesBot/web/src/html/music/music.html"
+    html_file = f"{local_work('appdata_path')}/html/music/music.html"
 
     try:
 
@@ -302,18 +291,22 @@ def update_music(data):
 
         album_src = f"../../player/images/album.png?noCache={randint(0, 100000)}"
 
-        main_div = soup.find("div", {"id": f"main-block"})
+        main_div = soup.find("div", {"class": f"player"})
         main_div['style'] = f'animation-duration: {duration}s'
 
-        image_redeem = soup.find("img", {"class": "img-responsive"})
         music_name_tag = soup.find("span", {"class": "music_name"})
         artist_name_tag = soup.find("span", {"class": "artist_name"})
-        redeem_user_music_tag = soup.find("span", {"class": "redem_user_music"})
+        user_name_tag = soup.find("span", {"class": "user_name"})
 
-        image_redeem['src'] = album_src
         music_name_tag.string = music
         artist_name_tag.string = artist
-        redeem_user_music_tag.string = user
+        user_name_tag.string = user
+
+        artwork_tag = soup.find("div", {'class':'artwork'})
+
+        if artwork_tag:
+
+            artwork_tag['style'] = f"background: url(https://i.imgur.com/3idGgyU.png), url({album_src}) center no-repeat;"
 
         return str(soup)
 
@@ -325,7 +318,7 @@ def update_music(data):
 
 def update_goal(data):
 
-    goal_data = manipulate_json(f"{local_work('appdata_path')}/VibesBot/web/src/config/goal.json", "load")
+    goal_data = manipulate_json(f"{local_work('appdata_path')}/config/goal.json", "load")
 
     try:
 
@@ -347,7 +340,7 @@ def update_goal(data):
 
             type_goal = data['type_goal']
 
-            path = normpath_simple(f"{local_work('appdata_path')}/VibesBot/web/src/html/goal/{type_goal}/goal.html")
+            path = normpath_simple(f"{local_work('appdata_path')}/html/goal/{type_goal}/goal.html")
             
             with open(path, "r") as html:
                 soup = bs(html, 'html.parser')
@@ -370,7 +363,7 @@ def update_goal(data):
             goal_data[type_goal]['progress_bar'] = data['bar_color']
             goal_data[type_goal]['progress_bar_background'] = data['background_bar_color']
 
-            manipulate_json(f"{local_work('appdata_path')}/VibesBot/web/src/config/goal.json", "save", goal_data)
+            manipulate_json(f"{local_work('appdata_path')}/config/goal.json", "save", goal_data)
 
             with open(path, "w", encoding="utf-8") as html_w:
                 html_w.write(str(soup))
@@ -381,7 +374,20 @@ def update_goal(data):
 
             type_goal = data['type_goal']
 
-            path = normpath_simple(f"{local_work('appdata_path')}/VibesBot/web/src/html/goal/{type_goal}/goal.html")
+            path = normpath_simple(f"{local_work('appdata_path')}/html/goal/{type_goal}/goal.html")
+            
+            outer_bar = soup.find("div", {"class": "progress-outer"})
+            title_text = soup.find("h3", {"class": "progress-title"})
+            goal_text = soup.find("span", {"id": "progress-title"})
+            progress_bar = soup.find("div", {"class": "progress-bar"})
+            progress_bar_bg = soup.find("div", {"class": "progress"})
+
+            goal_text.string = data['text_value']
+            outer_bar['style'] = f"background-color: {data['outer_color']}"
+            title_text['style'] = f"color: {data['text_color']}"
+            progress_bar['style'] = f"background-color: {data['bar_color']}"
+            progress_bar_bg['style'] = f"background-color: {data['background_bar_color']}"
+
 
             with open(path, "r") as html:
                 soup = bs(html, 'html.parser')
@@ -411,7 +417,7 @@ def replace_all(text, dic_res):
 
 def messages_file_load(key):
 
-    with open(f"{local_work('appdata_path')}/VibesBot/web/src/messages/messages_file.json", "r", encoding='utf-8') as messages_file:
+    with open(f"{local_work('appdata_path')}/messages/messages_file.json", "r", encoding='utf-8') as messages_file:
         messages_data = json.load(messages_file)
 
     message = messages_data[key]
@@ -422,12 +428,11 @@ def messages_file_load(key):
 def compare_and_insert_keys():
     
     source_directory = f"{local_work('datadir')}/web/src"
-    destination_directory = f"{local_work('appdata_path')}/VibesBot/web/src"
+    destination_directory = f"{local_work('appdata_path')}"
 
     if not os.path.exists(destination_directory):
 
         shutil.copytree(source_directory, destination_directory)
-
 
     for root_directory, _, files in os.walk(source_directory):
         
@@ -439,7 +444,7 @@ def compare_and_insert_keys():
                 destination_file_path = source_file_path.replace(source_directory, destination_directory)
 
                 if not os.path.exists(destination_file_path):
-                    print(f"File missing in the destination directory: {destination_file_path}")
+                    error_log(f"File missing in the destination directory: {destination_file_path}")
                     shutil.copy2(source_file_path, destination_file_path)
 
                 try:
@@ -462,7 +467,7 @@ def compare_and_insert_keys():
                                     
                                     dest_file.truncate()
                                     
-                                    print(f"Content updated in the file {destination_file_path}")
+                                    error_log(f"Content updated in the file {destination_file_path}")
 
                             elif isinstance(data1, dict) and isinstance(data2, dict):
                                 
@@ -473,7 +478,7 @@ def compare_and_insert_keys():
 
                                 if missing_keys:
                                     
-                                    print(f"Keys missing in the file {destination_file_path}:")
+                                    error_log(f"Keys missing in the file {destination_file_path}:")
                                     
                                     for key in missing_keys:
                                         print(key)
@@ -492,27 +497,48 @@ def compare_and_insert_keys():
                                         dest_file.seek(0)
                                         json.dump(content, dest_file, indent=4, ensure_ascii=False)
                                         dest_file.truncate()
-                                        print(f"Content updated in the file {destination_file_path}")
+                                        error_log(f"Content updated in the file {destination_file_path}")
 
                             else:
                                 
-                                print(f"Error: File {source_file_path} or {destination_file_path} contains an incompatible format.")
+                                error_log(f"Error: File {source_file_path} or {destination_file_path} contains an incompatible format.")
 
                         except json.JSONDecodeError as e:
                             
-                            print(f"Error decoding the destination JSON file: {destination_file_path}")
-                            print(e)
+                            error_log(f"Error decoding the destination JSON file: {destination_file_path}")
                             
                             # If a read error occurs, copy the source file to the destination file
                             
                             shutil.copy2(source_file_path, destination_file_path)
-                            print(f"Destination file copied to resolve the issue: {destination_file_path}")
+                            error_log(f"Destination file copied to resolve the issue: {destination_file_path}")
                             
                 except json.JSONDecodeError as e:
-                    print(f"Error decoding the source JSON file: {source_file_path}")
-                    print(e)
+                    error_log(f"Error decoding the source JSON file: {source_file_path}")
+
+    for root_directory, dirs, files in os.walk(destination_directory):
+        for d in dirs:
+            destination_path = os.path.join(root_directory, d)
+            source_path = destination_path.replace(destination_directory, source_directory)
+
+            
+            if not os.path.exists(source_path):
+                if os.path.isdir(destination_path):
+                    error_log(f"File or directory in the destination directory that is not in the source directory: {destination_path}")
+                    shutil.rmtree(destination_path)
+
+        for file in files:
+
+            destination_path = os.path.join(root_directory, file)
+            source_path = destination_path.replace(destination_directory, source_directory)
+
+            if not os.path.exists(source_path):
+                if os.path.isfile(destination_path):
+                    error_log(f"File in the destination directory that is not in the source directory: {destination_path}")
+                    os.remove(destination_path)
+
 
     return True
+
 
 def normpath_simple(path):
     

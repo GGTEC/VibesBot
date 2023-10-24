@@ -1,18 +1,19 @@
 
 from TikTokLive import TikTokLiveClient
 from TikTokLive.types.events import *
-from TikTokLive.types.errors import LiveNotFound, FailedFetchRoomInfo, AlreadyConnecting
+from TikTokLive.types.errors import LiveNotFound, FailedFetchRoomInfo, AlreadyConnecting, InitialCursorMissing
 
 import threading
 import time
 import utils
 from auth import auth_data
+import sys
 
 class TikTokLiveThread():
     def __init__(self, listener_callbacks):
         super().__init__()
 
-        authdata = auth_data(f"{utils.local_work('appdata_path')}/VibesBot/web/src/auth/auth.json")
+        authdata = auth_data(f"{utils.local_work('appdata_path')}/auth/auth.json")
 
         cookies = {
             "sessionid": authdata.SESSIONID(),
@@ -23,11 +24,19 @@ class TikTokLiveThread():
         self.cookies = cookies
         self.listener_callbacks = listener_callbacks
         self.client = None
-        self.running = True
+        self.running = False
         self.client_thread = None
+        self.callback = None
+
+    def callback_log(self, function):
+        self.callback = function
 
     def run_client_thread(self):
+
+        self.running = True
+
         while self.running:
+            
             try:
                 self.client = TikTokLiveClient(
                     unique_id=self.username,
@@ -41,8 +50,23 @@ class TikTokLiveThread():
                 self.client.run()
 
             except Exception as e:
+                
+                if isinstance(e, LiveNotFound):
+                    if self.callback:
+                        self.callback("Streamer não encontrado ou live offline, Tentando novamente...")
 
-                print(f"Error in TikTokLiveClient: {e}")
+                elif isinstance(e, FailedFetchRoomInfo):
+
+                    if self.callback:
+                        self.callback(str(e))
+
+                elif isinstance(e, InitialCursorMissing):
+
+                    if self.callback:
+                        self.callback("Erro de conexão com o TikTok, reinicie o programa.")
+                else:
+                    utils.error_log(e)
+                    
                 time.sleep(10)
 
     def run(self):
@@ -55,5 +79,5 @@ class TikTokLiveThread():
     def close(self):
         self.running = False
         if self.client:
-                self.client.stop()
-                self.client_thread.join()
+            self.client.stop()
+            return

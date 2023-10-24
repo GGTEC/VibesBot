@@ -346,7 +346,7 @@ function toast_notifc(text){
 
   Bs5Utils.registerStyle('dark-purple', {
     btnClose: ['btn-close-white'],
-    main: ['bg-dark', 'text-white'],
+    main: ['bg-black', 'text-white'],
     border: ['custom-border-modal']
   });
 
@@ -693,6 +693,7 @@ async function userdata_js(type_id,data){
 
               var row = table.row.add([
                 userdata_parse[key].display_name,
+                key,
                 userdata_parse[key].roles,
                 userdata_parse[key].likes,
                 userdata_parse[key].shares,

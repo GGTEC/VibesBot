@@ -302,14 +302,34 @@ function setElementState(elementId, value) {
 
       } else if (element.tagName === "INPUT" && element.type === "range") {
 
-        console.log(element.tagName,element,value)
-
         element.value = value;
-
 
       }
     }
 }
+
+async function get_event_state(element){
+
+    data ={
+        "type_id" : 'get_state',
+        "type" : element.value
+    };
+
+    var event_data = await window.pywebview.api.event_log(JSON.stringify(data))
+
+    if (event_data){
+
+        document.getElementById('select-show').hidden = false
+
+        data_parse = JSON.parse(event_data)
+        
+        console.log(data_parse)
+        setElementState('show-event',data_parse["show-event"])
+        setElementState('show-event-chat',data_parse["show-event-chat"])
+        setElementState('show-event-html',data_parse["show-event-html"])
+
+    }
+}   
 
 async function event_log_config(type_id){
 
@@ -318,27 +338,6 @@ async function event_log_config(type_id){
     var sliderFontEvents = document.getElementById("slider-font-events");
     var colorEvents = document.getElementById("color-events");
     var dataShowEvents = document.getElementById("data-show-events");
-    var showEvents = document.getElementById("show-events");
-    var showEventsChat = document.getElementById("show-events-chat");
-    var showCommands = document.getElementById("show-commands");
-    var showCommandsChat = document.getElementById("show-commands-chat");
-    var showFollow = document.getElementById("show-follow");
-    var showFollowChat = document.getElementById("show-follow-chat");
-    var showLikes = document.getElementById("show-likes");
-    var showLikesChat = document.getElementById("show-likes-chat");
-    var showGifts = document.getElementById("show-gifts");
-    var showGiftsChat = document.getElementById("show-gifts-chat");
-    var showChest = document.getElementById("show-chest");
-    var showChestChat = document.getElementById("show-chest-chat");
-    var showShare = document.getElementById("show-share");
-    var showShareChat = document.getElementById("show-share-chat");
-    var showJoin = document.getElementById("show-join");
-    var showJoinChat = document.getElementById("show-join-chat");
-    var showStartGoal = document.getElementById("show-goal-start");
-    var showStartGoalChat = document.getElementById("show-goal-start-chat");
-    var showEndGoal = document.getElementById("show-goal-end");
-    var showEndGoalChat = document.getElementById("show-goal-end-chat");
-
 
     if (type_id == 'save'){
 
@@ -346,27 +345,7 @@ async function event_log_config(type_id){
         data["type_id"] = type_id;
         data["slider-font-events"] = sliderFontEvents.value;
         data["color-events"] = colorEvents.value;
-        data["data-show-events"] = getCheckedValue(dataShowEvents);
-        data["show-events"] = getCheckedValue(showEvents);
-        data["show-events-chat"] = getCheckedValue(showEventsChat);
-        data["show-commands"] = getCheckedValue(showCommands);
-        data["show-commands-chat"] = getCheckedValue(showCommandsChat);
-        data["show-follow"] = getCheckedValue(showFollow);
-        data["show-follow-chat"] = getCheckedValue(showFollowChat);
-        data["show-likes"] = getCheckedValue(showLikes);
-        data["show-likes-chat"] = getCheckedValue(showLikesChat);
-        data["show-gifts"] = getCheckedValue(showGifts);
-        data["show-gifts-chat"] = getCheckedValue(showGiftsChat);
-        data["show-chest"] = getCheckedValue(showChest);
-        data["show-chest-chat"] = getCheckedValue(showChestChat);
-        data["show-share"] = getCheckedValue(showShare);
-        data["show-share-chat"] = getCheckedValue(showShareChat);
-        data["show-join"] = getCheckedValue(showJoin);
-        data["show-join-chat"] = getCheckedValue(showJoinChat);
-        data["show-goal-start"] = getCheckedValue(showStartGoal);
-        data["show-goal-start-chat"] = getCheckedValue(showStartGoalChat);
-        data["show-goal-end"] = getCheckedValue(showEndGoal);
-        data["show-goal-end-chat"] = getCheckedValue(showEndGoalChat);
+        data["data-show-events"] = dataShowEvents.value;
 
         window.pywebview.api.event_log(JSON.stringify(data));
 
@@ -387,6 +366,16 @@ async function event_log_config(type_id){
                 setElementState(elementId, value);
             });
         }
+
+    } else if (type_id == 'save_state'){
+
+        data = {}
+        data["type_id"] = type_id;
+        data["show-events"] = document.getElementById('show-event').checked ? 1 : 0;
+        data["show-events-chat"] = document.getElementById('show-event-chat').checked ? 1 : 0;;
+        data["show-events-html"] = document.getElementById('show-event-html').checked ? 1 : 0;;
+
+        window.pywebview.api.event_log(JSON.stringify(data));
 
     }
 
@@ -1040,3 +1029,9 @@ async function tts_command(type_id){
 
     }
 }
+
+function show_userdata_modal(){
+    $("#userdata-modal").modal("show");
+    userdata_js('get')
+}
+

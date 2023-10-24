@@ -23,7 +23,7 @@
             socket = new WebSocket("ws://localhost:7688");
         
             socket.onopen = function(event) {
-              console.log("Conectado ao servidor");
+              console.log("Conectado ao servidor likes");
               socket.send('likes');
             };
         
