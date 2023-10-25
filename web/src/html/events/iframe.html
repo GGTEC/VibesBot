@@ -31,22 +31,16 @@
                 if (event.data === 'ping') {
                     socket.send('pong');
                 } else {
+
                   var data_parse = JSON.parse(event.data);
-                  if (data_parse.type === 'save_html') {
 
-                    iframe.contentDocument.documentElement.innerHTML = data_parse.html;
+                  if (data_parse.type == 'event'){
 
-                  } else if (data_parse.type === 'update_goal'){
-
-                    if (data_parse.type_goal == 'event'){
-
-                        var iframeDocument = iframe.contentDocument;
+                      var iframeDocument = iframe.contentDocument;
 
                         iframeDocument.documentElement.innerHTML = data_parse.html;
 
                       }
-
-                    }
                 }
             };
         

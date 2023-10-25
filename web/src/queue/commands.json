@@ -19,5 +19,12 @@
         "delay": "10",
         "last_use": 0,
         "user_level": "mod"
+    },
+    "self_add_queue": {
+        "command": "!proximo",
+        "status": 1,
+        "delay": "10",
+        "last_use": 0,
+        "user_level": "mod"
     }
 }

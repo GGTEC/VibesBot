@@ -38,10 +38,10 @@ def broadcast_message(message):
     elif 'type' in message_loads:
         connection_type = message_loads['type']
 
-
     if connection_type in connections_by_type:
-
+            
         for client in connections_by_type[connection_type].values():
+
             client_handler = client['handler']
             try:
                 client_handler.send_message(message)

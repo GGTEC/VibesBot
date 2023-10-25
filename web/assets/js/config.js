@@ -143,6 +143,62 @@ function slider_font_events() {
     output.innerHTML = slider.value
 };
 
+async function black_list_remove(music){
+
+    var music_data = await window.pywebview.api.sr_config_py('list_rem',music);
+        
+    if (music_data){
+
+        music_list = JSON.parse(music_data)
+
+        var dataTableData = [];
+
+        $.each(music_list, function(index, value) {
+
+            var button_config = document.createElement("button");
+
+            button_config.innerText = "Remover";
+            button_config.classList.add('bnt','bt-submit')
+            button_config.setAttribute('onclick', `black_list_remove('${value}')`)
+
+            dataTableData.push([
+                value,
+                button_config.outerHTML
+            ]);
+        });
+
+        if ($.fn.DataTable.isDataTable("#list_musics_block")) {
+
+            $('#list_musics_block').DataTable().clear().draw();
+            $('#list_musics_block').DataTable().destroy();
+        }
+        
+
+        var table = $('#list_musics_block').DataTable( {
+            destroy: true,
+            scrollX: true,
+            paging: false,
+            ordering:  false,
+            retrieve : false,
+            processing: true,
+            responsive: false,
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/pt-BR.json'
+            },
+            columns: [
+                { title: 'Termos de musicas bloqueados' },
+                { title: 'Remover' }
+            ]
+        } );
+
+        for (var i = 0; i < dataTableData.length; i++) {
+            table.row.add(dataTableData[i]).draw();
+        }
+    }
+
+
+}
+
 async function sr_config_js(event,type_id){
     
     if (type_id == 'get'){
@@ -250,21 +306,57 @@ async function sr_config_js(event,type_id){
         
     } else if (type_id == 'list_get'){
 
-        var music_data_parse = await window.pywebview.api.sr_config_py(type_id,'null')
+        var music_data = await window.pywebview.api.sr_config_py(type_id,'null')
         
-        if (music_data_parse){
+        if (music_data){
 
+            music_list = JSON.parse(music_data)
+            
             $("#modal_list_block").modal("show")
 
-            var tbody = document.getElementById('block-list-body');
+            var dataTableData = [];
 
-            tbody.innerHTML = "";
-        
-            Object.entries(music_data_parse).forEach(([v,k]) => {
-        
-              tbody.innerHTML += '<tr><td>' + k + '</td></tr>';
-              
-            })
+            $.each(music_list, function(index, value) {
+
+                var button_config = document.createElement("button");
+
+                button_config.innerText = "Remover";
+                button_config.classList.add('bnt','bt-submit')
+                button_config.setAttribute('onclick', `black_list_remove('${value}')`)
+
+                dataTableData.push([
+                    value,
+                    button_config.outerHTML
+                ]);
+            });
+
+            if ($.fn.DataTable.isDataTable("#list_musics_block")) {
+
+                $('#list_musics_block').DataTable().clear().draw();
+                $('#list_musics_block').DataTable().destroy();
+            }
+            
+
+            var table = $('#list_musics_block').DataTable( {
+                destroy: true,
+                scrollX: true,
+                paging: false,
+                ordering:  false,
+                retrieve : false,
+                processing: true,
+                responsive: false,
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/pt-BR.json'
+                },
+                columns: [
+                    { title: 'Termos de musicas bloqueados' },
+                    { title: 'Remover' }
+                ]
+            } );
+
+            for (var i = 0; i < dataTableData.length; i++) {
+                table.row.add(dataTableData[i]).draw();
+            }
         }
 
     } else if (type_id == 'list_add'){
@@ -368,12 +460,14 @@ async function event_log_config(type_id){
         }
 
     } else if (type_id == 'save_state'){
-
+        
+        element = document.getElementById('select-event-type');
         data = {}
         data["type_id"] = type_id;
-        data["show-events"] = document.getElementById('show-event').checked ? 1 : 0;
-        data["show-events-chat"] = document.getElementById('show-event-chat').checked ? 1 : 0;;
-        data["show-events-html"] = document.getElementById('show-event-html').checked ? 1 : 0;;
+        data["type"] = element.value;
+        data["show-event"] = document.getElementById('show-event').checked ? 1 : 0;
+        data["show-event-chat"] = document.getElementById('show-event-chat').checked ? 1 : 0;;
+        data["show-event-html"] = document.getElementById('show-event-html').checked ? 1 : 0;;
 
         window.pywebview.api.event_log(JSON.stringify(data));
 
@@ -1025,7 +1119,6 @@ async function tts_command(type_id){
         var data = JSON.stringify(data);
 
         window.pywebview.api.tts_command(data)
-        input.value = '';
 
     }
 }

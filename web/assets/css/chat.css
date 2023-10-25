@@ -245,7 +245,9 @@ body {
   background-color: #4f016c;
 }
 .bg-dark {
-  background-color: #000 !important;
+  box-shadow: 6px 14px 19px 0 rgb(0 0 0 / 60%) !important;
+  background-color:#754b9905 !important;
+  backdrop-filter: blur( 16.5px ) !important;
 }
 
 .events-sub-color {

@@ -138,13 +138,11 @@ def append_notice(data_receive):
                 }
 
                 data_goal = {
-                    "type": "update_event",
+                    "type": "event",
                     "html": utils.update_notif(data_update)
                 }
 
                 sk.broadcast_message(json.dumps(data_goal))
-
-
 
     except Exception as e:
         
@@ -444,10 +442,13 @@ def event_log(data_save):
 
             utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","save",event_log_data)
 
+            toast("Salvo")
+            
         except Exception as e:
             
             utils.error_log(e)
             toast("error")
+
 
 def select_file_py(type_id):
     
@@ -673,7 +674,6 @@ def tts_command(data_receive):
 
     if type_id == "get":
         
-        
         tts_command_data = utils.manipulate_json(tts_json_path, "load")
         
         if tts_command_data is not None:
@@ -702,7 +702,9 @@ def tts_command(data_receive):
 
                 utils.manipulate_json(tts_json_path, "save", tts_command_data)
 
+            toast('Salvo')
         except Exception as e:
+            toast('Ocorreu um erro ao salvar')
             utils.error_log(e)
 
 
@@ -953,8 +955,9 @@ def giveaway_py(type_id, data_receive):
 
 
 def queue(type_id, data_receive):
+    
+    json_path =f"{utils.local_work('appdata_path')}/queue/queue.json"
 
-    json_path = f"{utils.local_work('appdata_path')}/queue/queue.json"
 
     if type_id == "get":
 
@@ -995,6 +998,8 @@ def queue(type_id, data_receive):
                 "message": utils.replace_all(str(utils.messages_file_load("response_namein_queue")), aliases), 
                 "user_input": ""
             }
+
+        queue_data = utils.manipulate_json(json_path, "load")
 
         return json.dumps(queue_data, ensure_ascii=False)
 
@@ -1840,10 +1845,16 @@ def sr_config_py(type_id, data_receive):
             config_music_data["blacklist"].remove(data_receive)
 
             utils.manipulate_json(config_json_path, "save", config_music_data)
+
             toast("Termo ou nome removido")
 
         else:
+
             toast("O termo ou nome não está na lista")
+
+        config_music_data = utils.manipulate_json(config_json_path, "load")
+
+        return json.dumps(config_music_data["blacklist"], ensure_ascii=False)
 
 
 def update_check(type_id):
@@ -1856,7 +1867,7 @@ def update_check(type_id):
             response_json = json.loads(response.text)
             version = response_json["tag_name"]
 
-            if version != "1.0.6":
+            if version != "1.0.7":
                 
                 return True
 
@@ -2137,6 +2148,7 @@ def process_redem_music(user_input, redem_by_user):
                     
                     data_append = {"type": "event", "message": utils.replace_all(utils.messages_file_load("music_length_error"), aliases), "user_input": ""}
                     append_notice(data_append)
+
             else:
 
                 music_name_short = textwrap.shorten(music_name, width=13, placeholder="...")
@@ -2399,9 +2411,10 @@ def commands_module(data) -> None:
     command_lower = command_string.lower()
 
     if len(command_string.split()) > 1:
+
         split_command = command_string.split(maxsplit=1)
         command, sufix = split_command
-
+        
     else:
         sufix = None
 
@@ -2981,7 +2994,7 @@ def commands_module(data) -> None:
 
                                 data_append = {
                                     "type": "event",
-                                    "message": utils.replace_all(utils.messages_file_load("command_disabled"),aliases),
+                                    "message": utils.replace_all(utils.messages_file_load("response_add_queue"),aliases),
                                     "user_input": "",
                                 }
 
@@ -3045,6 +3058,109 @@ def commands_module(data) -> None:
                 }
 
                 append_notice(data_append)
+
+        elif compare_strings(command, command_data_queue["self_add_queue"]["command"]):
+            
+            data_append = {
+                "type": "command",
+                "message": utils.replace_all(str(utils.messages_file_load("event_command")), aliases),
+                "user_input": sufix,
+            }
+            append_notice(data_append)
+
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/commands.json","load")
+
+            delay = command_data_queue["add_queue"]["delay"]
+            last_use = command_data_queue["add_queue"]["last_use"]
+            status = command_data_queue["add_queue"]["status"]
+            user_level = command_data_queue["add_queue"]["user_level"]
+
+            if status:
+
+                if check_perm(user_type, user_level):
+
+                    message_delay, check_time, current = utils.check_delay(delay, last_use)
+
+                    if check_time:
+
+                        queue_file_path = f"{utils.local_work('appdata_path')}/queue/queue.json"
+
+                        queue_data = utils.manipulate_json(queue_file_path,"load")
+
+                        if user not in queue_data:
+
+                            queue_data.append(user)
+
+                            utils.manipulate_json(queue_file_path,"save",queue_data)
+
+                            toast("Nome adicionado")
+
+                            aliases = {
+                                "{username}": str(user),
+                                "{command}": str(command),
+                                "{prefix}": str(prefix),
+                                "{user_level}": str(user_type),
+                                "{sufix}": str(sufix),
+                                "{random}": str(random_value),
+                                "{value}": str(sufix),
+                            }
+
+                            data_append = {
+                                "type": "event",
+                                "message": utils.replace_all(utils.messages_file_load("response_queue"),aliases),
+                                "user_input": "",
+                            }
+
+                            append_notice(data_append)
+
+                        else:
+
+                            toast("O nome já está na lista")
+
+                            aliases = {
+                                "{username}": str(user),
+                                "{command}": str(command),
+                                "{prefix}": str(prefix),
+                                "{user_level}": str(user_type),
+                                "{sufix}": str(sufix),
+                                "{random}": str(random_value),
+                                "{value}": str(sufix),
+                            }
+
+                            data_append = {
+                                "type": "event",
+                                "message": utils.messages_file_load("response_namein_queue"),
+                                "user_input": "",
+                            }
+
+                            append_notice(data_append)
+
+                        command_data_queue["add_queue"]["last_use"] = current
+
+                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/commands.json","save",command_data_queue)
+
+                    else:
+                        data_append = {
+                            "type": "event",
+                            "message": utils.replace_all(message_delay, aliases),
+                            "user_input": "",
+                        }
+
+                        append_notice(data_append)
+
+                else:
+                    send_error_level(user, user_level, str(command))
+
+            else:
+
+                data_append = {
+                    "type": "command",
+                    "message": utils.replace_all(utils.messages_file_load("command_disabled"), aliases),
+                    "user_input": sufix,
+                }
+
+                append_notice(data_append)
+
 
         elif compare_strings(command, command_data_queue["check_queue"]["command"]):
 
@@ -3230,7 +3346,7 @@ def commands_module(data) -> None:
 
                     if check_time:
 
-                        if sufix != "":
+                        if sufix != None:
 
                             user_input_short = textwrap.shorten(sufix, width=300, placeholder=" ")
                             tts = gTTS(text=user_input_short, lang="pt-br", slow=False)
@@ -3543,7 +3659,7 @@ async def on_comment(event):
     
     
     try:
-        if comment != None:
+        if comment != None and username != None and userid != None:
             
             chat_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/chat_config.json","load")
             

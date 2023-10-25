@@ -62,13 +62,11 @@ async function queue_js(type_id,item){
 
         var add_queue = document.getElementById('add_queue').value;
 
-        var queue_list = await window.pywebview.api.queue(type_id,add_queue);
+        var queue_data = await window.pywebview.api.queue(type_id,add_queue);
 
-        if (queue_list) {
+        if (queue_data) {
             
-            queue_parse = JSON.parse(queue_data)
-
-            var queue_list = queue_parse.queue
+            queue_list = JSON.parse(queue_data)
 
             var dataTableData = [];
 
@@ -121,11 +119,11 @@ async function queue_js(type_id,item){
 
     } else if (type_id == "queue_rem"){
 
-        var queue_list = await window.pywebview.api.queue(type_id,item);
+        var queue_data = await window.pywebview.api.queue(type_id,item);
 
-        if (queue_list) {
+        if (queue_data) {
 
-            queue_list = JSON.parse(queue_list)
+            queue_list = JSON.parse(queue_data)
 
             var dataTableData = [];
 

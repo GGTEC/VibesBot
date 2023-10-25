@@ -244,6 +244,7 @@ def copy_file(source, dest):
 
 def update_notif(data):
 
+    
     notifc_config_Data = manipulate_json(f"{local_work('appdata_path')}/config/notfic.json", "load")
 
     duration = notifc_config_Data['HTML_REDEEM_TIME']
@@ -257,7 +258,7 @@ def update_notif(data):
         with open(html_file, "r") as html:
             soup = bs(html, 'html.parser')
 
-        main_div = soup.find("div", {"id": f"enter"})
+        main_div = soup.find("div", {"class": f"enter"})
         main_div['style'] = f'animation-duration: {duration}s'
 
         messsage_tag = soup.find("span", {"class": "message"})
@@ -375,6 +376,19 @@ def update_goal(data):
             type_goal = data['type_goal']
 
             path = normpath_simple(f"{local_work('appdata_path')}/html/goal/{type_goal}/goal.html")
+            
+            with open(path, "r") as html:
+                soup = bs(html, 'html.parser')
+
+
+            data = {
+                'text_value' : goal_data[type_goal]['goal_text'],
+                'outer_color' : goal_data[type_goal]['outer_bar'],
+                'text_color' : goal_data[type_goal]['title_text'],
+                'bar_color' : goal_data[type_goal]['progress_bar'],
+                'background_bar_color' : goal_data[type_goal]['progress_bar_background'],
+            }
+
             
             outer_bar = soup.find("div", {"class": "progress-outer"})
             title_text = soup.find("h3", {"class": "progress-title"})

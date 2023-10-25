@@ -29,6 +29,7 @@
     "music_error_name": "Erro ao executar musica, tente com o link",
     "music_stream_error": "Não foi possível reproduzir a musica.",
     "music_link_youtube": "Os links devem ser do youtube.",
+    "music_length_error" : "A musica é muito grande",
     "command_sr_error_link": "{username} --> Você deve fornecer um nome ou link de musica",
     "command_volume_confirm": "{username} --> O volume foi alterado para {volume}",
     "command_volume_error": "{username} --> O volume deve ser um valor entre 0 e 100",
