@@ -4,27 +4,39 @@
         "status": 1,
         "delay": "10",
         "last_use": 0,
-        "user_level": "mod"
+        "user_level": "mod",
+        "cost" : 0,
+        "cost_status" : 0,
+        "cost_type" : "None"
     },
     "rem_queue": {
         "command": "!remqueue ",
         "status": 1,
         "delay": "10",
         "last_use": 0,
-        "user_level": "mod"
+        "user_level": "mod",
+        "cost" : 0,
+        "cost_status" : 0,
+        "cost_type" : "None"
     },
     "add_queue": {
         "command": "!addqueue",
         "status": 1,
         "delay": "10",
         "last_use": 0,
-        "user_level": "mod"
+        "user_level": "mod",
+        "cost" : 0,
+        "cost_status" : 0,
+        "cost_type" : "None"
     },
     "self_add_queue": {
         "command": "!proximo",
         "status": 1,
         "delay": "10",
         "last_use": 0,
-        "user_level": "mod"
+        "user_level": "mod",
+        "cost" : 0,
+        "cost_status" : 0,
+        "cost_type" : "None"
     }
 }

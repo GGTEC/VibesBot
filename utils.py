@@ -244,7 +244,6 @@ def copy_file(source, dest):
 
 def update_notif(data):
 
-    
     notifc_config_Data = manipulate_json(f"{local_work('appdata_path')}/config/notfic.json", "load")
 
     duration = notifc_config_Data['HTML_REDEEM_TIME']
@@ -448,12 +447,19 @@ def compare_and_insert_keys():
 
         shutil.copytree(source_directory, destination_directory)
 
+    def update_dict_recursive(dest_dict, source_dict):
+        for key, value in source_dict.items():
+            if key in dest_dict:
+                if isinstance(value, dict) and isinstance(dest_dict[key], dict):
+                    update_dict_recursive(dest_dict[key], value)
+            else:
+                dest_dict[key] = value
+                error_log(f"Chave '{key}' atualizada: {value}")
+
     for root_directory, _, files in os.walk(source_directory):
         
         for file in files:
-            
-            if file.endswith('.json') and file:
-                
+            if file.endswith('.json'):
                 source_file_path = os.path.join(root_directory, file)
                 destination_file_path = source_file_path.replace(source_directory, destination_directory)
 
@@ -462,72 +468,19 @@ def compare_and_insert_keys():
                     shutil.copy2(source_file_path, destination_file_path)
 
                 try:
-                    
                     with open(source_file_path, 'r', encoding='utf-8') as src_file, open(destination_file_path, 'r+', encoding='utf-8') as dest_file:
                         data1 = json.load(src_file)
-                        dest_file.seek(0)
-                        
-                        try:
-                            data2 = json.load(dest_file)
+                        data2 = json.load(dest_file)
 
-                            if isinstance(data1, list) and isinstance(data2, list):
-                                updated_content = data1 + [item for item in data2 if item not in data1]
+                        if isinstance(data1, dict) and isinstance(data2, dict):
+                            update_dict_recursive(data2, data1)
+                            dest_file.seek(0)
+                            json.dump(data2, dest_file, indent=4, ensure_ascii=False)
+                            dest_file.truncate()
 
-                                if updated_content != data2:
-                                    
-                                    dest_file.seek(0)
-                                    
-                                    json.dump(updated_content, dest_file, indent=4, ensure_ascii=False)
-                                    
-                                    dest_file.truncate()
-                                    
-                                    error_log(f"Content updated in the file {destination_file_path}")
-
-                            elif isinstance(data1, dict) and isinstance(data2, dict):
-                                
-                                keys1 = set(data1.keys())
-                                keys2 = set(data2.keys())
-                                
-                                missing_keys = keys1 - keys2
-
-                                if missing_keys:
-                                    
-                                    error_log(f"Keys missing in the file {destination_file_path}:")
-                                    
-                                    for key in missing_keys:
-                                        print(key)
-                                        
-                                    content = data2
-                                    altered = False
-
-                                    for key in missing_keys:
-                                        
-                                        if key not in content or content[key] != data1[key]:
-                                            content[key] = data1[key]
-                                            altered = True
-
-                                    if altered:
-                                        
-                                        dest_file.seek(0)
-                                        json.dump(content, dest_file, indent=4, ensure_ascii=False)
-                                        dest_file.truncate()
-                                        error_log(f"Content updated in the file {destination_file_path}")
-
-                            else:
-                                
-                                error_log(f"Error: File {source_file_path} or {destination_file_path} contains an incompatible format.")
-
-                        except json.JSONDecodeError as e:
-                            
-                            error_log(f"Error decoding the destination JSON file: {destination_file_path}")
-                            
-                            # If a read error occurs, copy the source file to the destination file
-                            
-                            shutil.copy2(source_file_path, destination_file_path)
-                            error_log(f"Destination file copied to resolve the issue: {destination_file_path}")
-                            
                 except json.JSONDecodeError as e:
                     error_log(f"Error decoding the source JSON file: {source_file_path}")
+
 
     for root_directory, dirs, files in os.walk(destination_directory):
         for d in dirs:
@@ -561,3 +514,4 @@ def normpath_simple(path):
     path_norm_simple = path_norm.replace('\\', '/')
     
     return path_norm_simple
+

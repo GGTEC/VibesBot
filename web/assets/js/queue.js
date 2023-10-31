@@ -180,6 +180,9 @@ async function queue_js(type_id,item){
         var command_queue_status = document.getElementById('command-queue-status');
         var command_queue_command = document.getElementById('command-queue-command');
         var command_queue_delay = document.getElementById('command-queue-delay');
+        var command_queue_cost_status = document.getElementById('command-cost-status-queue'); 
+        var command_queue_cost = document.getElementById('command-cost-queue'); 
+        var command_queue_cost_type = document.getElementById("command-cost-type-queue");
 
         var queue_command_edit = document.getElementById('command_queue_form');
 
@@ -189,13 +192,19 @@ async function queue_js(type_id,item){
 
             queue_parse = JSON.parse(queue_parse)
             
-            queue_command_edit.hidden = false
+            queue_command_edit.hidden = false       
 
+            command_queue_cost_status.checked = queue_parse.cost_status == 1 ? true : false;
             command_queue_status.checked = queue_parse.status == 1 ? true : false;
             command_queue_command.value = queue_parse.command
             command_queue_delay.value = queue_parse.delay
+            command_queue_cost.value = queue_parse.cost
 
             $("#command-queue-perm").selectpicker('val',queue_parse.user_level)
+            $("#command-queue-perm").selectpicker("refresh");
+
+            $("#command-cost-type-queue").selectpicker('val', queue_parse.cost_type);
+            $("#command-cost-type-queue").selectpicker("refresh");
 
         }
 
@@ -207,7 +216,12 @@ async function queue_js(type_id,item){
         var command_queue_command = document.getElementById('command-queue-command');
         var command_queue_delay = document.getElementById('command-queue-delay');
 
+        var command_queue_cost_status = document.getElementById('command-cost-status-queue'); 
+        var command_queue_cost = document.getElementById('command-cost-queue'); 
+        var command_queue_cost_type = document.getElementById("command-cost-type-queue");
+
         var command_status = command_queue_status.checked ? 1 : 0;
+        var command_cost_status = command_queue_cost_status.checked ? 1 : 0;
         
         var roles = []; 
 
@@ -220,7 +234,10 @@ async function queue_js(type_id,item){
             command: command_queue_command.value,
             status: command_status,
             delay: command_queue_delay.value,
-            user_level: roles
+            user_level: roles,
+            cost: command_queue_cost.value,
+            cost_type: command_queue_cost_type.value,
+            cost_status: command_cost_status
         }
 
         var formData = JSON.stringify(data);

@@ -200,13 +200,14 @@
   </div>
 
   <div id="main" class="d-none">
+    
       <div class="l-navbar" id="nav-bar">
         <nav class="nav">
               <button class="nav-link active" id="v-pills-start-tab"  data-bs-placement="right" data-bs-toggle="pill" data-bs-target="#v-pills-start" type="button" role="tab" aria-controls="v-pills-start" aria-selected="true">
               <i class="fa-sharp fa-solid fa-home nav_icon" title="Inicio"></i>
                 <span class="nav_name">Inicio</span>
               </button>
-              <button class="nav-link" id="v-pills-comandos-tab" data-bs-placement="right" data-bs-toggle="pill" data-bs-target="#v-pills-comandos" type="button" role="tab" aria-controls="v-pills-comandos">
+              <button class="nav-link" id="v-pills-comands-tab" data-bs-placement="right" data-bs-toggle="pill" data-bs-target="#v-pills-comands" type="button" role="tab" aria-controls="v-pills-comands">
                 <i class="fa-sharp fa-solid fa-terminal nav_icon"  title="Comandos"></i>
                 <span class="nav_name">Comandos</span>
               </button>
@@ -249,6 +250,7 @@
         </nav>
       </div>
       <div class="tab-content h-100 w-100" id="v-pills-tabContent">
+
         <div class="tab-pane active vh-100" id="v-pills-start" role="tabpanel" aria-labelledby="v-pills-start-tab">
           <div class="background">
             <span></span>
@@ -368,7 +370,7 @@
             </div>
           </div>
         </div>
-        <div class="tab-pane" id="v-pills-comandos" role="tabpanel" aria-labelledby="v-pills-comandos-tab">
+        <div class="tab-pane" id="v-pills-comands" role="tabpanel" aria-labelledby="v-pills-comands-tab">
           <div id="commands-div">
             <div class="internal-top">
               <span>Comandos</span>
@@ -412,9 +414,9 @@
                 <i class="fa-solid fa-circle-dollar-to-slot fa-2xl"></i>
                   <p>Sorteio</p>
               </button>
-              <button class="btn redeem-block-bt" type="button" onclick="show_commands_div('tts-commands-div')">
+              <button class="btn redeem-block-bt" type="button" onclick="show_commands_div('default-commands-div')">
                 <i class="fa-solid fa-terminal fa-2xl"></i>
-                  <p>Texto Falado</p>
+                  <p>Comandos padrão</p>
               </button>
               <button class="btn redeem-block-bt" type="button" onclick="commands_fun('command-list')">
                 <i class="fa-solid fa-terminal fa-2xl"></i>
@@ -481,7 +483,42 @@
                       </option>
                     </select>
                   </div>
-                  <div class="form-group mt-3 mb-3 ">
+                  <div class="form-group mt-5">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Ativar custo para utilizar comando
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="command-cost-status-create" type="checkbox" onchange="command_cost('create')"/>
+                          <label for="command-cost-status-create" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="command-costdiv-create" hidden>
+                    <div class="form-group mb-3 mt-4">
+                      <label for="command-cost-type">Tipo de custo</label>
+                      <select class="form-control bg-dark mt-3" id="command-cost-type">
+                        <option value="gifts">
+                          Presentes
+                        </option>
+                        <option value="likes">
+                          Curtidas
+                        </option>
+                        <option value="shares">
+                          Compartilhamentos
+                        </option>
+                      </select>
+                    </div>
+                    <div class="form-group mt-2">
+                      <label for="command-cost-create">Custo do comando</label>
+                      <input type="number" class="form-control bg-dark mt-3" id="command-cost-create"/>
+                    </div>
+                  </div>
+                  <div class="form-group mt-5 mb-2">
                     <div class="row mt-3">
                       <div class="col">
                         <p class="form-check-label">
@@ -540,6 +577,21 @@
                       </button>
                     </div>
                   </div>
+                  <div class="form-group mt-3 mb-3">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Status do comando
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="command-simple-status" type="checkbox" />
+                          <label for="command-simple-status" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   <div class="form-group mt-3">
                     <label for="edit-command">Comando</label>
                     <input type="text" class="form-control bg-dark mt-3" id="edit-command" placeholder="Digite o comando" required pattern="[^\s]+" />
@@ -575,22 +627,42 @@
                       </option>
                     </select>
                   </div>
-                  <div class="form-group mt-3 mb-3 ">
+                  <div class="form-group mt-5">
                     <div class="row mt-3">
                       <div class="col">
                         <p class="form-check-label">
-                          Status do comando
+                          Ativar custo para utilizar comando
                         </p>
                       </div>
                       <div class="col-2">
                         <div class="material-switch bg-white d-flex justify-content-end">
-                          <input id="command-simple-status" type="checkbox" />
-                          <label for="command-simple-status" class="form-check-label"></label>
+                          <input id="command-cost-status-edit" type="checkbox" onchange="command_cost('edit')"/>
+                          <label for="command-cost-status-edit" class="form-check-label"></label>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div class="form-group mt-3 mb-3 ">
+                  <div id="command-costdiv-edit" hidden>
+                    <div class="form-group mb-3 mt-4">
+                      <label for="command-cost-type">Tipo de custo</label>
+                      <select class="form-control bg-dark mt-3" id="command-cost-type-edit">
+                        <option value="gifts">
+                          Presentes
+                        </option>
+                        <option value="likes">
+                          Curtidas
+                        </option>
+                        <option value="shares">
+                          Compartilhamentos
+                        </option>
+                      </select>
+                    </div>
+                    <div class="form-group mt-2">
+                      <label for="command-cost-edit">Custo do comando</label>
+                      <input type="number" class="form-control bg-dark mt-3" id="command-cost-edit"/>
+                    </div>
+                  </div>
+                  <div class="form-group mt-5 mb-2">
                     <div class="row mt-3">
                       <div class="col">
                         <p class="form-check-label">
@@ -749,7 +821,42 @@
                       </option>
                     </select>
                   </div>
-                  <button class="btn bt-submit mt-3" type="button" onclick="sr_config_js('event','save_command')">
+                  <div class="form-group mt-5">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Ativar custo para utilizar comando
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="command-cost-status-player" type="checkbox" onchange="command_cost('player')"/>
+                          <label for="command-cost-status-player" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="command-costdiv-player" hidden>
+                    <div class="form-group mb-3 mt-4">
+                      <label for="command-cost-type">Tipo de custo</label>
+                      <select class="form-control bg-dark mt-3" id="command-cost-type-player">
+                        <option value="gifts">
+                          Presentes
+                        </option>
+                        <option value="likes">
+                          Curtidas
+                        </option>
+                        <option value="shares">
+                          Compartilhamentos
+                        </option>
+                      </select>
+                    </div>
+                    <div class="form-group mt-2">
+                      <label for="command-cost-player">Custo do comando</label>
+                      <input type="number" class="form-control bg-dark mt-3" id="command-cost-player"/>
+                    </div>
+                  </div>
+                  <button class="btn bt-submit mt-5" type="button" onclick="sr_config_js('event','save_command')">
                     Salvar
                   </button>
                 </div>
@@ -851,107 +958,42 @@
                       </option>
                     </select>
                   </div>
-                  <button class="btn bt-submit mt-3" type="button" onclick="queue_js('save_commands')">
-                    Salvar
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div id="counter-commands-div" hidden>
-            <div class="internal-top">
-              <span>Comandos do Contador</span>
-              <button type="button" class="btn" onclick="hide_commands_div('counter-commands-div')"
-                data-toggle="tooltip" data-bs-placement="left" title="Voltar">
-                <i class="fa-sharp fa-solid fa-chevron-left fa-xl"></i>
-              </button>
-            </div>
-            <div class="h-scroll flex-wrap flex-wrap justify-content-center">
-              <div class="background">
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-             </div>
-              <div class="internal-block">
-                <div class="bg-dark form-block">
-                  <label for="command-counter-select">Selecione o comando para configurar.</label>
-                  <div class="input-group none-flex mt-3">
-                    <select class="form-control bg-dark" id="command-counter-select">
-                      <option value="check_counter">
-                        Verificar a contagem
-                      </option>
-                      <option value="reset_counter">
-                        Reiniciar o contador
-                      </option>
-                      <option value="set_counter">
-                        Aplicar um valor ao contador
-                      </option>
-                    </select>
-                    <button class="btn bt-submit" type="button" onclick="counter_js('get_counter_commands','event')">
-                      Editar
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div class="internal-block">
-                <div class="bg-dark form-block mt-0" id="command_counter_form" hidden>
-                  <div class="form-group mt-3">
-                    <label for="command-counter-command">Comando</label>
-                    <input type="text" class="form-control bg-dark mt-3" id="command-counter-command" />
-                  </div>
-                  <div class="form-group mt-4">
+                  <div class="form-group mt-5">
                     <div class="row mt-3">
                       <div class="col">
-                        <p class="form-check-label">Status do comando</p>
+                        <p class="form-check-label">
+                          Ativar custo para utilizar comando
+                        </p>
                       </div>
                       <div class="col-2">
                         <div class="material-switch bg-white d-flex justify-content-end">
-                          <input id="command-counter-status" type="checkbox" />
-                          <label for="command-counter-status" class="form-check-label"></label>
+                          <input id="command-cost-status-queue" type="checkbox" onchange="command_cost('queue')"/>
+                          <label for="command-cost-status-queue" class="form-check-label"></label>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div class="form-group mt-2">
-                    <label for="command-player-delay">Tempo de recarga</label>
-                    <input type="number" min="5" value="5" class="form-control bg-dark mt-3" id="command-counter-delay" />
+                  <div id="command-costdiv-queue" hidden>
+                    <div class="form-group mb-3 mt-4">
+                      <label for="command-cost-type">Tipo de custo</label>
+                      <select class="form-control bg-dark mt-3" id="command-cost-type-queue">
+                        <option value="gifts">
+                          Presentes
+                        </option>
+                        <option value="likes">
+                          Curtidas
+                        </option>
+                        <option value="shares">
+                          Compartilhamentos
+                        </option>
+                      </select>
+                    </div>
+                    <div class="form-group mt-2">
+                      <label for="command-cost-queue">Custo do comando</label>
+                      <input type="number" class="form-control bg-dark mt-3" id="command-cost-queue"/>
+                    </div>
                   </div>
-                  <div class="form-group mt-3">
-                    <label for="command-player-perm">Permissão</label>
-                    <select class="form-control bg-dark mt-3" id="command-counter-perm" multiple>
-                      <option value="spec">
-                        Todos
-                      </option>
-                      <option value="follow">
-                        Seguidor
-                      </option>
-                      <option value="gifts">
-                        Presenteador
-                      </option>
-                      <option value="Likes">
-                        Curtidor (Likes)
-                      </option>
-                      <option value="shares">
-                        Compartilhador
-                      </option>
-                      <option value="subscriber">
-                        Inscrito
-                      </option>
-                      <option value="moderator">
-                        Moderador
-                      </option>
-                    </select>
-                  </div>
-                  <button class="btn bt-submit mt-3" type="button"
-                    onclick="counter_js('save_counter_commands','event')">
+                  <button class="btn bt-submit mt-5" type="button" onclick="queue_js('save_commands')">
                     Salvar
                   </button>
                 </div>
@@ -1056,17 +1098,52 @@
                       </option>
                     </select>
                   </div>
-                  <button class="btn bt-submit mt-3" type="button" onclick="giveaway_js('event','save_commands')">
+                  <div class="form-group mt-5">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Ativar custo para utilizar comando
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="command-cost-status-giveaway" type="checkbox" onchange="command_cost('giveaway')"/>
+                          <label for="command-cost-status-giveaway" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="command-costdiv-giveaway" hidden>
+                    <div class="form-group mb-3 mt-4">
+                      <label for="command-cost-type">Tipo de custo</label>
+                      <select class="form-control bg-dark mt-3" id="command-cost-type-giveaway">
+                        <option value="gifts">
+                          Presentes
+                        </option>
+                        <option value="likes">
+                          Curtidas
+                        </option>
+                        <option value="shares">
+                          Compartilhamentos
+                        </option>
+                      </select>
+                    </div>
+                    <div class="form-group mt-2">
+                      <label for="command-cost-giveaway">Custo do comando</label>
+                      <input type="number" class="form-control bg-dark mt-3" id="command-cost-giveaway"/>
+                    </div>
+                  </div>
+                  <button class="btn bt-submit mt-5" type="button" onclick="giveaway_js('event','save_commands')">
                     Salvar
                   </button>
                 </div>
               </div>
             </div>
           </div>
-          <div id="tts-commands-div" hidden>
+          <div id="default-commands-div" hidden>
             <div class="internal-top">
-              <span>Comandos de Sorteio</span>
-              <button type="button" class="btn" onclick="hide_commands_div('tts-commands-div')"
+              <span>Comandos Padrão</span>
+              <button type="button" class="btn" onclick="hide_commands_div('default-commands-div')"
                 data-toggle="tooltip" data-bs-placement="left" title="Voltar">
                 <i class="fa-sharp fa-solid fa-chevron-left fa-xl"></i>
               </button>
@@ -1087,6 +1164,7 @@
              </div>
               <div class="internal-block">
                 <div class="bg-dark form-block">
+                  <h5>Comando para texto-falado (TTS)</h5>
                   <div class="form-group mt-3">
                     <label for="tts-command">Comando</label>
                     <input type="text" class="form-control bg-dark mt-3" id="tts-command" placeholder="Digite o comando" required pattern="[^\s]+" />
@@ -1126,6 +1204,22 @@
                     <div class="row mt-3">
                       <div class="col">
                         <p class="form-check-label">
+                          Ativar prefixo "Usuário falou" antes do texto
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="command-tts-prefix" type="checkbox" />
+                          <label for="command-tts-prefix" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="small">O prefixo pode ser alterado nas configurações de Textos para Eventos/Erros</p>
+                  <div class="form-group mt-3">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
                           Status do comando
                         </p>
                       </div>
@@ -1137,7 +1231,133 @@
                       </div>
                     </div>
                   </div>
-                  <button type="button" class="btn bt-submit mt-4" onclick="tts_command('save')">
+                  <div class="form-group mt-5">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Ativar custo para utilizar comando
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="command-cost-status-tts" type="checkbox" onchange="command_cost('tts')"/>
+                          <label for="command-cost-status-tts" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="command-costdiv-tts" hidden>
+                    <div class="form-group mb-3 mt-4">
+                      <label for="command-cost-type-tts">Tipo de custo</label>
+                      <select class="form-control bg-dark mt-3" id="command-cost-type-tts">
+                        <option value="gifts">
+                          Presentes
+                        </option>
+                        <option value="likes">
+                          Curtidas
+                        </option>
+                        <option value="shares">
+                          Compartilhamentos
+                        </option>
+                      </select>
+                    </div>
+                    <div class="form-group mt-2">
+                      <label for="command-cost-tts">Custo do comando</label>
+                      <input type="number" class="form-control bg-dark mt-3" id="command-cost-tts"/>
+                    </div>
+                  </div>
+                  <button type="button" class="btn bt-submit mt-5" onclick="tts_command('save')">
+                    Salvar
+                  </button>
+                </div>
+                <div class="bg-dark form-block">
+                  <h5>Comando para saldo (Likes, Moedas, Compartilhamentos)</h5>
+                  <div class="form-group mt-3">
+                    <label for="balance-command">Comando</label>
+                    <input type="text" class="form-control bg-dark mt-3" id="balance-command" placeholder="Digite o comando" required pattern="[^\s]+" />
+                    <p class="text-muted text-sm-start m-0">Utilize qualquer prefixo (!,@,#,$), O comando não deve conter espaços</p>
+                  </div>
+                  <div class="form-group mt-2">
+                    <label for="balance-delay">Tempo de recarga</label>
+                    <input type="number" class="form-control bg-dark mt-3" min="5" value="5" id="balance-delay" required />
+                  </div>
+                  <div class="form-group mt-4">
+                    <label for="user-level-balance">Permissão</label>
+                    <select class="form-control bg-dark mt-3" id="user-level-balance" multiple>
+                      <option value="spec">
+                        Todos
+                      </option>
+                      <option value="follow">
+                        Seguidor
+                      </option>
+                      <option value="gifts">
+                        Presenteador
+                      </option>
+                      <option value="Likes">
+                        Curtidor (Likes)
+                      </option>
+                      <option value="shares">
+                        Compartilhador
+                      </option>
+                      <option value="subscriber">
+                        Inscrito
+                      </option>
+                      <option value="moderator">
+                        Moderador
+                      </option>
+                    </select>
+                  </div>
+                  <div class="form-group mt-3">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Status do comando
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="command-balance-status" type="checkbox" />
+                          <label for="command-balance-status" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mt-5">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Ativar custo para utilizar comando
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="command-cost-status-balance" type="checkbox" onchange="command_cost('balance')"/>
+                          <label for="command-cost-status-balance" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="command-costdiv-balance" hidden>
+                    <div class="form-group mb-3 mt-4">
+                      <label for="command-cost-type-balance">Tipo de custo</label>
+                      <select class="form-control bg-dark mt-3" id="command-cost-type-balance">
+                        <option value="gifts">
+                          Presentes
+                        </option>
+                        <option value="likes">
+                          Curtidas
+                        </option>
+                        <option value="shares">
+                          Compartilhamentos
+                        </option>
+                      </select>
+                    </div>
+                    <div class="form-group mt-2">
+                      <label for="command-cost-balance">Custo do comando</label>
+                      <input type="number" class="form-control bg-dark mt-3" id="command-cost-balance"/>
+                    </div>
+                  </div>
+                  <button type="button" class="btn bt-submit mt-5" onclick="balance_command('save')">
                     Salvar
                   </button>
                 </div>
@@ -1340,22 +1560,22 @@
                     </button>
                   </div>
                 </div>
-                <div class="form-group mt-4 mb-3 ">
-                  <div class="row mt-3">
-                    <div class="col">
-                      <p class="form-check-label">
-                        Status da meta
-                      </p>
-                    </div>
-                    <div class="col-2">
-                      <div class="material-switch bg-white d-flex justify-content-end">
-                        <input id="goal-status" type="checkbox" />
-                        <label for="goal-status" class="form-check-label"></label>
+                <div id="edit-goal-div" hidden>
+                  <div class="form-group mt-4 mb-3 ">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Status da meta
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="goal-status" type="checkbox" />
+                          <label for="goal-status" class="form-check-label"></label>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div id="edit-goal-div" hidden>
                   <div class="form-group mt-3">
                     <label for="goal">Meta</label>
                     <input type="number" class="form-control bg-dark mt-3" id="goal"/>
@@ -1366,7 +1586,7 @@
                     </select>
                   </div>
                   <div class="form-group mt-3">
-                    <label for="goal-event mb-2">Ao completar a meta</label>
+                    <label for="goal-event">Ao completar a meta</label>
                     <select class="bg-dark mt-2" id="goal-event" onchange="ttk_goal('select_event')">
                       <option value="double">
                         Dobrar
@@ -1374,14 +1594,17 @@
                       <option value="add">
                         Adicionar Valor
                       </option>
+                      <option value="Multiply">
+                        Multiplicar
+                      </option>
                       <option value="none">
                         Não fazer nada
                       </option>
                     </select>
                   </div>
                   <div class="form-group mt-3" id="goal-add-div">
-                    <label for="goal-add-value">Valor para adicionar</label>
-                    <input type="number" class="form-control bg-dark mt-3" id="goal-add-value"/>
+                    <label for="goal-add-value">Valor para adicionar/Multiplicar</label>
+                    <input type="number" class="form-control bg-dark mt-3" id="goal-add-value" value="0" min="0"/>
                   </div>
                   <div class="form-group mt-4 mb-3 ">
                     <div class="row mt-3">
@@ -1604,7 +1827,7 @@
                       <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar" id="file-select-ttk-share" onclick="getFolder('file-select-ttk-share','sound')" required />
                     </div>
                     <div class="form-group mt-3">
-                      <label for="ttk-share-delay">Tempo de delay em segundos para notificações de likes (Bom para evitar flood ao chat de notificações)</label>
+                      <label for="ttk-share-delay">Tempo de delay em segundos para notificações de compartilhamentos (Bom para evitar flood ao chat de notificações)</label>
                       <input type="number" class="form-control bg-dark mt-3" id="ttk-share-delay"/>
                     </div>
                     <div class="form-group mt-3">
@@ -2110,6 +2333,9 @@
                         <option value="error_tts_no_text">
                           Erro: Texto ausente para conversão de fala
                         </option>
+                        <option value="tts_prefix">
+                          Commando: Prefixo de Texto-Falado
+                        </option>
                         <option value="error_user_level">
                           Erro: Permissões insuficientes para usar o comando
                         </option>
@@ -2461,8 +2687,7 @@
                 <div class="form-group bg-dark form-block">
                   <div class="form-group">
                     <label for="slider-font">Tamanho da letra no chat</label>
-                    <input class="mt-4" type="range" min="0" max="100" value="18" id="slider-font" step="1"
-                      oninput="slider_font()" />
+                    <input class="mt-4" type="range" min="0" max="100" value="18" id="slider-font" step="1" oninput="rangevalue_config.innerText = this.value"/>
                     <output id="rangevalue_config">18px</output>
                   </div>
                   <div class="row">
@@ -2675,8 +2900,7 @@
                 <div class="bg-dark form-block">
                   <div class="form-group">
                     <label for="slider-font-events">Tamanho da fonte no registro de eventos</label>
-                    <input class="mt-4" type="range" min="0" max="100" value="18" id="slider-font-events" step="1"
-                      oninput="slider_font_events()" />
+                    <input class="mt-4" type="range" min="0" max="100" value="18" id="slider-font-events" step="1" oninput="rangevalue_config_events.innerText = this.value" />
                     <output id="rangevalue_config_events">18px</output>
                   </div>
                   <div class="form-group mt-2">
@@ -2837,7 +3061,7 @@
             <div class="d-flex card bg-dark form-block align-self-center">
               <img src="./src/profile.png" class="rounded mx-auto d-block" width="150px" />
               <div class="card-body text-center">
-                <h4 class="card-title m-3">VibesBot V1.0.7</h4>
+                <h4 class="card-title m-3">VibesBot V1.1.0</h4>
               </div>
               <div class="card-footer">
                 <div class="form-group mt-3 mb-3 ">
@@ -2880,6 +3104,7 @@
             </div>
           </div>
         </div>
+
       </div>
       <div class="toast m-5 bg-dark p-0 d-none" id="notific" role="alert">
         <div class="toast-header d-flex justify-content-between">

@@ -6,8 +6,9 @@ function show_commands_div(div_id) {
         commands_fun('get_list');
     } else if (div_id == "edit-commands-div") {
         commands_fun('get_list');
-    } else if (div_id ==  'tts-commands-div'){
+    } else if (div_id ==  'default-commands-div'){
         tts_command('get')
+        balance_command('get')
     }
 
     document.getElementById("commands-div").hidden = true;
@@ -26,8 +27,12 @@ async function commands_fun(type_id){
 
     if (type_id == 'create'){
 
-        seletor = document.getElementById('command-audio-status');
-        div = document.getElementById('command-audio-div');
+        var seletor = document.getElementById('command-audio-status');
+        var div = document.getElementById('command-audio-div');
+        var cost = document.getElementById('command-cost-create'); 
+        var cost_type = document.getElementById("command-cost-type");
+        var cost_status = document.getElementById("command-cost-status-create");
+        var cost_status = cost_status.checked ? 1 : 0;
 
         var type = seletor.checked ? 'sound' : '';
 
@@ -44,6 +49,9 @@ async function commands_fun(type_id){
             delay: document.getElementById('new-delay').value,
             user_level: roles,
             sound: document.getElementById('sound-command').value,
+            cost: cost.value,
+            cost_type: cost_type.value,
+            cost_status: cost_status
         };
     
         var formData = JSON.stringify(data);
@@ -63,10 +71,15 @@ async function commands_fun(type_id){
         var sound = document.getElementById('sound-command-edit').value;
         var seletor_edit = document.getElementById('command-audio-status-edit');
         var div_edit = document.getElementById('command-audio-div-edit');
+        var cost = document.getElementById('command-cost-edit'); 
+        var cost_type = document.getElementById("command-cost-type-edit");
+        var cost_status = document.getElementById("command-cost-status-edit");
+        
 
         var type = seletor_edit.checked ? 'sound' : '';
 
         var status_command = status_command.checked ? 1 : 0;
+        var cost_status = cost_status.checked ? 1 : 0;
 
         var roles = []; 
 
@@ -83,6 +96,10 @@ async function commands_fun(type_id){
             delay: document.getElementById('edit-delay').value,
             sound: sound,
             user_level: roles,
+            cost: cost.value,
+            cost_type: cost_type.value,
+            cost_status: cost_status
+            
         };
 
         var formData = JSON.stringify(data);
@@ -150,13 +167,16 @@ async function commands_fun(type_id){
             $("#command-select-edit").selectpicker("refresh");
     
             for (var i = 0; i < list_command_parse.length; i++) {
+
                 var optn = list_command_parse[i];
     
                 $("#command-select-del").append('<option style="background: #000; color: #fff;" value="'+ optn +'">'+ optn +'</option>');
-                $("#command-select-del").selectpicker("refresh");
                 $("#command-select-edit").append('<option style="background: #000; color: #fff;" value="'+ optn +'">'+ optn +'</option>');
-                $("#command-select-edit").selectpicker("refresh");
+
             }
+
+            $("#command-select-del").selectpicker("refresh");
+            $("#command-select-edit").selectpicker("refresh");
         }
 
     } else if (type_id == 'get_info'){
@@ -164,6 +184,10 @@ async function commands_fun(type_id){
         var command = document.getElementById("command-select-edit").value;
         var seletor_edit = document.getElementById('command-audio-status-edit');
         var div_edit = document.getElementById('command-audio-div-edit');
+        var cost = document.getElementById('command-cost-edit'); 
+        var cost_type = document.getElementById("command-cost-type-edit");
+        var cost_status = document.getElementById("command-cost-status-edit");
+        var status = document.getElementById("command-simple-status")
 
         data = {
             type_id : type_id,
@@ -184,27 +208,26 @@ async function commands_fun(type_id){
             var sound_edit = command_info_parse.sound;
             var edit_level = command_info_parse.edit_level;
 
-            if (status_command == 1){
-                document.getElementById("command-simple-status").checked = true;
-            } else if (status_command == 0){
-                document.getElementById("command-simple-status").checked = false;
-            }
+            status.checked = status_command == 1 ? true : false;
+            cost_status.checked = command_info_parse.cost_status == 1 ? true : false;
 
-            if (sound_edit != ""){
-                seletor_edit.checked = true
-                div_edit.hidden = false
-            } else {
-                seletor_edit.checked = false
-                div_edit.hidden = true
-            }
+            command_cost_get('edit',command_info_parse.cost_status)
+
+            seletor_edit.checked = sound_edit != "" ? true : false
+            div_edit.hidden = sound_edit != "" ? true : false
 
 
             document.getElementById('sound-command-edit').value = sound_edit;
             document.getElementById("edit-command").value = command_edit;
             document.getElementById("edit-delay").value = delay_edit;
+            cost.value = command_info_parse.cost;
+            
 
             $("#user-level-command-edit").selectpicker('val', edit_level);
             $("#user-level-command-edit").selectpicker("refresh");
+
+            $("#command-cost-type-edit").selectpicker('val', command_info_parse.cost_type);
+            $("#command-cost-type-edit").selectpicker("refresh");
 
 
         }
@@ -235,17 +258,17 @@ async function commands_fun(type_id){
                     const lastUse = item.last_use != "" ? new Date(item.last_use * 1000).toLocaleString() : "Nunca";
                     const status = item.status != "" ? (item.status === 1 ? "Ativado" : "Desativado") : "Desativado";
                     const delay = item.delay != "" ? item.delay : "Null";
-                    
+                    const command = item.hasOwnProperty("command") ? item.command : key
                     const userLevel = item.user_level;
 
                     let userLevelstring = '';
 
                     if (Array.isArray(userLevel)) {
+
                         userLevel.forEach((level, index) => {
-                            // Adicione o elemento atual à string
+
                             userLevelstring += level;
                             
-                            // Adicione uma vírgula se não for o último elemento
                             if (index < userLevel.length - 1) {
                                 userLevelstring += ', ';
                             }
@@ -254,8 +277,9 @@ async function commands_fun(type_id){
                         userLevelstring = item.user_level;;
                     }
 
+
                     dataTableData.push([
-                        key,
+                        command,
                         type,
                         lastUse,
                         status,
@@ -320,22 +344,14 @@ function command_audio_status(type_id){
         var seletor_create = document.getElementById('command-audio-status');
         var div_create = document.getElementById('command-audio-div');
 
-        if (seletor_create.checked){
-            div_create.hidden = false;
-        } else {
-            div_create.hidden = true;
-        }
+        div_create.hidden = seletor_create.checked ? false : true
 
     } else if(type_id == 'edit'){
 
         var seletor_edit = document.getElementById('command-audio-status-edit');
         var div_edit = document.getElementById('command-audio-div-edit');
 
-        if (seletor_edit.checked){
-            div_edit.hidden = false;
-        } else {
-            div_edit.hidden = true;
-        }
+        div_edit.hidden = seletor_edit.checked ? false : true
     }
 
 }

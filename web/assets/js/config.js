@@ -136,13 +136,6 @@ function hide_config_div(div_id, modal) {
     document.getElementById(div_id).hidden = true;
 }
 
-function slider_font_events() {
-    slider = document.getElementById('slider-font-events');
-    output = document.getElementById('rangevalue_config_events');
-    $('.chat-message ').css("font-size", slider.value + "px");
-    output.innerHTML = slider.value
-};
-
 async function black_list_remove(music){
 
     var music_data = await window.pywebview.api.sr_config_py('list_rem',music);
@@ -171,8 +164,7 @@ async function black_list_remove(music){
 
             $('#list_musics_block').DataTable().clear().draw();
             $('#list_musics_block').DataTable().destroy();
-        }
-        
+        }  
 
         var table = $('#list_musics_block').DataTable( {
             destroy: true,
@@ -237,6 +229,9 @@ async function sr_config_js(event,type_id){
         var command_player_command = document.getElementById('command-player-command');
         var command_player_status = document.getElementById('command-player-status');
         var command_player_delay = document.getElementById('command-player-delay');
+        var command_player_cost_status = document.getElementById('command-cost-status-player'); 
+        var command_player_cost = document.getElementById('command-cost-player'); 
+        var command_player_cost_type = document.getElementById("command-cost-type-player");
 
         var command_data_parse = await window.pywebview.api.sr_config_py(type_id,select_command_player.value)
 
@@ -246,12 +241,19 @@ async function sr_config_js(event,type_id){
 
             form_player.hidden = false
 
+            command_cost_get('player',command_data_parse.cost_status)
+
             command_player_command.value = command_data_parse.command
             command_player_status.checked = command_data_parse.status == 1 ? true : false
             command_player_delay.value = command_data_parse.delay
+            command_player_cost_status.checked = command_data_parse.cost_status == 1 ? true : false;
+            command_player_cost.value = command_data_parse.cost;
 
             $("#command-player-perm").selectpicker('val', command_data_parse.user_level);
             $("#command-player-perm").selectpicker("refresh");
+
+            $("#command-cost-type-player").selectpicker('val', command_data_parse.cost_type);
+            $("#command-cost-type-player").selectpicker("refresh");
 
         }
 
@@ -264,19 +266,26 @@ async function sr_config_js(event,type_id){
         var command_player_command = document.getElementById('command-player-command');
         var command_player_status = document.getElementById('command-player-status');
         var command_player_delay = document.getElementById('command-player-delay');
+        var command_player_cost_status = document.getElementById('command-cost-status-player'); 
+        var command_player_cost = document.getElementById('command-cost-player'); 
+        var command_player_cost_type = document.getElementById("command-cost-type-player");
 
         var roles = []; 
 
         $('#command-player-perm :selected').each(function(i, selected){ 
             roles[i] = $(selected).val(); 
         });
-
+        var command_player_cost_status = command_player_cost_status.checked ? 1 : 0
+        var command_player_status = command_player_status.checked ? 1 : 0
         data = {
             type_command : select_command_player.value,
             command: command_player_command.value,
             delay: command_player_delay.value,
             user_level: roles,
-            status: command_player_status = command_player_status.checked ? 1 : 0
+            status:command_player_status,
+            cost: command_player_cost.value,
+            cost_type: command_player_cost_type.value,
+            cost_status: command_player_cost_status
         }
 
         var formData = JSON.stringify(data);
@@ -415,7 +424,6 @@ async function get_event_state(element){
 
         data_parse = JSON.parse(event_data)
         
-        console.log(data_parse)
         setElementState('show-event',data_parse["show-event"])
         setElementState('show-event-chat',data_parse["show-event-chat"])
         setElementState('show-event-html',data_parse["show-event-html"])
@@ -424,8 +432,6 @@ async function get_event_state(element){
 }   
 
 async function event_log_config(type_id){
-
-    var font_size_range = document.getElementById('rangevalue_config_events');
 
     var sliderFontEvents = document.getElementById("slider-font-events");
     var colorEvents = document.getElementById("color-events");
@@ -587,46 +593,47 @@ async function ttk_alerts(type){
             sound: status_sound,
             sound_loc : follow_input_sound.value,
             sound_volume : follow_volume_sound.value,
-            delay : like_delay.value 
         }
 
         var data = JSON.stringify(data);
 
-        window.pywebview.api.tiktok_config(data)
+        window.pywebview.api.tiktok_alerts(data)
         
     } else if (type == "save_sound_like"){
         
-        var status_sound = status_sound_like.checked ? 1 : 0;
+        var status_sound = like_status_sound.checked ? 1 : 0;
 
         data = {
             type_id : "save_sound_like",
             sound: status_sound,
             sound_loc : like_input_sound.value,
-            sound_volume : like_volume_sound.value 
+            sound_volume : like_volume_sound.value,
+            delay : like_delay.value 
         }
 
         var data = JSON.stringify(data);
 
-        window.pywebview.api.tiktok_config(data)
+        window.pywebview.api.tiktok_alerts(data)
         
     } else if (type == "save_sound_share"){
         
-        var status_sound = status_sound_share.checked ? 1 : 0;
+        var status_sound = share_status_sound.checked ? 1 : 0;
 
         data = {
             type_id : "save_sound_share",
             sound: status_sound,
             sound_loc : share_input_sound.value,
-            sound_volume : share_volume_sound.value 
+            sound_volume : share_volume_sound.value,
+            delay : share_delay.value 
         }
 
         var data = JSON.stringify(data);
 
-        window.pywebview.api.tiktok_config(data)
+        window.pywebview.api.tiktok_alerts(data)
     }
 }
 
-function ttk_modal(button){
+async function ttk_modal(button){
 
     var id = button.getAttribute('data-id');
     var gift_id_inp = document.getElementById('ttk-gift-id');
@@ -831,7 +838,7 @@ async function ttk_goal(type_id){
             document.getElementById('file-select-ttk-goal-sound').value = goal_data.sound_file;
             document.getElementById('audio-volume-ttk-goal-sound').value = goal_data.sound_volume;
 
-            if (goal_data.goal_add != ""){
+            if (goal_data.goal_add != "double"){
 
                 goal_add_div.hidden = false
                 document.getElementById('goal-add-value').value = goal_data.goal_add
@@ -1009,7 +1016,7 @@ async function ttk_goal(type_id){
         
         var goal_event = document.getElementById('goal-event');
 
-        if (goal_event.value == 'add'){
+        if (goal_event.value != 'double'){
             goal_add_div.hidden = false
         } else {
             goal_add_div.hidden = true
@@ -1074,7 +1081,11 @@ async function tts_command(type_id){
     var command = document.getElementById('tts-command');
     var delay = document.getElementById('tts-delay');
     var status = document.getElementById('command-tts-status');
-
+    var prefix = document.getElementById('command-tts-prefix');
+    var cost_status = document.getElementById('command-cost-status-tts'); 
+    var cost = document.getElementById('command-cost-tts'); 
+    var cost_type = document.getElementById("command-cost-type-tts");
+ 
     if (type_id == 'get'){
 
         data = {
@@ -1089,18 +1100,30 @@ async function tts_command(type_id){
 
             rec_parse = JSON.parse(rec)
 
+            command_cost_get('tts',rec_parse.cost_status)
+
             command.value = rec_parse.command;
             delay.value = rec_parse.delay;
             status.checked = rec_parse.status == 1 ? true : false;
+            prefix.checked = rec_parse.prefix == 1 ? true : false;
+
+            cost_status.checked = rec_parse.cost_status == 1 ? true : false;
+
+            cost.value = rec_parse.cost;
 
             $("#user-level-tts").selectpicker('val', rec_parse.user_level);
             $("#user-level-tts").selectpicker("refresh");
+
+            $("#command-cost-type-tts").selectpicker('val', rec_parse.cost_type);
+            $("#command-cost-type-tts").selectpicker("refresh");
     
         }
 
     } else if (type_id == "save"){
         
         var status = status.checked ? 1 : 0;
+        var cost_status = cost_status.checked ? 1 : 0;
+        var prefix = prefix.checked ? 1 : 0;
         
         var roles = []; 
 
@@ -1111,9 +1134,13 @@ async function tts_command(type_id){
         data = {
             type_id : 'save',
             status : status,
+            prefix : prefix,
             command : command.value,
             delay: delay.value,
-            roles: roles
+            user_level: roles,
+            cost: cost.value,
+            cost_type: cost_type.value,
+            cost_status: cost_status
         }
 
         var data = JSON.stringify(data);
@@ -1123,8 +1150,99 @@ async function tts_command(type_id){
     }
 }
 
+async function balance_command(type_id){
+
+    var command = document.getElementById('balance-command');
+    var delay = document.getElementById('balance-delay');
+    var status = document.getElementById('command-balance-status');
+    var cost_status = document.getElementById('command-cost-status-balance'); 
+    var cost = document.getElementById('command-cost-balance'); 
+    var cost_type = document.getElementById("command-cost-type-balance");
+ 
+    if (type_id == 'get'){
+
+        data = {
+            type_id : 'get',
+        }
+
+        var data = JSON.stringify(data);
+
+        var rec = await window.pywebview.api.tts_command(data);
+    
+        if (rec) {
+
+            rec_parse = JSON.parse(rec)
+
+            command_cost_get('balance',rec_parse.cost_status)
+
+            command.value = rec_parse.command;
+            delay.value = rec_parse.delay;
+            status.checked = rec_parse.status == 1 ? true : false;
+            cost_status.checked = rec_parse.cost_status == 1 ? true : false;
+            cost.value = rec_parse.cost;
+            
+
+            $("#user-level-balance").selectpicker('val', rec_parse.user_level);
+            $("#user-level-balance").selectpicker("refresh");
+
+            $("#command-cost-type-balance").selectpicker('val', rec_parse.cost_type);
+            $("#command-cost-type-balance").selectpicker("refresh");
+    
+        }
+
+    } else if (type_id == "save"){
+        
+        var status = status.checked ? 1 : 0;
+        var cost_status = cost_status.checked ? 1 : 0;
+        var roles = []; 
+
+        $('#user-level-balance :selected').each(function(i, selected){ 
+            roles[i] = $(selected).val(); 
+        });
+
+        data = {
+            type_id : 'save',
+            status : status,
+            command : command.value,
+            delay: delay.value,
+            user_level: roles,
+            cost: cost.value,
+            cost_type: cost_type.value,
+            cost_status: cost_status
+        }
+
+        var data = JSON.stringify(data);
+
+        window.pywebview.api.balance_command(data)
+
+    }
+}
+
 function show_userdata_modal(){
     $("#userdata-modal").modal("show");
     userdata_js('get')
 }
 
+function command_cost(type){
+    
+    var checkbox = document.getElementById(`command-cost-status-${type}`);
+
+    if (checkbox.checked){
+        document.getElementById(`command-costdiv-${type}`).hidden = false
+    } else {
+        document.getElementById(`command-costdiv-${type}`).hidden = true
+    }
+
+}
+
+function command_cost_get(type,value){
+    
+    var checkbox = document.getElementById(`command-cost-status-${type}`);
+
+    if (checkbox.checked){
+        document.getElementById(`command-costdiv-${type}`).hidden = false
+    } else {
+        document.getElementById(`command-costdiv-${type}`).hidden = true
+    }
+
+}

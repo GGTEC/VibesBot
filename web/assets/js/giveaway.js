@@ -49,6 +49,9 @@ async function giveaway_js(event,type_id) {
         var command_giveaway_status = document.getElementById('command-giveaway-status');
         var command_giveaway_command = document.getElementById('command-giveaway-command');
         var command_giveaway_delay = document.getElementById('command-giveaway-delay');
+        var command_giveaway_cost_status = document.getElementById('command-cost-status-giveaway'); 
+        var command_giveaway_cost = document.getElementById('command-cost-giveaway'); 
+        var command_giveaway_cost_type = document.getElementById("command-cost-type-giveaway");
 
         var giveaway_command_edit = document.getElementById('command_giveaway_form');
 
@@ -61,10 +64,16 @@ async function giveaway_js(event,type_id) {
             giveaway_command_edit.hidden = false
 
             command_giveaway_status.checked = giveaway_parse.status == 1 ? true : false;
+            command_giveaway_cost_status.checked = giveaway_parse.cost_status == 1 ? true : false;
             command_giveaway_command.value = giveaway_parse.command
             command_giveaway_delay.value = giveaway_parse.delay
+            command_giveaway_cost.value = giveaway_parse.cost
 
             $("#command-giveaway-perm").selectpicker('val',giveaway_parse.user_level)
+            $("#command-giveaway-perm").selectpicker("refresh");
+
+            $("#command-cost-type-tts").selectpicker('val', giveaway_parse.cost_type);
+            $("#command-cost-type-tts").selectpicker("refresh");
 
         }
 
@@ -138,8 +147,12 @@ async function giveaway_js(event,type_id) {
         var command_giveaway_status = document.getElementById('command-giveaway-status');
         var command_giveaway_command = document.getElementById('command-giveaway-command');
         var command_giveaway_delay = document.getElementById('command-giveaway-delay');
+        var command_giveaway_cost_status = document.getElementById('command-cost-status-giveaway'); 
+        var command_giveaway_cost = document.getElementById('command-cost-giveaway'); 
+        var command_giveaway_cost_type = document.getElementById("command-cost-type-giveaway");
 
         var command_status = command_giveaway_status.checked ? 1 : 0;
+        var cost_status = command_giveaway_cost_status.checked ? 1 : 0;
 
         var roles = []; 
 
@@ -152,7 +165,10 @@ async function giveaway_js(event,type_id) {
             command: command_giveaway_command.value,
             status: command_status,
             delay: command_giveaway_delay.value,
-            user_level: roles
+            user_level: roles,
+            cost: cost.value,
+            cost_type: command_giveaway_cost_type.value,
+            cost_status: cost_status
         }
 
         var formData = JSON.stringify(data);

@@ -1,6 +1,5 @@
 {
     "status": 1,
-    "prefix" : 1,
     "command" : "!voz",
     "user_level": [
           "spec",

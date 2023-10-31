@@ -46,12 +46,14 @@ loaded_status = False
 window_chat_open = False
 window_events_open = False
 
-lock_manager = LockManager('VibesBot')
-lock_manager.lock()
+lock_manager = LockManager()
+lock_manager.check()
+
 
 def play_sound(audio, volume):
 
     convert_vol = int(volume) / 100
+
     pygame.mixer.music.load(audio)
     pygame.mixer.music.set_volume(convert_vol)
     pygame.mixer.music.play()
@@ -528,6 +530,9 @@ def commands_py(data_receive):
             delay = data["delay"]
             user_level = data["user_level"]
             sound = data["sound"]
+            cost = data["cost"]
+            cost_status = data["cost_status"]
+            cost_type = data["cost_type"]
 
             command_data = utils.manipulate_json(command_json_path, "load")
 
@@ -539,6 +544,9 @@ def commands_py(data_receive):
                     "user_level": user_level,
                     "delay": delay,
                     "sound": sound,
+                    "cost_type" : cost_type,
+                    "cost" : cost,
+                    "cost_status" : cost_status,
                     "last_use": 0,
                 }
 
@@ -550,25 +558,33 @@ def commands_py(data_receive):
             toast("error")
 
     elif type_rec == "edit":
+
         try:
             command = data["command"]
             new_command = data["new_command"]
             status = data["status_command"]
-            new_delay = data["delay"]
+            delay = data["delay"]
             sound = data["sound"]
             user_level = data["user_level"]
+            cost = data["cost"]
+            cost_status = data["cost_status"]
+            cost_type = data["cost_type"]
             command_type = "sound"
 
             command_data = utils.manipulate_json(command_json_path, "load", None)
 
             if command_data is not None:
+
                 del command_data[command]
 
                 command_data[new_command] = {
                     "status": status,
                     "type": command_type,
                     "user_level": user_level,
-                    "delay": new_delay,
+                    "delay": delay,
+                    "cost_type" : cost_type,
+                    "cost" : cost, 
+                    "cost_status" : cost_status, 
                     "last_use": 0,
                     "sound": sound,
                 }
@@ -598,16 +614,21 @@ def commands_py(data_receive):
             toast("error")
 
     elif type_rec == "get_info":
+
         try:
             command = data["command"]
             command_data = utils.manipulate_json(command_json_path, "load", None)
 
             if command_data is not None:
+
                 user_level = command_data[command]["user_level"]
                 delay = command_data[command]["delay"]
                 status = command_data[command]["status"]
                 sound = command_data[command]["sound"]
                 type_cmd = command_data[command]["type"]
+                cost_type = command_data[command]["cost_type"]
+                cost = command_data[command]["cost"]
+                cost_status = command_data[command]["cost_status"]
 
                 data = {
                     "status": status,
@@ -615,16 +636,21 @@ def commands_py(data_receive):
                     "edit_command": command,
                     "edit_level": user_level,
                     "edit_delay": delay,
+                    "edit_cost_type" : cost_type,
+                    "edit_cost" : cost, 
+                    "edit_cost_Status" : cost_status, 
                     "sound": sound,
                 }
 
                 data_dump = json.dumps(data, ensure_ascii=False)
+
                 return data_dump
 
         except Exception as e:
             utils.error_log(e)
 
     elif type_rec == "get_list":
+
         try:
             command_data = utils.manipulate_json(command_json_path, "load", None)
 
@@ -635,33 +661,48 @@ def commands_py(data_receive):
             utils.error_log(e)
 
     elif type_rec == "command-list":
+
         try:
+
             commands = utils.manipulate_json(command_json_path, "load", None)
 
-            if commands is not None:
-                command_data_queue = utils.manipulate_json(
-                    f"{utils.local_work('appdata_path')}/queue/commands.json",
-                    "load",
-                    None,
-                )
-                command_data_giveaway = utils.manipulate_json(
-                    f"{utils.local_work('appdata_path')}/giveaway/commands.json",
-                    "load",
-                    None,
-                )
-                command_data_player = utils.manipulate_json(
-                    f"{utils.local_work('appdata_path')}/player/config/commands.json",
-                    "load",
-                    None,
-                )
+            command_data_queue = utils.manipulate_json(
+                f"{utils.local_work('appdata_path')}/queue/commands.json",
+                "load",
+                None,
+            )
+            command_data_giveaway = utils.manipulate_json(
+                f"{utils.local_work('appdata_path')}/giveaway/commands.json",
+                "load",
+                None,
+            )
+            command_data_player = utils.manipulate_json(
+                f"{utils.local_work('appdata_path')}/player/config/commands.json",
+                "load",
+                None,
+            )
 
-                data = {
-                    "commands": [commands],
-                    "commands_queue": [command_data_queue],
-                    "commands_giveaway": [command_data_giveaway],
-                    "commands_player": [command_data_player],
-                }
-                return json.dumps(data, ensure_ascii=False)
+            command_data_tts = utils.manipulate_json(
+                f"{utils.local_work('appdata_path')}/config/tts.json",
+                "load",
+                None,
+            )
+            command_data_balance = utils.manipulate_json(
+                f"{utils.local_work('appdata_path')}/config/balance.json",
+                "load",
+                None,
+            )
+
+            data = {
+                "commands": [commands],
+                "commands_queue": [command_data_queue],
+                "commands_giveaway": [command_data_giveaway],
+                "commands_player": [command_data_player],
+                "commands_tts": [command_data_tts],
+                "commands_balance": [command_data_balance],
+            }
+            return json.dumps(data, ensure_ascii=False)
+            
         except Exception as e:
             utils.error_log(e)
 
@@ -681,11 +722,16 @@ def tts_command(data_receive):
             data = {
                 "command": tts_command_data["command"],
                 "status": tts_command_data["status"],
+                "prefix": tts_command_data["prefix"],
                 "delay": tts_command_data["delay"],
-                "user_level" : tts_command_data["user_level"]
+                "user_level" : tts_command_data["user_level"],
+                "cost_type" : tts_command_data["cost_type"],
+                "cost" : tts_command_data["cost"],
+                "cost_status" : tts_command_data["cost_status"]
             }
 
             data_dump = json.dumps(data, ensure_ascii=False)
+
             return data_dump
 
     elif type_id == "save":
@@ -697,8 +743,12 @@ def tts_command(data_receive):
                 
                 tts_command_data["command"] = data["command"]
                 tts_command_data["status"] = data["status"]
+                tts_command_data["prefix"] = data["prefix"]
                 tts_command_data["delay"] = data["delay"]
                 tts_command_data["user_level"] = data["user_level"]
+                tts_command_data["cost_type"] = data["cost_type"]
+                tts_command_data["cost"] = data["cost"]
+                tts_command_data["cost_status"] = data["cost_status"]
 
                 utils.manipulate_json(tts_json_path, "save", tts_command_data)
 
@@ -706,6 +756,56 @@ def tts_command(data_receive):
         except Exception as e:
             toast('Ocorreu um erro ao salvar')
             utils.error_log(e)
+
+
+def balance_command(data_receive):
+    
+    data = json.loads(data_receive)
+    type_id = data["type_id"]
+    balance_json_path = (f"{utils.local_work('appdata_path')}/config/balance.json")
+
+    if type_id == "get":
+        
+        balance_command_data = utils.manipulate_json(balance_json_path, "load")
+        
+        if balance_command_data is not None:
+            
+            data = {
+                "command": balance_command_data["command"],
+                "status": balance_command_data["status"],
+                "delay": balance_command_data["delay"],
+                "user_level" : balance_command_data["user_level"],
+                "cost_type" : balance_command_data["cost_type"],
+                "cost" : balance_command_data["cost"],
+                "cost_status" : balance_command_data["cost_status"]
+            }
+
+            data_dump = json.dumps(data, ensure_ascii=False)
+
+            return data_dump
+
+    elif type_id == "save":
+        
+        try:
+            balance_command_data = utils.manipulate_json(balance_json_path, "load")
+
+            if balance_command_data is not None:
+                
+                balance_command_data["command"] = data["command"]
+                balance_command_data["status"] = data["status"]
+                balance_command_data["delay"] = data["delay"]
+                balance_command_data["user_level"] = data["user_level"]
+                balance_command_data["cost_type"] = data["cost_type"]
+                balance_command_data["cost"] = data["cost"]
+                balance_command_data["cost_status"] = data["cost_status"]
+
+                utils.manipulate_json(balance_json_path, "save", balance_command_data)
+
+            toast('Salvo')
+        except Exception as e:
+            toast('Ocorreu um erro ao salvar')
+            utils.error_log(e)
+
 
 
 def giveaway_py(type_id, data_receive):
@@ -744,6 +844,9 @@ def giveaway_py(type_id, data_receive):
                 "delay": giveaway_commands_data["delay"],
                 "last_use": giveaway_commands_data["last_use"],
                 "user_level": giveaway_commands_data["user_level"],
+                "cost_type" : giveaway_commands_data["cost_type"],
+                "cost" : giveaway_commands_data["cost"],
+                "cost_status" : giveaway_commands_data["cost_status"]
             }
 
             data_dump = json.dumps(data, ensure_ascii=False)
@@ -816,6 +919,9 @@ def giveaway_py(type_id, data_receive):
             giveaway_commands_data["status"] = data["status"]
             giveaway_commands_data["delay"] = data["delay"]
             giveaway_commands_data["user_level"] = data["user_level"]
+            giveaway_commands_data["cost_type"] = data["cost_type"]
+            giveaway_commands_data["cost"] = data["cost"]
+            giveaway_commands_data["cost_status"] = data["cost_status"]
 
             utils.manipulate_json(f"{giveaway_names_path}/{type_command}.json","save",giveaway_commands_data)
 
@@ -1047,6 +1153,9 @@ def queue(type_id, data_receive):
                 "delay": command_queue_data[data_receive]["delay"],
                 "last_use": command_queue_data[data_receive]["last_use"],
                 "user_level": command_queue_data[data_receive]["user_level"],
+                "cost_type" : command_queue_data[data_receive]["cost_type"],
+                "cost" : command_queue_data[data_receive]["cost"],
+                "cost_status" : command_queue_data[data_receive]["cost_status"]
             }
 
             return json.dumps(data, ensure_ascii=False)
@@ -1072,6 +1181,9 @@ def queue(type_id, data_receive):
                 "delay": data_received["delay"],
                 "last_use": command_queue_data[type_command]["last_use"],
                 "user_level": data_received["user_level"],
+                "cost_type" : data_received["cost_type"],
+                "cost" : data_received["cost"],
+                "cost_status" : data_received["cost_status"]
             }
 
             utils.manipulate_json(json_commands_path, "save", command_queue_data)
@@ -1493,20 +1605,26 @@ def tiktok_goal(data):
 
     if type_id == "save":
         
-        goal_type = data["goal_type"]
+        try:
 
-        if goal_type == "gift":
-            goal_data[goal_type]["gift"] = data["gift"]
+            goal_type = data["goal_type"]
 
-        goal_data[goal_type]["status"] = data["status"]
-        goal_data[goal_type]["goal"] = data["goal"]
-        goal_data[goal_type]["goal_after"] = data["goal_add_value"]
-        goal_data[goal_type]["event"] = data["event"]
-        goal_data[goal_type]["sound_status"] = data["sound_status"]
-        goal_data[goal_type]["sound_file"] = data["sound_file"]
-        goal_data[goal_type]["sound_volume"] = data["sound_volume"]
+            if goal_type == "gift":
+                goal_data[goal_type]["gift"] = data["gift"]
 
-        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json", "save", goal_data)
+            goal_data[goal_type]["status"] = data["status"]
+            goal_data[goal_type]["goal"] = data["goal"]
+            goal_data[goal_type]["goal_after"] = data["goal_add_value"]
+            goal_data[goal_type]["event"] = data["event"]
+            goal_data[goal_type]["sound_status"] = data["sound_status"]
+            goal_data[goal_type]["sound_file"] = data["sound_file"]
+            goal_data[goal_type]["sound_volume"] = data["sound_volume"]
+
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json", "save", goal_data)
+
+        except Exception as e:
+            utils.error_log(e)
+            toast("error")
 
     if type_id == "save_html":
         
@@ -1533,6 +1651,7 @@ def disclosure_py(type_id, data_receive):
     disclosure_json_path = f"{utils.local_work('appdata_path')}/config/disclosure.json"
 
     if type_id == "save":
+
         disclosure_data = utils.manipulate_json(disclosure_json_path, "load")
         disclosure_data["message"] = data_receive
         utils.manipulate_json(disclosure_json_path, "save", disclosure_data)
@@ -1754,12 +1873,16 @@ def sr_config_py(type_id, data_receive):
     if type_id == "get_command":
         
         try:
+
             data = {
                 "command": commands_music_data[data_receive]["command"],
                 "status": commands_music_data[data_receive]["status"],
                 "delay": commands_music_data[data_receive]["delay"],
                 "last_use": commands_music_data[data_receive]["last_use"],
                 "user_level": commands_music_data[data_receive]["user_level"],
+                "cost_type" : commands_music_data[data_receive]["cost_type"],
+                "cost" : commands_music_data[data_receive]["cost"],
+                "cost_status" : commands_music_data[data_receive]["cost_status"]
             }
 
 
@@ -1796,6 +1919,7 @@ def sr_config_py(type_id, data_receive):
             toast("error")
 
     elif type_id == "save_command":
+
         try:
             data = json.loads(data_receive)
 
@@ -1807,6 +1931,9 @@ def sr_config_py(type_id, data_receive):
                 "delay": data["delay"],
                 "last_use": commands_music_data[type_command]["last_use"],
                 "user_level": data["user_level"],
+                "cost_type" : data["cost_type"],
+                "cost" : data["cost"],
+                "cost_status" : data["cost_status"]
             }
 
             utils.manipulate_json(commands_path, "save", commands_music_data)
@@ -1867,7 +1994,7 @@ def update_check(type_id):
             response_json = json.loads(response.text)
             version = response_json["tag_name"]
 
-            if version != "1.0.7":
+            if version != "1.1.0":
                 
                 return True
 
@@ -2219,7 +2346,7 @@ def open_py(type_id, link_profile):
         toast("Relatório de erros limpo")
 
     elif type_id == "discord":
-        webbrowser.open("https://discord.io/ggtec", new=0, autoraise=True)
+        webbrowser.open("https://discord.gg/utm5NZq", new=0, autoraise=True)
 
     elif type_id == "wiki":
         webbrowser.open("https://ggtec.netlify.app/apps/re/", new=0, autoraise=True)
@@ -2356,23 +2483,29 @@ def userdata_py(type_id, username):
 
 def commands_module(data) -> None:
 
-    def send_error_level(user, user_level, command):
-        
-        aliases = {
-            "{username}": str(user),
-            "{user_level}": str(user_level),
-            "{command}": str(command),
-        }
+    def check_cost(user, cost, type_cost, status):
 
-        data_append = {
-            "type": "event",
-            "message": utils.replace_all(utils.messages_file_load("error_user_level"), aliases),
-            "user_input": "",
-        }
+        user_data_load = utils.manipulate_json(f"{utils.local_work('appdata_path')}/user_info/users_database.json","load")
 
-        append_notice(data_append)
+        if status:
+
+            value_user = int(user_data_load[user][type_cost])
+
+            if int(value_user) >= int(cost):
+
+                value_user = int(value_user) - int(cost)
+                user_data_load[user][type_cost] = value_user
+
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}/user_info/users_database.json","save",user_data_load)
+
+                return True
+            else:
+                return False
+        else:
+            return True
 
     def check_perm(user_list, command_list):
+        
         list_1 = set(user_list)
         list_2 = set(command_list)
 
@@ -2398,14 +2531,13 @@ def commands_module(data) -> None:
     command_data_player = utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json","load")
     command_data_queue = utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/commands.json","load")
     command_data_tts = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/tts.json","load")
+    command_data_balance = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/balance.json","load")
 
-    message_sender = data["user_id"]
+    user = data["user_id"]
     message_text = data["message"]
-    user = message_sender
-    
     username = data["user_name"]
 
-    user_type = user_data_load[user]["roles"]
+    user_roles = user_data_load[user]["roles"]
 
     command_string = message_text
     command_lower = command_string.lower()
@@ -2416,9 +2548,9 @@ def commands_module(data) -> None:
         command, sufix = split_command
         
     else:
-        sufix = None
 
-    command = command_lower.split()[0].strip()
+        sufix = None
+        command = command_lower.strip()
 
     prefix = command[0]
 
@@ -2433,9 +2565,77 @@ def commands_module(data) -> None:
         "{prefix}": str(prefix),
         "{sufix}": str(sufix),
         "{random}": str(random_value),
+        "{value}": str(sufix),
     }
 
+    def check_status(command_info, aliases):
+
+        data_append = {
+            "type": "command",
+            "message": utils.replace_all(str(utils.messages_file_load("event_command")), aliases),
+            "user_input": sufix,
+        }
+
+        append_notice(data_append)
+    
+        status = command_info["status"]
+        user_level = command_info["user_level"]
+        delay = int(command_info["delay"])
+        last_use = command_info["last_use"]
+        cost = command_info["cost"]
+        cost_type = command_info["cost_type"]
+        cost_status = command_info["cost_status"]
+
+        message_delay, check_time, current = utils.check_delay(delay, last_use)
+        
+        if status:
+        
+            if check_perm(user_roles, user_level):
+            
+                if check_time:
+                    
+                    if check_cost(user, cost, cost_type, cost_status):
+                        
+                        return current, 'None', True
+                    
+                    else:
+
+                        aliases = {
+                            "{cost}" : str(cost),
+                            "{cost_type}"  : str(cost_type),
+                            "{username}" : str(username)
+                        }
+                                                    
+                        message_error = utils.replace_all(utils.messages_file_load("command_cost"), aliases)
+
+                        return current, message_error, False
+                else:
+
+                    message_error = message_delay
+
+                    return current, message_error, False
+                
+            else:
+
+                aliases = {
+                    "{username}": str(user),
+                    "{user_level}": str(user_level),
+                    "{command}": str(command),
+                }
+
+
+                message_error = utils.replace_all(utils.messages_file_load("error_user_level"), aliases)
+
+                return current, message_error, False
+
+        else:
+            
+            message_error = utils.replace_all(utils.messages_file_load("command_disabled"), aliases)
+
+            return current, message_error, False
+
     def play_sound():
+        
         audio_path = command_data[command]["sound"]
         audio_volume = "50"
 
@@ -2450,114 +2650,59 @@ def commands_module(data) -> None:
         pygame.mixer.music.load(audio_path)
         pygame.mixer.music.set_volume(convert_vol)
         pygame.mixer.music.play()
-
+    
     if status_commands == 1:
 
         if command in command_data:
 
             command_info = command_data[command]
-            status = command_info["status"]
-            user_level = command_info["user_level"]
-            delay = int(command_info["delay"])
-            last_use = command_info["last_use"]
 
-            if check_perm(user_type, user_level):
+            current, message_error, status = check_status(command_info, aliases)
 
-                message_delay, check_time, current = utils.check_delay(delay, last_use)
+            if status:
+                    
+                if command_info["type"] == "sound":
+                    play_sound()
 
-                if check_time:
+                command_info["last_use"] = current
 
-                    if status == 1:
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/commands.json","save",command_data)
 
-                        command_info["last_use"] = current
-
-                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/commands.json","save",command_data)
-
-
-                        data_append = {
-                            "type": "command",
-                            "message": utils.replace_all(str(utils.messages_file_load("event_command")), aliases),
-                            "user_input": sufix,
-                        }
-
-                        append_notice(data_append)
-
-                        if command_info["type"] == "sound":
-                            play_sound()
-                    else:
-                        data_append = {
-                            "type": "event",
-                            "message": utils.replace_all(utils.messages_file_load("command_disabled"), aliases),
-                            "user_input": "",
-                        }
-
-                        append_notice(data_append)
-                else:
-
-                    data_append = {
-                        "type": "event",
-                        "message": message_delay,
-                        "user_input": "",
-                    }
-
-                    append_notice(data_append)
             else:
-                send_error_level(user, str(user_level), str(command))
 
+                data_append = {
+                    "type": "command",
+                    "message": message_error,
+                    "user_input": "",
+                }
+
+                append_notice(data_append)
+                
         elif compare_strings(command, command_data_giveaway["add_user"]["command"]):
 
-            data_append = {
-                "type": "command",
-                "message": utils.replace_all(str(utils.messages_file_load("event_command")), aliases),
-                "user_input": sufix,
-            }
+            command_info = command_data_giveaway["add_user"]
 
-            append_notice(data_append)
-
-            add_user_info = command_data_giveaway["add_user"]
-            status = add_user_info["status"]
-            delay = add_user_info["delay"]
-            last_use = add_user_info["last_use"]
-            user_level = add_user_info["user_level"]
+            current, message_error, status = check_status(command_info, aliases)
 
             if status:
 
-                if check_perm(user_type, user_level):
+                if sufix != "":
 
-                    message_delay_global, check_time_global, current = utils.check_delay(delay, last_use)
+                    user_input = sufix
 
-                    if check_time_global:
+                    data = {"new_name": user_input.strip(), "user_level": "mod"}
+                    giveaway_py("add_user", data)
 
-                        user_input = command_string.split(add_user_info)
 
-                        if sufix != "":
-                            user_input = sufix
+                command_info["last_use"] = current
 
-                            data = {"new_name": user_input.strip(), "user_level": "mod"}
-                            giveaway_py("add_user", data)
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}/giveaway/commands.json","save",command_data_giveaway)
 
-                        add_user_info["last_use"] = current
-
-                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/giveaway/commands.json","save",command_data_giveaway)
-                    else:
-
-                        data_append = {
-                            "type": "event",
-                            "message": utils.replace_all(message_delay_global, aliases),
-                            "user_input": "",
-                        }
-
-                        append_notice(data_append)
-                else:
-
-                    send_error_level(user, user_level, str(command))
             else:
 
-                message_event = utils.replace_all(utils.messages_file_load("command_disabled"), aliases)
-
                 data_append = {
-                    "type": "event",
-                    "message": message_event,
+                    "type": "command",
+                    "message": message_error,
                     "user_input": "",
                 }
 
@@ -2565,114 +2710,62 @@ def commands_module(data) -> None:
 
         elif compare_strings(command, command_data_player["volume"]["command"]):
 
-            data_append = {
-                "type": "command",
-                "message": utils.replace_all(str(utils.messages_file_load("event_command")), aliases),
-                "user_input": sufix,
-            }
+            command_info = command_data_player["volume"]
 
-            append_notice(data_append)
-
-            volume_info = command_data_player["volume"]
-            delay = volume_info["delay"]
-            last_use = volume_info["last_use"]
-            status = volume_info["status"]
-            user_level = volume_info["user_level"]
+            current, message_error, status = check_status(command_info, aliases)
 
             if status:
 
-                if check_perm(user_type, user_level):
+                prefix_volume = command_info["command"]
 
-                    message_delay, check_time, current = utils.check_delay(delay, last_use)
+                volume_value_command = command_lower.split(prefix_volume.lower())
 
-                    if check_time:
+                if len(volume_value_command) > 1 and volume_value_command[1] != "":
 
-                        prefix_volume = volume_info["command"]
+                    volume_value_command = volume_value_command[1]
 
-                        volume_value_command = command_lower.split(prefix_volume.lower())
+                    if volume_value_command.strip().isdigit():
 
-                        if len(volume_value_command) > 1 and volume_value_command[1] != "":
+                        volume_value_int = int(volume_value_command)
 
-                            volume_value_command = volume_value_command[1]
+                        if volume_value_int in range(0, 101):
 
-                            if volume_value_command.strip().isdigit():
+                            volume_value = volume_value_int / 100
 
-                                volume_value_int = int(volume_value_command)
-
-                                if volume_value_int in range(0, 101):
-
-                                    volume_value = volume_value_int / 100
-
-                                    window.evaluate_js(f"player('volume', 'none', {volume_value})")
-
-                                    aliases_commands = {
-                                        "{username}": str(user),
-                                        "{volume}": str(volume_value_int),
-                                    }
-
-                                    data_append = {
-                                        "type": "event",
-                                        "message": utils.replace_all(utils.messages_file_load("command_volume_confirm"),aliases_commands),
-                                        "user_input": "",
-                                    }
-
-                                    append_notice(data_append)
-
-                                else:
-                                    aliases_commands = {
-                                        "{username}": user,
-                                        "{volume}": str(volume_value_int),
-                                    }
-
-                                    data_append = {
-                                        "type": "event",
-                                        "message": utils.replace_all(utils.messages_file_load("command_volume_error"),aliases_commands),
-                                        "user_input": "",
-                                    }
-
-                                    append_notice(data_append)
-
-                            else:
-
-                                data_append = {
-                                    "type": "event",
-                                    "message": utils.messages_file_load("command_volume_number"),
-                                    "user_input": "",
-                                }
-
-                                append_notice(data_append)
-
-                            volume_info["last_use"] = current
-
-                            utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json","save",command_data_player)
-
-                        else:
-
-                            volume_atual = window.evaluate_js(
-                                f"player('get_volume', 'none', 'none')"
-                            )
+                            window.evaluate_js(f"player('volume', 'none', {volume_value})")
 
                             aliases_commands = {
                                 "{username}": str(user),
-                                "{volume}": str(volume_atual),
+                                "{volume}": str(volume_value_int),
                             }
 
                             data_append = {
-                                "type": "event",
-                                "message": utils.replace_all(utils.messages_file_load("command_volume_response"),aliases_commands),
+                                "type": "command",
+                                "message": utils.replace_all(utils.messages_file_load("command_volume_confirm"),aliases_commands),
                                 "user_input": "",
                             }
 
                             append_notice(data_append)
 
-                            volume_info["last_use"] = current
+                        else:
+                            aliases_commands = {
+                                "{username}": user,
+                                "{volume}": str(volume_value_int),
+                            }
 
-                            utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json","save",command_data_player)
+                            data_append = {
+                                "type": "command",
+                                "message": utils.replace_all(utils.messages_file_load("command_volume_error"),aliases_commands),
+                                "user_input": "",
+                            }
+
+                            append_notice(data_append)
 
                     else:
+
                         data_append = {
-                            "type": "event",
-                            "message": utils.replace_all(message_delay, aliases),
+                            "type": "command",
+                            "message": utils.messages_file_load("command_volume_number"),
                             "user_input": "",
                         }
 
@@ -2680,14 +2773,32 @@ def commands_module(data) -> None:
 
                 else:
 
-                    send_error_level(user, user_level, str(command))
+                    volume_atual = window.evaluate_js(
+                        f"player('get_volume', 'none', 'none')"
+                    )
+
+                    aliases_commands = {
+                        "{username}": str(user),
+                        "{volume}": str(volume_atual),
+                    }
+
+                    data_append = {
+                        "type": "command",
+                        "message": utils.replace_all(utils.messages_file_load("command_volume_response"),aliases_commands),
+                        "user_input": "",
+                    }
+
+                    append_notice(data_append)
+
+                command_info["last_use"] = current
+
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json","save",command_data_player)
 
             else:
                 
-
                 data_append = {
-                    "type": "event",
-                    "message": utils.replace_all(utils.messages_file_load("command_disabled"), aliases),
+                    "type": "command",
+                    "message": message_error,
                     "user_input": "",
                 }
 
@@ -2695,38 +2806,68 @@ def commands_module(data) -> None:
 
         elif compare_strings(command, command_data_player["skip"]["command"]):
 
-            data_append = {
-                "type": "command",
-                "message": utils.replace_all(str(utils.messages_file_load("event_command")), aliases),
-                "user_input": sufix,
-            }
+            command_info = command_data_player["skip"]
 
-            config_data_player = utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/config.json",type_id="load")
-
-            skip_votes = int(config_data_player["skip_votes"])
-            skip_requests = int(config_data_player["skip_requests"])
-            skip_mod = config_data_player["skip_mod"]
-            skip_users = config_data_player["skip_users"]
-
-            delay = command_data_player["skip"]["delay"]
-            last_use = command_data_player["skip"]["last_use"]
-            status = command_data_player["skip"]["status"]
-            user_level = command_data_player["skip"]["user_level"]
+            current, message_error, status = check_status(command_info, aliases)
 
             if status:
 
-                if check_perm(user_type, user_level):
+                config_data_player = utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/config.json","load")
 
-                    message_delay, check_time, current = utils.check_delay(delay, last_use)
+                skip_votes = int(config_data_player["skip_votes"])
+                skip_requests = int(config_data_player["skip_requests"])
+                skip_mod = config_data_player["skip_mod"]
+                skip_users = config_data_player["skip_users"]
 
-                    if check_time:
+                playing = window.evaluate_js(f"player('playing', 'none', 'none')")
 
-                        playing = window.evaluate_js(f"player('playing', 'none', 'none')")
+                if not playing == "False":
+                    
+                    if "moderator" in user_roles and skip_mod == 1:
+                        
+                        window.evaluate_js(f"player('stop', 'none', 'none')")
 
-                        if not playing == "False":
-                            
-                            if "moderator" in user_type and skip_mod == 1:
-                                
+                        aliases_commands = {
+                            "{username}": str(user),
+                        }
+
+                        data_append = {
+                            "type": "command",
+                            "message": utils.replace_all(utils.messages_file_load("command_skip_confirm"),aliases),
+                            "user_input": "",
+                        }
+
+                        append_notice(data_append)
+
+                        command_data_player["skip"]["last_use"] = current
+
+                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json","save",command_data_player)
+
+                        config_data_player["skip_requests"] = 0
+
+                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/config.json","save",config_data_player)
+
+                    else:
+                        if not user in skip_users:
+
+                            skip_requests = int(skip_requests) + 1
+
+                            aliases_commands = {
+                                "{username}": str(user),
+                                "{votes}": str(skip_requests),
+                                "{minimum}": str(skip_votes),
+                            }
+
+                            data_append = {
+                                "type": "command",
+                                "message": utils.replace_all(utils.messages_file_load("skip_votes"),aliases_commands),
+                                "user_input": "",
+                            }
+
+                            append_notice(data_append)
+
+                            if int(skip_requests) == skip_votes:
+
                                 window.evaluate_js(f"player('stop', 'none', 'none')")
 
                                 aliases_commands = {
@@ -2734,8 +2875,8 @@ def commands_module(data) -> None:
                                 }
 
                                 data_append = {
-                                    "type": "event",
-                                    "message": utils.replace_all(utils.messages_file_load("command_skip_confirm"),aliases),
+                                    "type": "command",
+                                    "message": utils.replace_all(utils.messages_file_load("command_skip_confirm"),aliases_commands),
                                     "user_input": "",
                                 }
 
@@ -2743,81 +2884,21 @@ def commands_module(data) -> None:
 
                                 command_data_player["skip"]["last_use"] = current
 
-                                utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json","save",command_data_player)
+                                utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json","save",command_data_player,)
 
                                 config_data_player["skip_requests"] = 0
+                                config_data_player["skip_users"] = []
 
                                 utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/config.json","save",config_data_player)
 
                             else:
-                                if not user in skip_users:
 
-                                    skip_requests = int(skip_requests) + 1
+                                skip_users.append(user)
 
-                                    aliases_commands = {
-                                        "{username}": str(user),
-                                        "{votes}": str(skip_requests),
-                                        "{minimum}": str(skip_votes),
-                                    }
+                                config_data_player["skip_users"] = skip_users
+                                config_data_player["skip_requests"] = int(skip_requests)
 
-                                    data_append = {
-                                        "type": "event",
-                                        "message": utils.replace_all(utils.messages_file_load("skip_votes"),aliases_commands),
-                                        "user_input": "",
-                                    }
-
-                                    append_notice(data_append)
-
-                                    if int(skip_requests) == skip_votes:
-
-                                        window.evaluate_js(f"player('stop', 'none', 'none')")
-
-                                        aliases_commands = {
-                                            "{username}": str(user),
-                                        }
-
-                                        data_append = {
-                                            "type": "event",
-                                            "message": utils.replace_all(utils.messages_file_load("command_skip_confirm"),aliases_commands),
-                                            "user_input": "",
-                                        }
-
-                                        append_notice(data_append)
-
-                                        command_data_player["skip"]["last_use"] = current
-
-                                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json","save",command_data_player,)
-
-                                        config_data_player["skip_requests"] = 0
-                                        config_data_player["skip_users"] = []
-
-                                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/config.json","save",config_data_player)
-
-                                    else:
-
-                                        skip_users.append(user)
-
-                                        config_data_player["skip_users"] = skip_users
-                                        config_data_player["skip_requests"] = int(skip_requests)
-
-                                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/config.json","save",config_data_player,)
-
-                                else:
-                                    aliases_commands = {
-                                        "{username}": str(user),
-                                    }
-
-                                    data_append = {
-                                        "type": "event",
-                                        "message": utils.replace_all(utils.messages_file_load("command_skip_inlist"),aliases_commands),
-                                        "user_input": "",
-                                    }
-
-                                    append_notice(data_append)
-
-                                    command_data_player["skip"]["last_use"] = current
-
-                                    utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json","save",command_data_player,)
+                                utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/config.json","save",config_data_player,)
 
                         else:
                             aliases_commands = {
@@ -2825,8 +2906,8 @@ def commands_module(data) -> None:
                             }
 
                             data_append = {
-                                "type": "event",
-                                "message": utils.replace_all(utils.messages_file_load("command_skip_noplaying"),aliases_commands),
+                                "type": "command",
+                                "message": utils.replace_all(utils.messages_file_load("command_skip_inlist"),aliases_commands),
                                 "user_input": "",
                             }
 
@@ -2834,111 +2915,208 @@ def commands_module(data) -> None:
 
                             command_data_player["skip"]["last_use"] = current
 
-                            utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json","save",command_data_player)
-                    else:
-
-                        data_append = {
-                            "type": "event",
-                            "message": utils.replace_all(message_delay, aliases),
-                            "user_input": "",
-                        }
-
-                        append_notice(data_append)
+                            utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json","save",command_data_player,)
 
                 else:
                     
-                    send_error_level(user, user_level, str(command))
+                    aliases_commands = {
+                        "{username}": str(user),
+                    }
 
+                    data_append = {
+                        "type": "command",
+                        "message": utils.replace_all(utils.messages_file_load("command_skip_noplaying"),aliases_commands),
+                        "user_input": "",
+                    }
+
+                    append_notice(data_append)
+
+                    command_data_player["skip"]["last_use"] = current
+
+                    utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json","save",command_data_player)
+            
             else:
 
-                message_event = utils.replace_all(
-                    utils.messages_file_load("command_disabled"), aliases
-                )
-
                 data_append = {
-                    "type": "event",
-                    "message": message_event,
+                    "type": "command",
+                    "message": message_error,
                     "user_input": "",
                 }
 
                 append_notice(data_append)
         
-        elif compare_strings(command,command_data_player['request']['command']):
+        elif compare_strings(command, command_data_player['request']['command']):
 
-            data_append = {
-                "type": "command",
-                "message": utils.replace_all(str(utils.messages_file_load("event_command")), aliases),
-                "user_input": sufix,
-            }
-            
-            append_notice(data_append)
+            command_info = command_data_player['request']
 
-            delay = command_data_player['request']['delay']
-            last_use = command_data_player['request']['last_use']
-            status = command_data_player['request']['status']
-            user_level = command_data_player['request']['user_level']
-            
-            message_delay, check_time, current = utils.check_delay(delay,last_use)
-            
+            current, message_error, status = check_status(command_info, aliases)
+
             if status:
 
-                if check_perm(user_type, user_level):
+                prefix_sr = command_data_player['request']['command']
+                user_input = command_string.split(prefix_sr)
 
-                    if check_time:
-                            
-                            prefix_sr = command_data_player['request']['command']
-                            user_input = command_string.split(prefix_sr)
+                if len(user_input) > 1 and user_input[1] != "":
+                    
+                    user_input = user_input[1]
+                    
+                    if sr_config_py('get-status','null') == 1:
 
-                            if len(user_input) > 1 and user_input[1] != "":
-                                
-                                user_input = user_input[1]
-                                
-                                if sr_config_py('get-status','null') == 1:
-
-                                    threading.Thread(target=process_redem_music, args=(user_input, username,), daemon=True).start()
-                                    
-                                else:
-                                    
-                                    data_append = {
-                                        "type": "command",
-                                        "message": utils.replace_all(utils.messages_file_load('music_disabled'), aliases),
-                                        "user_input": sufix,
-                                    }
-                                    
-                                    append_notice(data_append)
-                                
-                                    command_data_player['request']['last_use'] = current
-                                    
-                                    utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json","save",command_data_player)
-                                    
-
-                            else:
-
-                                data_append = {
-                                    "type": "command",
-                                    "message": utils.replace_all(str(utils.messages_file_load("event_command")), aliases),
-                                    "user_input": sufix,
-                                }
-                                
-                                append_notice(data_append)
-
-                    else:
-                        data_append = {
-                            "type": "event",
-                            "message": utils.replace_all(message_delay, aliases),
-                            "user_input": "",
-                        }
-
-                        append_notice(data_append)
+                        threading.Thread(target=process_redem_music, args=(user_input, username,), daemon=True).start()
                         
+                    else:
+                        
+                        data_append = {
+                            "type": "command",
+                            "message": utils.replace_all(utils.messages_file_load('music_disabled'), aliases),
+                            "user_input": sufix,
+                        }
+                        
+                        append_notice(data_append)
+                    
+                        command_data_player['request']['last_use'] = current
+                        
+                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json","save",command_data_player)
+                        
+
                 else:
-                    send_error_level(user,user_level, str(command))
+
+                    data_append = {
+                        "type": "command",
+                        "message": utils.replace_all(str(utils.messages_file_load("command_value")), aliases),
+                        "user_input": sufix,
+                    }
+                    
+                    append_notice(data_append)
 
             else:
                 
                 data_append = {
                     "type": "command",
-                    "message": utils.replace_all(utils.messages_file_load("command_disabled"), aliases),
+                    "message": message_error,
+                    "user_input": sufix,
+                }
+
+                append_notice(data_append)
+
+        elif compare_strings(command,command_data_player['atual']['command']):
+
+            command_info = command_data_player['atual']
+
+            current, message_error, status = check_status(command_info, aliases)
+
+            if status:
+                           
+                f = open(f"{utils.local_work('appdata_path')}/player/list_files/currentsong.txt", "r+", encoding="utf-8")
+                current_song = f.read()
+
+                aliases_commands = {'{username}': str(user), '{music}': str(current_song)}
+
+                data_append = {
+                    "type": "command",
+                    "message": utils.replace_all(utils.messages_file_load('command_current_confirm'),aliases_commands),
+                    "user_input": sufix,
+                }
+
+                append_notice(data_append)
+                    
+                command_data_player['atual']['last_use'] = current
+        
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json", "save", command_data_player)
+
+            else:
+
+                data_append = {
+                    "type": "command",
+                    "message": message_error,
+                    "user_input": sufix,
+                }
+
+                append_notice(data_append)
+
+        elif compare_strings(command,command_data_player['next']['command']):
+
+            command_info = command_data_player['next']
+
+            current, message_error, status = check_status(command_info, aliases)
+
+            if status:
+
+                playlist_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/list_files/playlist.json", "load")
+                queue_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/list_files/queue.json", "load")
+
+                check_playlist = any(playlist_data.keys())
+                check_queue = any(queue_data.keys())
+
+                if check_queue:
+
+                    queue_keys = [int(x) for x in queue_data.keys()]
+                    min_key_queue = min(queue_keys)
+                    min_key_queue_str = str(min_key_queue)
+
+                    next_song = queue_data[min_key_queue_str]['MUSIC_NAME']
+                    resquest_by = queue_data[min_key_queue_str]['USER']
+
+                    aliases_commands = {
+                        '{username}': str(user),
+                        '{music}': str(next_song),
+                        '{request_by}': str(resquest_by)
+                    }
+
+                    data_append = {
+                        "type": "command",
+                        "message":  utils.replace_all(utils.messages_file_load('command_next_confirm'), aliases_commands),
+                        "user_input": sufix,
+                    }
+
+                    append_notice(data_append)
+
+                elif check_playlist:
+
+                    playlist_keys = [int(x) for x in playlist_data.keys()]
+                    min_key_playlist = min(playlist_keys)
+                    min_key_playlist_str = str(min_key_playlist)
+
+                    next_song = playlist_data[min_key_playlist_str]['MUSIC_NAME']
+                    resquest_by = playlist_data[min_key_playlist_str]['USER']
+
+                    aliases_commands = {
+                        '{username}': str(user),
+                        '{music}': str(next_song),
+                        '{request_by}': str(resquest_by)
+                    }
+
+                    data_append = {
+                        "type": "command",
+                        "message":  utils.replace_all(utils.messages_file_load('command_next_confirm'), aliases_commands),
+                        "user_input": sufix,
+                    }
+
+                    append_notice(data_append)
+
+                else:
+
+                    aliases_commands = {
+                        '{username}': str(user),
+                    }
+
+                    data_append = {
+                        "type": "command",
+                        "message":  utils.replace_all(utils.messages_file_load('command_next_no_music'), aliases_commands),
+                        "user_input": sufix,
+                    }
+
+                    append_notice(data_append)
+                            
+                command_data_player['next']['last_use'] = current
+        
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}/player/config/commands.json", "save", command_data_player)
+
+            else:
+
+                data_append = {
+                    "type": "command",
+                    "message": message_error,
                     "user_input": sufix,
                 }
 
@@ -2946,114 +3124,65 @@ def commands_module(data) -> None:
 
         elif compare_strings(command, command_data_queue["add_queue"]["command"]):
             
-            data_append = {
-                "type": "command",
-                "message": utils.replace_all(str(utils.messages_file_load("event_command")), aliases),
-                "user_input": sufix,
-            }
-            append_notice(data_append)
+            command_info = command_data_queue["add_queue"]
 
-            utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/commands.json","load")
-
-            delay = command_data_queue["add_queue"]["delay"]
-            last_use = command_data_queue["add_queue"]["last_use"]
-            status = command_data_queue["add_queue"]["status"]
-            user_level = command_data_queue["add_queue"]["user_level"]
+            current, message_error, status = check_status(command_info, aliases)
 
             if status:
 
-                if check_perm(user_type, user_level):
+                if sufix != "":
+                    
+                    queue_file_path = f"{utils.local_work('appdata_path')}/queue/queue.json"
 
-                    message_delay, check_time, current = utils.check_delay(delay, last_use)
+                    queue_data = utils.manipulate_json(queue_file_path,"load")
 
-                    if check_time:
+                    if sufix not in queue_data:
 
-                        if sufix != "":
-                            
-                            queue_file_path = f"{utils.local_work('appdata_path')}/queue/queue.json"
+                        queue_data.append(sufix)
 
-                            queue_data = utils.manipulate_json(queue_file_path,"load")
+                        utils.manipulate_json(queue_file_path,"save",queue_data)
 
-                            if sufix not in queue_data:
+                        toast("Nome adicionado")
 
-                                queue_data.append(sufix)
-
-                                utils.manipulate_json(queue_file_path,"save",queue_data)
-
-                                toast("Nome adicionado")
-
-                                aliases = {
-                                    "{username}": str(user),
-                                    "{command}": str(command),
-                                    "{prefix}": str(prefix),
-                                    "{user_level}": str(user_type),
-                                    "{sufix}": str(sufix),
-                                    "{random}": str(random_value),
-                                    "{value}": str(sufix),
-                                }
-
-                                data_append = {
-                                    "type": "event",
-                                    "message": utils.replace_all(utils.messages_file_load("response_add_queue"),aliases),
-                                    "user_input": "",
-                                }
-
-                                append_notice(data_append)
-
-                            else:
-
-                                toast("O nome já está na lista")
-
-                                aliases = {
-                                    "{username}": str(user),
-                                    "{command}": str(command),
-                                    "{prefix}": str(prefix),
-                                    "{user_level}": str(user_type),
-                                    "{sufix}": str(sufix),
-                                    "{random}": str(random_value),
-                                    "{value}": str(sufix),
-                                }
-
-
-                                data_append = {
-                                    "type": "event",
-                                    "message": utils.messages_file_load("response_namein_queue"),
-                                    "user_input": "",
-                                }
-
-                                append_notice(data_append)
-
-                            command_data_queue["add_queue"]["last_use"] = current
-
-                            utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/commands.json","save",command_data_queue)
-
-                        else:
-
-                            data_append = {
-                                "type": "event",
-                                "message": utils.replace_all(utils.messages_file_load("command_sufix"), aliases),
-                                "user_input": "",
-                            }
-
-                            append_notice(data_append)
-
-                    else:
                         data_append = {
-                            "type": "event",
-                            "message": utils.replace_all(message_delay, aliases),
+                            "type": "command",
+                            "message": utils.replace_all(utils.messages_file_load("response_add_queue"),aliases),
                             "user_input": "",
                         }
 
                         append_notice(data_append)
 
+                    else:
+
+                        toast("O nome já está na lista")
+
+                        data_append = {
+                            "type": "command",
+                            "message": utils.messages_file_load("response_namein_queue"),
+                            "user_input": "",
+                        }
+
+                        append_notice(data_append)
+
+                    command_data_queue["add_queue"]["last_use"] = current
+
+                    utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/commands.json","save",command_data_queue)
+
                 else:
-                    send_error_level(user, user_level, str(command))
+
+                    data_append = {
+                        "type": "command",
+                        "message": utils.replace_all(utils.messages_file_load("command_sufix"), aliases),
+                        "user_input": "",
+                    }
+
+                    append_notice(data_append)
 
             else:
 
                 data_append = {
                     "type": "command",
-                    "message": utils.replace_all(utils.messages_file_load("command_disabled"), aliases),
+                    "message": message_error,
                     "user_input": sufix,
                 }
 
@@ -3061,262 +3190,162 @@ def commands_module(data) -> None:
 
         elif compare_strings(command, command_data_queue["self_add_queue"]["command"]):
             
-            data_append = {
-                "type": "command",
-                "message": utils.replace_all(str(utils.messages_file_load("event_command")), aliases),
-                "user_input": sufix,
-            }
-            append_notice(data_append)
+            command_info = command_data_queue["self_add_queue"]
 
-            utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/commands.json","load")
+            queue_file_path = f"{utils.local_work('appdata_path')}/queue/queue.json"
+            
+            queue_data = utils.manipulate_json(queue_file_path,"load")
+            
+            if username not in queue_data:
 
-            delay = command_data_queue["add_queue"]["delay"]
-            last_use = command_data_queue["add_queue"]["last_use"]
-            status = command_data_queue["add_queue"]["status"]
-            user_level = command_data_queue["add_queue"]["user_level"]
+                current, message_error, status = check_status(command_info, aliases)
 
-            if status:
+                if status:
 
-                if check_perm(user_type, user_level):
 
-                    message_delay, check_time, current = utils.check_delay(delay, last_use)
 
-                    if check_time:
+                    queue_data.append(username)
 
-                        queue_file_path = f"{utils.local_work('appdata_path')}/queue/queue.json"
+                    utils.manipulate_json(queue_file_path,"save",queue_data)
 
-                        queue_data = utils.manipulate_json(queue_file_path,"load")
+                    toast("Nome adicionado")
 
-                        if user not in queue_data:
+                    window.evaluate_js(f"queue_js('get',Null)")
 
-                            queue_data.append(user)
+                    data_append = {
+                        "type": "command",
+                        "message": utils.replace_all(utils.messages_file_load("response_queue"),aliases),
+                        "user_input": "",
+                    }
 
-                            utils.manipulate_json(queue_file_path,"save",queue_data)
+                    append_notice(data_append)
 
-                            toast("Nome adicionado")
+                    command_data_queue["self_add_queue"]["last_use"] = current
 
-                            aliases = {
-                                "{username}": str(user),
-                                "{command}": str(command),
-                                "{prefix}": str(prefix),
-                                "{user_level}": str(user_type),
-                                "{sufix}": str(sufix),
-                                "{random}": str(random_value),
-                                "{value}": str(sufix),
-                            }
-
-                            data_append = {
-                                "type": "event",
-                                "message": utils.replace_all(utils.messages_file_load("response_queue"),aliases),
-                                "user_input": "",
-                            }
-
-                            append_notice(data_append)
-
-                        else:
-
-                            toast("O nome já está na lista")
-
-                            aliases = {
-                                "{username}": str(user),
-                                "{command}": str(command),
-                                "{prefix}": str(prefix),
-                                "{user_level}": str(user_type),
-                                "{sufix}": str(sufix),
-                                "{random}": str(random_value),
-                                "{value}": str(sufix),
-                            }
-
-                            data_append = {
-                                "type": "event",
-                                "message": utils.messages_file_load("response_namein_queue"),
-                                "user_input": "",
-                            }
-
-                            append_notice(data_append)
-
-                        command_data_queue["add_queue"]["last_use"] = current
-
-                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/commands.json","save",command_data_queue)
-
-                    else:
-                        data_append = {
-                            "type": "event",
-                            "message": utils.replace_all(message_delay, aliases),
-                            "user_input": "",
-                        }
-
-                        append_notice(data_append)
+                    utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/commands.json","save",command_data_queue)
 
                 else:
-                    send_error_level(user, user_level, str(command))
 
+                    data_append = {
+                        "type": "command",
+                        "message": message_error,
+                        "user_input": sufix,
+                    }
+
+                    append_notice(data_append)
             else:
+
+                toast("O nome já está na lista")
 
                 data_append = {
                     "type": "command",
-                    "message": utils.replace_all(utils.messages_file_load("command_disabled"), aliases),
-                    "user_input": sufix,
+                    "message": utils.messages_file_load("response_namein_queue"),
+                    "user_input": "",
                 }
 
                 append_notice(data_append)
 
-
         elif compare_strings(command, command_data_queue["check_queue"]["command"]):
 
+            command_info = command_data_queue["check_queue"]
 
-            data_append = {
-                "type": "command",
-                "message": utils.replace_all(str(utils.messages_file_load("event_command")), aliases),
-                "user_input": sufix,
-            }
-            append_notice(data_append)
-
-            delay, last_use, status, user_level = (
-                command_data_queue["check_queue"]["delay"],
-                command_data_queue["check_queue"]["last_use"],
-                command_data_queue["check_queue"]["status"],
-                command_data_queue["check_queue"]["user_level"],
-            )
-
-            response = utils.messages_file_load("response_get_queue")
+            current, message_error, status = check_status(command_info, aliases)
 
             if status:
 
-                if check_perm(user_type, user_level):
+                queue_file_path = f"{utils.local_work('appdata_path')}/queue/queue.json"
+            
+                queue_data = utils.manipulate_json(queue_file_path,"load")
 
-                    message_delay, check_time, current = utils.check_delay(delay, last_use)
+                response = utils.replace_all(str(utils.messages_file_load("response_get_queue")), aliases)
 
-                    if check_time:
+                match = re.search(r'\{queue-(\d*)\}', response)
 
-                        data_append = {
-                            "type": "event",
-                            "message": utils.replace_all(str(response), aliases),
-                            "user_input": "",
-                        }
-                        append_notice(data_append)
+                if match:
 
-                        command_data_queue["check_queue"]["last_use"] = current
+                    number = match.group(1)
 
-                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/tiktoktbot/web/src/queue/commands.json","save",command_data_queue)
-                    else:
+                    response = response.replace(match.group(0), ', '.join(queue_data[:number]))
 
-                        data_append = {
-                            "type": "event",
-                            "message": utils.replace_all(message_delay, aliases),
-                            "user_input": "",
-                        }
-
-                        append_notice(data_append)
-                else:
-
-                    send_error_level(user, user_level, str(command))
-            else:
-                
-                message_event = utils.replace_all(utils.messages_file_load("command_disabled"), aliases)
 
                 data_append = {
                     "type": "command",
-                    "message": message_event,
+                    "message": response,
+                    "user_input": "",
+                }
+
+                append_notice(data_append)
+
+                command_data_queue["check_queue"]["last_use"] = current
+
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}/tiktoktbot/web/src/queue/commands.json","save",command_data_queue)
+
+            else:
+                
+                data_append = {
+                    "type": "command",
+                    "message": message_error,
                     "user_input": sufix,
                 }
+
                 append_notice(data_append)
 
         elif compare_strings(command, command_data_queue["rem_queue"]["command"]):
 
-            data_append = {
-                "type": "command",
-                "message": utils.replace_all(str(utils.messages_file_load("event_command")), aliases),
-                "user_input": sufix,
-            }
-            append_notice(data_append)
+            command_info = command_data_queue["rem_queue"]
 
-            delay, last_use, status, user_level = (
-                command_data_queue["rem_queue"]["delay"],
-                command_data_queue["rem_queue"]["last_use"],
-                command_data_queue["rem_queue"]["status"],
-                command_data_queue["rem_queue"]["user_level"],
-            )
+            current, message_error, status = check_status(command_info, aliases)
 
             if status:
+         
+                if sufix != "":
 
-                if check_perm(user_type, user_level):
+                    queue_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/queue.json","load")
 
-                    message_delay, check_time, current = utils.check_delay(delay, last_use)
+                    if sufix in queue_data:
 
-                    if check_time:
+                        queue_data.remove(sufix)
 
-                        if sufix != "":
+                        utils.manipulate_json( queue_file_path,"save", queue_data)
 
-                            queue_file_path = f"{utils.local_work('appdata_path')}/queue/queue.json"
-                            
-                            queue_data = utils.manipulate_json(queue_file_path,"load")
-
-                            if sufix in queue_data:
-
-                                queue_data.remove(sufix)
-
-                                utils.manipulate_json( queue_file_path,"save", queue_data)
-
-                                toast("Nome removido")
-
-                                aliases = {
-                                    "{username}": str(user),
-                                    "{command}": str(command),
-                                    "{prefix}": str(prefix),
-                                    "{user_level}": str(user_type),
-                                    "{sufix}": str(sufix),
-                                    "{random}": str(random_value),
-                                    "{value}": str(sufix),
-                                }
-
-                                response = utils.messages_file_load("response_rem_queue")
-
-                            else:
-                                toast("O nome não está na lista")
-
-                                aliases = {
-                                    "{username}": str(user),
-                                    "{command}": str(command),
-                                    "{prefix}": str(prefix),
-                                    "{user_level}": str(user_type),
-                                    "{sufix}": str(sufix),
-                                    "{random}": str(random_value),
-                                    "{value}": str(sufix),
-                                }
-
-                                response = utils.messages_file_load("response_noname_queue")
-
-                            command_data_queue["rem_queue"]["last_use"] = current
-
-                            utils.manipulate_json(f"{utils.local_work('appdata_path')}/tiktoktbot/web/src/queue/commands.json","save",command_data_queue)
-
-                        else:
-                            data_append = {
-                                "type": "event",
-                                "message": utils.replace_all(utils.messages_file_load("command_sufix"), aliases),
-                                "user_input": "",
-                            }
-
-                            append_notice(data_append)
-
-                    else:
                         data_append = {
-                            "type": "event",
-                            "message": utils.replace_all(message_delay, aliases),
+                            "type": "command",
+                            "message": utils.replace_all(utils.messages_file_load("response_rem_queue"), aliases),
                             "user_input": "",
                         }
 
                         append_notice(data_append)
 
+                    else:
+                        toast("O nome não está na lista")
+
+                        data_append = {
+                            "type": "command",
+                            "message": utils.replace_all(utils.messages_file_load("response_noname_queue"), aliases),
+                            "user_input": "",
+                        }
+
+                        append_notice(data_append)
+
+                    command_data_queue["rem_queue"]["last_use"] = current
+
+                    utils.manipulate_json(f"{utils.local_work('appdata_path')}/tiktoktbot/web/src/queue/commands.json","save",command_data_queue)
+
                 else:
 
-                    send_error_level(user, user_level, str(command))
+                    data_append = {
+                        "type": "command",
+                        "message": utils.replace_all(utils.messages_file_load("command_sufix"), aliases),
+                        "user_input": "",
+                    }
+
+                    append_notice(data_append)
 
             else:
+
                 data_append = {
                     "type": "command",
-                    "message": utils.replace_all(utils.messages_file_load("command_disabled"), aliases),
+                    "message": message_error,
                     "user_input": sufix,
                 }
 
@@ -3324,86 +3353,109 @@ def commands_module(data) -> None:
 
         elif compare_strings(command, command_data_tts["command"]):
 
-            data_append = {
-                "type": "command",
-                "message": utils.replace_all(str(utils.messages_file_load("event_command")), aliases),
-                "user_input": sufix,
-            }
-            append_notice(data_append)
+            command_info = command_data_tts
 
-            delay, last_use, status, user_level = (
-                command_data_tts["delay"],
-                command_data_tts["last_use"],
-                command_data_tts["status"],
-                command_data_tts["user_level"],
-            )
+            current, message_error, status = check_status(command_info, aliases)
 
             if status:
 
-                if check_perm(user_type, user_level):
+                if sufix != None:
+                    
+                    message_prefix = utils.replace_all(utils.messages_file_load("tts_prefix"), aliases)
 
-                    message_delay, check_time, current = utils.check_delay(delay, last_use)
+                    if command_info['prefix']:
+                        sufix = sufix + message_prefix
 
-                    if check_time:
+                    user_input_short = textwrap.shorten(sufix, width=300, placeholder=" ")
+                    tts = gTTS(text=user_input_short, lang="pt", slow=False)
 
-                        if sufix != None:
+                    mp3_fp = BytesIO()
+                    tts.write_to_fp(mp3_fp)
+                    mp3_fp.seek(0)
 
-                            user_input_short = textwrap.shorten(sufix, width=300, placeholder=" ")
-                            tts = gTTS(text=user_input_short, lang="pt-br", slow=False)
+                    tts_playing = pygame.mixer.music.get_busy()
 
-                            mp3_fp = BytesIO()
-                            tts.write_to_fp(mp3_fp)
-                            mp3_fp.seek(0)
+                    while tts_playing:
+                        tts_playing = pygame.mixer.music.get_busy()
+                        time.sleep(2)
 
-                            tts_playing = pygame.mixer.music.get_busy()
+                    pygame.mixer.music.load(mp3_fp, "mp3")
+                    pygame.mixer.music.play()
 
-                            while tts_playing:
-                                tts_playing = pygame.mixer.music.get_busy()
-                                time.sleep(2)
+                    command_data_tts["last_use"] = current
 
-                            pygame.mixer.music.load(mp3_fp, "mp3")
-                            pygame.mixer.music.play()
-
-                            aliases = {
-                                "{username}": str(user),
-                                "{command}": str(command),
-                                "{prefix}": str(prefix),
-                                "{user_level}": str(user_type),
-                                "{sufix}": str(sufix),
-                                "{random}": str(random_value),
-                                "{value}": str(sufix),
-                            }
-
-                            command_data_tts["last_use"] = current
-
-                            utils.manipulate_json(
-                                "save",
-                                f"{utils.local_work('appdata_path')}/tiktoktbot/web/src/config/tts.json",
-                                command_data_tts,
-                            )
-
-                        else:
-
-                            data_append = {
-                                "type": "event",
-                                "message": utils.replace_all(utils.messages_file_load("command_sufix"), aliases),
-                                "user_input": "",
-                            }
-
-                            append_notice(data_append)
-
-                    else:
-                        data_append = {
-                            "type": "event",
-                            "message": utils.replace_all(message_delay, aliases),
-                            "user_input": "",
-                        }
-
-                        append_notice(data_append)
+                    utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/tts.json", command_data_tts, "save")
 
                 else:
 
-                    send_error_level(user, user_level, str(command))
+                    data_append = {
+                        "type": "command",
+                        "message": utils.replace_all(utils.messages_file_load("error_tts_no_text"), aliases),
+                        "user_input": "",
+                    }
+
+                    append_notice(data_append)
+
+            
+            else:
+
+                data_append = {
+                    "type": "command",
+                    "message": utils.replace_all(utils.messages_file_load("command_disabled"), aliases),
+                    "user_input": sufix,
+                }
+
+                append_notice(data_append)
+
+        elif compare_strings(command, command_data_balance["command"]):
+
+            command_info = command_data_balance
+
+            current, message_error, status = check_status(command_info, aliases)
+
+            if status:
+
+                if sufix != None:
+
+                    likes = user_data_load[user]["likes"]
+                    gifts = user_data_load[user]["gifts"]
+                    shares = user_data_load[user]["shares"]
+
+                    aliases_balance = {
+                        "{likes}" : likes,
+                        "{gifts}" : gifts,
+                        "{shares}" : shares
+                    }
+
+                    response = utils.replace_all(utils.messages_file_load("balance"), aliases)
+                    response = utils.replace_all(response, aliases_balance)
+
+                    data_append = {
+                        "type": "command",
+                        "message": response,
+                        "user_input": "",
+                    }
+
+                    append_notice(data_append)
+
+                    command_data_tts["last_use"] = current
+
+                    utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/balance.json", command_data_balance, "save")
+
+
+
+
+                else:
+
+                    data_append = {
+                        "type": "command",
+                        "message": utils.replace_all(utils.messages_file_load("command_sufix"), aliases),
+                        "user_input": "",
+                    }
+
+                    append_notice(data_append)
+
+            
             else:
 
                 data_append = {
@@ -3419,7 +3471,7 @@ def commands_module(data) -> None:
 
         data_append = {
             "type": "command",
-            "message": utils.replace_all(utils.messages_file_load("command_disabled"), aliases),
+            "message": utils.replace_all(utils.messages_file_load("commands_disabled"), aliases),
             "user_input": sufix,
         }
 
@@ -3464,31 +3516,29 @@ def update_goal(goal_type, ammount):
             if goal_data[goal_type]["event"] == "double":
                 
                 goal = int(goal_data[goal_type]["goal"]) * 2
+                goal_data[goal_type]["goal"] = goal
 
             elif goal_data[goal_type]["event"] == "add":
                 
-                if goal_data[goal_type]["goal_after"] == "":
-                    
-                    goal = int(goal_data[goal_type]["goal"]) + int(goal_data[goal_type]["goal"])
+                goal = int(goal_data[goal_type]["goal"]) + int(goal_data[goal_type]["goal_after"])
+                goal_data[goal_type]["goal"] = goal
 
-                    goal_data[goal_type]["goal_after"] = goal
-                    goal_data[goal_type]["goal"] = goal
+            elif goal_data[goal_type]["event"] == "multiply": 
 
-                else:
-                    
-                    goal = int(goal_data[goal_type]["goal"]) + int(goal_data[goal_type]["goal_after"])
-                    goal_data[goal_type]["goal"] = goal
+                goal = int(goal_data[goal_type]["goal"]) * int(goal_data[goal_type]["goal_after"])
+                goal_data[goal_type]["goal"] = goal
+
             else:
                 
                 goal = int(goal_data[goal_type]["goal"])
-            
+
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","save",goal_data)
+
             if goal_data[goal_type]["sound_status"] == 1 and goal_data[goal_type]["sound_file"] != "":
                 
                 play_sound(goal_data[goal_type]["sound_file"],goal_data[goal_type]["sound_volume"])
                 
                 
-            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","save",goal_data)
-
             data_goal = {
                 "type": "update_goal",
                 "type_goal": goal_type,
@@ -3546,12 +3596,19 @@ def update_roles(data):
 
             if user in user_data_load:
                 if user_data_load[user]["shares"] != "":
-                    user_shares = int(user_data_load[user]["shares"])
-                    user_data_load[user]["shares"] = user_shares + 1
-                else:
-                    user_data_load[user]["shares"] = user_shares
+                    if user_data_load[user]["shares"] == 0:
 
-                if not "shares" in roles and (user_data_load[user]["shares"]) > int(chat_data["share-role"]):
+                        user_data_load[user]["shares"] = 1
+
+                    else:
+
+                        user_shares = int(user_data_load[user]["shares"])
+                        user_data_load[user]["shares"] = user_shares + 1
+                else:
+
+                    user_data_load[user]["shares"] = 1
+
+                if not "shares" in roles and int(user_data_load[user]["shares"]) > int(chat_data["share-role"]):
                     roles.append("shares")
 
         elif type_id == "follow":
@@ -3739,35 +3796,54 @@ async def on_connect(event):
 
     activity()
 
+    new_room = tiktok_thread.client.room_id
+
     if not reconn:
 
-        like_list = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/likes.json","load")
-        
-        like_list = {
-            "likes" : {
-                
+        goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
+
+        room_id_store = goal_data['room']
+
+        if room_id_store != new_room:
+
+            goal_data['room'] = new_room
+
+            goal_data["diamonds"]["total_diamonds"] = 0
+            goal_data["gift"]["total_gifts"] = 0
+            goal_data["share"]["total_shares"] = 0
+            goal_data["max_viewer"]["total_viewer"] = 0
+            goal_data["follow"]["total_follow"] = 0
+            goal_data["likes"]["total_likes"] = 0
+
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","save",goal_data)
+
+            like_list = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/likes.json","load")
+            
+            like_list = {
+                "likes" : {
+                    
+                }
             }
-        }
-        
-        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/likes.json","save",like_list)
-        
-        join_list = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/joins.json","load")
-        
-        join_list = [] 
-        
-        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/joins.json","save",join_list)
+            
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/likes.json","save",like_list)
+            
+            join_list = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/joins.json","load")
+            
+            join_list = [] 
+            
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/joins.json","save",join_list)
 
-        data_append = {
-            "type": "event",
-            "message": utils.messages_file_load(f"event_ttk_connect"),
-            "user_input": "",
-        }
-        
-        append_notice(data_append)
+            data_append = {
+                "type": "event",
+                "message": utils.messages_file_load(f"event_ttk_connect"),
+                "user_input": "",
+            }
+            
+            append_notice(data_append)
 
-        toast("Conectado ao chat do TikTok.")
-        
-        send_discord_webhook({"type_id": "live_start"})
+            toast("Conectado ao chat do TikTok.")
+            
+            send_discord_webhook({"type_id": "live_start"})
 
     else:
         
@@ -3874,6 +3950,12 @@ async def on_like(event):
                 }
 
                 append_notice(data_append)
+
+        goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
+
+        goal_data["likes"]["total_likes"] = total_likes
+
+        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json", "save", goal_data)
 
         update_goal("likes", total_likes)
 
@@ -4000,15 +4082,21 @@ async def on_gift(event):
                 
                 total_gifts = int(goal_data["gift"]["total_gifts"]) + int(event.gift.count)
                 goal_data["gift"]["total_gifts"] = total_gifts
+
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json", "save", goal_data)
+
                 update_goal("gift", total_gifts)
 
+            goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
 
             diamonds = int(gift_diamonds) * int(event.gift.count)
             total_diamonds = int(goal_data["diamonds"]["total_diamonds"]) + int(diamonds)
             goal_data["diamonds"]["total_diamonds"] = int(total_diamonds)
-            update_goal("diamonds", total_diamonds)
 
             utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json", "save", goal_data)
+            
+            update_goal("diamonds", total_diamonds)
+
             
             if gift_name in gifts_data:
 
@@ -4061,19 +4149,24 @@ async def on_gift(event):
 
             goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
 
-
             if int(gift_id) == int(goal_data["gift"]["gift"]):
                 
                 total_gifts = goal_data["gift"]["total_gifts"] + int(event.gift.count)
                 goal_data["gift"]["total_gifts"] = total_gifts
+
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","save",goal_data)
+
                 update_goal("gift", total_gifts)
 
+            goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
+                
             diamonds = int(gift_diamonds)
             total_diamonds = int(goal_data["diamonds"]["total_diamonds"]) + int(diamonds)
             goal_data["diamonds"]["total_diamonds"] = total_diamonds
-            update_goal("diamonds", total_diamonds)
 
             utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","save",goal_data)
+
+            update_goal("diamonds", total_diamonds)
             
             if gift_name in gifts_data:
 
@@ -4138,6 +4231,12 @@ async def on_follow(event):
 
         update_roles(data_roles)
 
+        goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
+
+        goal_data["follow"]["total_follow"] = event.total_followers
+
+        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json", "save", goal_data)
+
         update_goal("follow", event.total_followers)
 
         data = {"goal": goal_data["follow"]["goal"], "total": event.total_followers}
@@ -4155,6 +4254,7 @@ async def on_share(event):
     activity()
 
     try:
+        
         user_id = event.user.unique_id
         
         event_config_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_not.json", "load")
@@ -4168,7 +4268,13 @@ async def on_share(event):
         
         utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","save",goal_data)
 
-        data_roles = {"type_id": "share", "user": user_id}
+        data_roles = {"type_id": "shares", "user": user_id}
+
+        goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
+
+        goal_data["share"]["total_share"] = total_shares
+
+        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json", "save", goal_data)
 
         update_roles(data_roles)
         update_goal("share", total_shares)
@@ -4205,11 +4311,11 @@ async def on_viewer_update(event):
             
             goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
 
-            max_specs = int(goal_data["max_viewer"]["max_specs"])
+            max_specs = int(goal_data["max_viewer"]["total_viewer"])
 
             if int(event.viewer_count) > max_specs:
                 
-                goal_data["max_viewer"]["max_specs"] = int(event.viewer_count)
+                goal_data["max_viewer"]["total_viewer"] = int(event.viewer_count)
                 update_goal("max_viewer", int(event.viewer_count))
 
 
@@ -4339,21 +4445,25 @@ def webview_start_app(app_mode):
     global window, window_chat, window_events, window_chat_open
 
     def set_window_chat_open():
+        
         global window_chat_open
 
         window_chat_open = True
 
     def set_window_chat_close():
+        
         global window_chat_open
 
         window_chat_open = False
 
     def set_window_events_open():
+        
         global window_events_open
 
         window_events_open = True
 
     def set_window_events_close():
+        
         global window_events_open
 
         window_events_open = False
@@ -4440,8 +4550,6 @@ def close():
 
     tiktok_thread.close()
 
-    lock_manager.unlock()
-    
     sys.exit(0)
 
 
@@ -4474,10 +4582,9 @@ def start_app():
                     f.writelines(lines[-1000:])
 
         event_log_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","load")
-        event_list = event_log_data["event-list"]
 
-        if len(event_list) > 100:
-            event_list = event_list[-100:]
+        if len(event_log_data["event-list"]) > 100:
+            event_list = event_log_data["event-list"][-100:]
             event_log_data["event-list"] = event_list
 
         utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","save",event_log_data)
@@ -4498,7 +4605,7 @@ def start_app():
         pygame.mixer.init()
 
         threading.Thread(target=loopcheck, args=(), daemon=True).start()
-        threading.Thread(target=sk.start_server, args=("localhost", 7688), daemon=True).start()
+        threading.Thread(target=sk.start_server, args=("127.0.0.1", 7688), daemon=True).start()
         threading.Thread(target=check_activity, args=(), daemon=True).start()
 
         tiktok_thread.run()

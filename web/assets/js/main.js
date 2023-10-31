@@ -650,8 +650,6 @@ async function userdata_js(type_id,data){
 
           userdata_parse = JSON.parse(userdata_parse)
 
-          console.log(userdata_parse)
-
           if ($.fn.DataTable.isDataTable("#userdata_table")) {
               $('#userdata_table').DataTable().clear().draw();
               $('#userdata_table').DataTable().destroy();

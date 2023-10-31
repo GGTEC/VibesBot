@@ -1,6 +1,7 @@
 {
     "error_tts_disabled": "{username} --> O modulo de texto-para-fala está desativado.",
     "error_tts_no_text": "{username} -->  Você deve fornecer um texto para ser falado",
+    "tts_prefix": "{username} disse = ",
     "error_user_level": "{username} --> Somente usuários com permissão {user_level} ou maior podem usar o comando = '{command}'.",
     "giveaway_response_win": "Parabéns {username} você ganhou o sorteio.",
     "giveaway_response_user_add": "O usuário {username} foi adicionado no sorteio.",
@@ -41,6 +42,7 @@
     "command_volume_response": "{username} --> O Volume atual é {volume}",
     "command_value": "{username} É necessário inserir um valor ou texto para executar esse comando.",
     "command_string": "{username} É necessário inserir um nome de usuário para executar o comando ex. !comando usuário .",
+    "command_cost" : "{username} É necessário {cost} {cost_type} para executar este comando.",
     "music_blacklist": "Não foi possivel reproduzir {music} Essa musica ou partes do nome dela foram encontrados na blacklist",
     "cmd_created": "O comando foi criado",
     "cmd_edited": "O comando foi editado",

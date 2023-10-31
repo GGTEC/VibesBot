@@ -20,7 +20,7 @@ class TikTokLiveThread():
             "sid_guard": authdata.SIDGUARD(),
         }
 
-        self.username = 'chorao.codm'
+        self.username = authdata.USERNAME()
         self.cookies = cookies
         self.listener_callbacks = listener_callbacks
         self.client = None
