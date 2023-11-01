@@ -451,7 +451,7 @@
                   <div class="form-group mt-3">
                     <label for="new-command">Comando</label>
                     <input type="text" class="form-control bg-dark mt-3" id="new-command" placeholder="Digite o comando" required pattern="[^\s]+" />
-                    <p class="text-muted text-sm-start m-0">Utilize qualquer prefixo (!,@,#,$), O comando não deve conter espaços</p>
+                    <p class="small mt-2">Utilize qualquer prefixo (!,@,#,$), O comando não deve conter espaços</p>
                   </div>
                   <div class="form-group mt-2">
                     <label for="new-delay">Tempo de recarga</label>
@@ -577,7 +577,7 @@
                       </button>
                     </div>
                   </div>
-                  <div class="form-group mt-3 mb-3">
+                  <div class="form-group mt-3">
                     <div class="row mt-3">
                       <div class="col">
                         <p class="form-check-label">
@@ -595,13 +595,13 @@
                   <div class="form-group mt-3">
                     <label for="edit-command">Comando</label>
                     <input type="text" class="form-control bg-dark mt-3" id="edit-command" placeholder="Digite o comando" required pattern="[^\s]+" />
-                    <p class="text-muted text-sm-start m-0">Utilize qualquer prefixo (!,@,#,$), O comando não deve conter espaços</p>
+                    <p class="small mt-2">Utilize qualquer prefixo (!,@,#,$), O comando não deve conter espaços</p>
                   </div>
-                  <div class="form-group mt-2">
+                  <div class="form-group mt-3">
                     <label for="edit-delay">Tempo de recarga</label>
                     <input type="number" class="form-control bg-dark mt-3" min="5" value="5" id="edit-delay" required />
                   </div>
-                  <div class="form-group mt-4">
+                  <div class="form-group mt-3">
                     <label for="user-level-command-edit">Permissão</label>
                     <select class="form-control bg-dark mt-3" id="user-level-command-edit" multiple>
                       <option value="spec">
@@ -627,7 +627,7 @@
                       </option>
                     </select>
                   </div>
-                  <div class="form-group mt-5">
+                  <div class="form-group mt-4">
                     <div class="row mt-3">
                       <div class="col">
                         <p class="form-check-label">
@@ -662,7 +662,7 @@
                       <input type="number" class="form-control bg-dark mt-3" id="command-cost-edit"/>
                     </div>
                   </div>
-                  <div class="form-group mt-5 mb-2">
+                  <div class="form-group mt-3">
                     <div class="row mt-3">
                       <div class="col">
                         <p class="form-check-label">
@@ -775,10 +775,6 @@
               <div class="internal-block">
                 <div class="bg-dark form-block mt-0" id="command_player_form" hidden>
                   <div class="form-group mt-3">
-                    <label for="command-player-command">Comando</label>
-                    <input type="text" class="form-control bg-dark mt-3" id="command-player-command" />
-                  </div>
-                  <div class="form-group mt-4">
                     <div class="row mt-3">
                       <div class="col">
                         <p class="form-check-label">Status do comando</p>
@@ -791,7 +787,11 @@
                       </div>
                     </div>
                   </div>
-                  <div class="form-group mt-2">
+                  <div class="form-group mt-3">
+                    <label for="command-player-command">Comando</label>
+                    <input type="text" class="form-control bg-dark mt-3" id="command-player-command" />
+                  </div>
+                  <div class="form-group mt-3">
                     <label for="command-player-delay">Tempo de recarga</label>
                     <input type="number" min="5" value="5" class="form-control bg-dark mt-3" id="command-player-delay" />
                   </div>
@@ -821,7 +821,7 @@
                       </option>
                     </select>
                   </div>
-                  <div class="form-group mt-5">
+                  <div class="form-group mt-4">
                     <div class="row mt-3">
                       <div class="col">
                         <p class="form-check-label">
@@ -837,7 +837,7 @@
                     </div>
                   </div>
                   <div id="command-costdiv-player" hidden>
-                    <div class="form-group mb-3 mt-4">
+                    <div class="form-group  mt-3">
                       <label for="command-cost-type">Tipo de custo</label>
                       <select class="form-control bg-dark mt-3" id="command-cost-type-player">
                         <option value="gifts">
@@ -851,12 +851,12 @@
                         </option>
                       </select>
                     </div>
-                    <div class="form-group mt-2">
+                    <div class="form-group mt-3">
                       <label for="command-cost-player">Custo do comando</label>
                       <input type="number" class="form-control bg-dark mt-3" id="command-cost-player"/>
                     </div>
                   </div>
-                  <button class="btn bt-submit mt-5" type="button" onclick="sr_config_js('event','save_command')">
+                  <button class="btn bt-submit mt-4" type="button" onclick="sr_config_js('event','save_command')">
                     Salvar
                   </button>
                 </div>
@@ -912,10 +912,6 @@
               <div class="internal-block">
                 <div class="bg-dark form-block mt-0" id="command_queue_form" hidden>
                   <div class="form-group mt-3">
-                    <label for="command-queue-command">Comando</label>
-                    <input type="text" class="form-control bg-dark mt-3" id="command-queue-command" />
-                  </div>
-                  <div class="form-group mt-4">
                     <div class="row mt-3">
                       <div class="col">
                         <p class="form-check-label">Status do comando</p>
@@ -928,7 +924,11 @@
                       </div>
                     </div>
                   </div>
-                  <div class="form-group mt-2">
+                  <div class="form-group mt-3">
+                    <label for="command-queue-command">Comando</label>
+                    <input type="text" class="form-control bg-dark mt-3" id="command-queue-command" />
+                  </div>
+                  <div class="form-group mt-3">
                     <label for="command-player-delay">Tempo de recarga</label>
                     <input type="number" min="5" value="5" class="form-control bg-dark mt-3" id="command-queue-delay" />
                   </div>
@@ -958,7 +958,7 @@
                       </option>
                     </select>
                   </div>
-                  <div class="form-group mt-5">
+                  <div class="form-group mt-4">
                     <div class="row mt-3">
                       <div class="col">
                         <p class="form-check-label">
@@ -974,7 +974,7 @@
                     </div>
                   </div>
                   <div id="command-costdiv-queue" hidden>
-                    <div class="form-group mb-3 mt-4">
+                    <div class="form-group mt-3">
                       <label for="command-cost-type">Tipo de custo</label>
                       <select class="form-control bg-dark mt-3" id="command-cost-type-queue">
                         <option value="gifts">
@@ -988,12 +988,12 @@
                         </option>
                       </select>
                     </div>
-                    <div class="form-group mt-2">
+                    <div class="form-group mt-3">
                       <label for="command-cost-queue">Custo do comando</label>
                       <input type="number" class="form-control bg-dark mt-3" id="command-cost-queue"/>
                     </div>
                   </div>
-                  <button class="btn bt-submit mt-5" type="button" onclick="queue_js('save_commands')">
+                  <button class="btn bt-submit mt-4" type="button" onclick="queue_js('save_commands')">
                     Salvar
                   </button>
                 </div>
@@ -1166,15 +1166,30 @@
                 <div class="bg-dark form-block">
                   <h5>Comando para texto-falado (TTS)</h5>
                   <div class="form-group mt-3">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Status do comando
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="command-tts-status" type="checkbox" />
+                          <label for="command-tts-status" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mt-3">
                     <label for="tts-command">Comando</label>
                     <input type="text" class="form-control bg-dark mt-3" id="tts-command" placeholder="Digite o comando" required pattern="[^\s]+" />
-                    <p class="text-muted text-sm-start m-0">Utilize qualquer prefixo (!,@,#,$), O comando não deve conter espaços</p>
+                    <p class="small mt-2">Utilize qualquer prefixo (!,@,#,$), O comando não deve conter espaços</p>
                   </div>
-                  <div class="form-group mt-2">
+                  <div class="form-group mt-3">
                     <label for="tts-delay">Tempo de recarga</label>
                     <input type="number" class="form-control bg-dark mt-3" min="5" value="5" id="tts-delay" required />
                   </div>
-                  <div class="form-group mt-4">
+                  <div class="form-group mt-3">
                     <label for="user-level-tts">Permissão</label>
                     <select class="form-control bg-dark mt-3" id="user-level-tts" multiple>
                       <option value="spec">
@@ -1200,7 +1215,7 @@
                       </option>
                     </select>
                   </div>
-                  <div class="form-group mt-3">
+                  <div class="form-group mt-4">
                     <div class="row mt-3">
                       <div class="col">
                         <p class="form-check-label">
@@ -1220,21 +1235,6 @@
                     <div class="row mt-3">
                       <div class="col">
                         <p class="form-check-label">
-                          Status do comando
-                        </p>
-                      </div>
-                      <div class="col-2">
-                        <div class="material-switch bg-white d-flex justify-content-end">
-                          <input id="command-tts-status" type="checkbox" />
-                          <label for="command-tts-status" class="form-check-label"></label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="form-group mt-5">
-                    <div class="row mt-3">
-                      <div class="col">
-                        <p class="form-check-label">
                           Ativar custo para utilizar comando
                         </p>
                       </div>
@@ -1247,7 +1247,7 @@
                     </div>
                   </div>
                   <div id="command-costdiv-tts" hidden>
-                    <div class="form-group mb-3 mt-4">
+                    <div class="form-group mt-3">
                       <label for="command-cost-type-tts">Tipo de custo</label>
                       <select class="form-control bg-dark mt-3" id="command-cost-type-tts">
                         <option value="gifts">
@@ -1261,7 +1261,7 @@
                         </option>
                       </select>
                     </div>
-                    <div class="form-group mt-2">
+                    <div class="form-group mt-3">
                       <label for="command-cost-tts">Custo do comando</label>
                       <input type="number" class="form-control bg-dark mt-3" id="command-cost-tts"/>
                     </div>
@@ -1273,15 +1273,30 @@
                 <div class="bg-dark form-block">
                   <h5>Comando para saldo (Likes, Moedas, Compartilhamentos)</h5>
                   <div class="form-group mt-3">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Status do comando
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="command-balance-status" type="checkbox" />
+                          <label for="command-balance-status" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mt-3">
                     <label for="balance-command">Comando</label>
                     <input type="text" class="form-control bg-dark mt-3" id="balance-command" placeholder="Digite o comando" required pattern="[^\s]+" />
-                    <p class="text-muted text-sm-start m-0">Utilize qualquer prefixo (!,@,#,$), O comando não deve conter espaços</p>
+                    <p class="small mt-2">Utilize qualquer prefixo (!,@,#,$), O comando não deve conter espaços</p>
                   </div>
-                  <div class="form-group mt-2">
+                  <div class="form-group mt-3">
                     <label for="balance-delay">Tempo de recarga</label>
                     <input type="number" class="form-control bg-dark mt-3" min="5" value="5" id="balance-delay" required />
                   </div>
-                  <div class="form-group mt-4">
+                  <div class="form-group mt-3">
                     <label for="user-level-balance">Permissão</label>
                     <select class="form-control bg-dark mt-3" id="user-level-balance" multiple>
                       <option value="spec">
@@ -1307,22 +1322,7 @@
                       </option>
                     </select>
                   </div>
-                  <div class="form-group mt-3">
-                    <div class="row mt-3">
-                      <div class="col">
-                        <p class="form-check-label">
-                          Status do comando
-                        </p>
-                      </div>
-                      <div class="col-2">
-                        <div class="material-switch bg-white d-flex justify-content-end">
-                          <input id="command-balance-status" type="checkbox" />
-                          <label for="command-balance-status" class="form-check-label"></label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="form-group mt-5">
+                  <div class="form-group mt-4">
                     <div class="row mt-3">
                       <div class="col">
                         <p class="form-check-label">
@@ -1338,7 +1338,7 @@
                     </div>
                   </div>
                   <div id="command-costdiv-balance" hidden>
-                    <div class="form-group mb-3 mt-4">
+                    <div class="form-group mt-3">
                       <label for="command-cost-type-balance">Tipo de custo</label>
                       <select class="form-control bg-dark mt-3" id="command-cost-type-balance">
                         <option value="gifts">
@@ -1352,7 +1352,7 @@
                         </option>
                       </select>
                     </div>
-                    <div class="form-group mt-2">
+                    <div class="form-group mt-3">
                       <label for="command-cost-balance">Custo do comando</label>
                       <input type="number" class="form-control bg-dark mt-3" id="command-cost-balance"/>
                     </div>
@@ -2974,14 +2974,15 @@
                     <label for="select-event-type">Configurar exibição mensagens no registro de eventos (selecione para editar)</label>
                     <select class="form-control bg-dark mt-3" id="select-event-type" onchange="get_event_state(this,'get_state')">
                       <option value="events">Eventos gerais</option>
+                      <option value="music">Musica</option>
                       <option value="commands">Comandos</option>
                       <option value="follow">Seguidor</option>
-                      <option value="likes">Likes</option>
-                      <option value="gifts">Gifts</option>
+                      <option value="likes">Curtidas</option>
+                      <option value="gifts">Presentes</option>
+                      <option value="share">Compartilhamentos</option>
                       <option value="chest">Baús</option>
                       <option value="goal-start">Inicio de metas</option>
                       <option value="goal-end">Fim de metas</option>
-                      <option value="share">Compartilhamentos</option>
                       <option value="join">Entradas no chat</option>
                     </select>
                   </div>
@@ -3061,7 +3062,7 @@
             <div class="d-flex card bg-dark form-block align-self-center">
               <img src="./src/profile.png" class="rounded mx-auto d-block" width="150px" />
               <div class="card-body text-center">
-                <h4 class="card-title m-3">VibesBot V1.1.0</h4>
+                <h4 class="card-title m-3">VibesBot V1.1.1</h4>
               </div>
               <div class="card-footer">
                 <div class="form-group mt-3 mb-3 ">

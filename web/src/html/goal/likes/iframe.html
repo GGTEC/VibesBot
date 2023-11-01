@@ -33,7 +33,7 @@
                 } else {
 
                   var data_parse = JSON.parse(event.data);
-                  console.log(data_parse)
+                  
                   if (data_parse.type === 'save_html') {
 
                     iframe.contentDocument.documentElement.innerHTML = data_parse.html;

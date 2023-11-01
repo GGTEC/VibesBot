@@ -1,6 +1,5 @@
 function append_notice_chat(data){
 
-
   var chatBlockOut = document.getElementById('chat-block-out');
 
   var message_rec = data.message;
@@ -12,31 +11,21 @@ function append_notice_chat(data){
   var font_size_chat = data.font_size_chat;
 
   var colorEvents = data.color_events;
-  var showEventsChat = data.show_events_chat;
-  var showCommandsChat = data.show_commands_chat;
-  var showFollowChat = data.show_follow_chat;
-  var showLikesChat = data.show_likes_chat;
-  var showGiftsChat = data.show_gifts_chat;
-  var showChestChat = data.show_chest_chat;
-  var showShareChat = data.show_share_chat;
-  var showJoinChat = data.show_join_chat;
-  var showStartGoalChat = data.show_goal_start_chat;
-  var showEndGoalChat = data.show_goal_end_chat;
-
   var type_message = data.type_event;
 
 
   const variableMappingsChat = {
-    "command": showCommandsChat,
-    "event": showEventsChat,
-    "follow": showFollowChat,
-    "like": showLikesChat,
-    "gift": showGiftsChat,
-    "chest": showChestChat,
-    "share": showShareChat,
-    "join": showJoinChat,
-    "goal_end": showEndGoalChat,
-    "goal_start": showStartGoalChat,
+    "command": data.show_commands_chat,
+    "event": data.show_events_chat,
+    "music": data.show_music_chat,
+    "follow": data.show_follow_chat,
+    "like": data.show_likes_chat,
+    "gift": data.show_gifts_chat,
+    "chest": data.show_chest_chat,
+    "share": data.show_share_chat,
+    "join": data.show_join_chat,
+    "goal_end": data.show_goal_end_chat,
+    "goal_start": data.show_goal_start_chat,
   };
 
   if (variableMappingsChat[type_message] === 1) {

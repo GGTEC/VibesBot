@@ -83,6 +83,8 @@ def append_notice(data_receive):
             "type_event": data_receive["type"],
             "show_commands" : event_log_data["show-commands"],
             "show_commands_chat" : event_log_data["show-commands-chat"],
+            "show_music" : event_log_data["show-music"],
+            "show_music_chat" : event_log_data["show-music-chat"],
             "show_follow" : event_log_data["show-follow"],
             "show_follow_chat" : event_log_data["show-follow-chat"],
             "show_likes" : event_log_data["show-likes"],
@@ -122,6 +124,7 @@ def append_notice(data_receive):
 
             variableMappings = {
                 "command": event_log_data["show-commands-html"],
+                "music" : event_log_data["show-music-html"],
                 "event": event_log_data["show-events-html"],
                 "follow": event_log_data["show-follow-html"],
                 "like": event_log_data["show-likes-html"],
@@ -481,40 +484,6 @@ def select_file_py(type_id):
     return folder
 
 
-def get_command_list():
-    command_simple_data = utils.manipulate_json(
-        f"{utils.local_work('appdata_path')}/config/simple_commands.json",
-        "load",
-        None,
-    )
-    command_counter_data = utils.manipulate_json(
-        f"{utils.local_work('appdata_path')}/counter/commands.json",
-        "load",
-        None,
-    )
-    command_giveaway_data = utils.manipulate_json(
-        f"{utils.local_work('appdata_path')}/giveaway/commands.json",
-        "load",
-        None,
-    )
-    command_player_data = utils.manipulate_json(
-        f"{utils.local_work('appdata_path')}/player/config/commands.json",
-        "load",
-        None,
-    )
-
-    data = {
-        "commands_simple": [command_simple_data],
-        "commands_counter": [command_counter_data],
-        "commands_giveaway": [command_giveaway_data],
-        "commands_player": [command_player_data],
-    }
-
-    command_list_dump = json.dumps(data, ensure_ascii=False)
-
-    return command_list_dump
-
-
 def commands_py(data_receive):
     
     data = json.loads(data_receive)
@@ -805,7 +774,6 @@ def balance_command(data_receive):
         except Exception as e:
             toast('Ocorreu um erro ao salvar')
             utils.error_log(e)
-
 
 
 def giveaway_py(type_id, data_receive):
@@ -1198,8 +1166,7 @@ def queue(type_id, data_receive):
 
 def not_config_py(data_receive, type_id, type_not):
 
-    json_path = f"{utils.local_work('appdata_path')}/config/event_not.json"
-    event_config_data = utils.manipulate_json(json_path, "load")
+    event_config_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_not.json", "load")
 
     if type_id == "get":
 
@@ -1217,7 +1184,7 @@ def not_config_py(data_receive, type_id, type_not):
             event_config_data[type_not]["status"] = data["not"]
             event_config_data[type_not]["response_chat"] = data["response_chat"]
 
-            utils.manipulate_json(json_path, "save", event_config_data)
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_not.json", "save", event_config_data)
 
             toast("success")
 
@@ -1668,60 +1635,6 @@ def disclosure_py(type_id, data_receive):
         return disclosure_message
 
 
-def get_video_info(title):
-    
-
-        def remove_string(value):
-            try:
-                symbols = [["[", "]"], ["(", ")"], ['"', '"']]
-                for symbol in symbols:
-                    if value.find(symbol[0]) and value.find(symbol[1]):
-                        value = value.replace(
-                            value[
-                                (index := value.find(symbol[0])) : value.find(
-                                    symbol[1], index + 1
-                                )
-                                + 1
-                            ],
-                            "",
-                        ).strip()
-                return value
-            except:
-                return value
-
-        ydl_opts = {"skip_download": True, "quiet": True}
-
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-
-            try:
-                if validators.url(title):
-
-                    video_info = ydl.extract_info(title, download=False)
-                else:
-                    video_info = ydl.extract_info(f"ytsearch:{title}", download=False)["entries"][0]
-                
-                video_id = video_info.get("id", None)
-                video_url = f"https://www.youtube.com/watch?v={video_id}"
-                video_title = video_info.get("title", None)
-                video_length = video_info.get("duration", None)
-                video_thumb = video_info.get("thumbnail", None)
-
-                data = {
-                    "url": video_url,
-                    "title": remove_string(video_title),
-                    "thumb": video_thumb,
-                    "length": video_length,
-                }
-
-                result = namedtuple("result", data.keys())(*data.values())
-
-                return result
-            
-            except Exception as e:
-                if isinstance(e, DownloadError):
-                    return '404'
-
-
 def playlist_py(type_id, data):
 
     playlist_json_path = f"{utils.local_work('appdata_path')}/player/list_files/playlist.json"
@@ -1994,7 +1907,7 @@ def update_check(type_id):
             response_json = json.loads(response.text)
             version = response_json["tag_name"]
 
-            if version != "1.1.0":
+            if version != "1.1.1":
                 
                 return True
 
@@ -2008,6 +1921,63 @@ def update_check(type_id):
 
         url = "https://github.com/GGTEC/VibesBot/releases"
         webbrowser.open(url, new=0, autoraise=True)
+
+
+def get_video_info(title):
+
+    def remove_string(value):
+
+        try:
+            symbols = [["[", "]"], ["(", ")"], ['"', '"']]
+            for symbol in symbols:
+                if value.find(symbol[0]) and value.find(symbol[1]):
+                    value = value.replace(
+                        value[
+                            (index := value.find(symbol[0])) : value.find(
+                                symbol[1], index + 1
+                            )
+                            + 1
+                        ],
+                        "",
+                    ).strip()
+            return value
+        except:
+            return value
+
+    ydl_opts = {"skip_download": True, "quiet": True}
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+
+        try:
+
+            if validators.url(title):
+
+                video_info = ydl.extract_info(title, download=False)
+
+            else:
+
+                video_info = ydl.extract_info(f"ytsearch:{title}", download=False)["entries"][0]
+            
+            video_id = video_info.get("id", None)
+            video_url = f"https://www.youtube.com/watch?v={video_id}"
+            video_title = video_info.get("title", None)
+            video_length = video_info.get("duration", None)
+            video_thumb = video_info.get("thumbnail", None)
+
+            data = {
+                "url": video_url,
+                "title": remove_string(video_title),
+                "thumb": video_thumb,
+                "length": video_length,
+            }
+
+            result = namedtuple("result", data.keys())(*data.values())
+
+            return result
+        
+        except:
+            
+            return '404'
 
 
 def start_play(link, user):
@@ -2055,7 +2025,7 @@ def start_play(link, user):
         if response == "404":
 
             data_append = {
-                "type": "event",
+                "type": "music",
                 "message": utils.replace_all(utils.messages_file_load("music_process_error"), aliases),
                 "user_input": "",
             }
@@ -2106,7 +2076,7 @@ def start_play(link, user):
                 toast(f"Reproduzindo {music_name_short} - {music_artist}")
 
                 data_append = {
-                    "type": "event",
+                    "type": "music",
                     "message": utils.replace_all(utils.messages_file_load("music_playing"), aliases),
                     "user_input": "",
                 }
@@ -2129,7 +2099,7 @@ def start_play(link, user):
                 toast(f"Erro ao processar música {link} - {user}")
 
                 data_append = {
-                    "type": "event",
+                    "type": "music",
                     "message": utils.replace_all(utils.messages_file_load("music_process_cache_error"), aliases),
                     "user_input": "",
                 }
@@ -2142,9 +2112,8 @@ def start_play(link, user):
 
         toast(f"Erro ao processar música {link} - {user}")
 
-        
         data_append = {
-            "type": "event",
+            "type": "music",
             "message": utils.replace_all(utils.messages_file_load("music_process_cache_error"), {"{username}": user}),
             "user_input": "",
         }
@@ -2229,67 +2198,119 @@ def loopcheck():
             time.sleep(3)
 
 
-def process_redem_music(user_input, redem_by_user):
+def music_process(user_input, redem_by_user):
     
     user_input = user_input.strip()
-    
-    toast(f"Processando pedido {user_input} - {redem_by_user}")
     
     config_music_path = F"{utils.local_work('appdata_path')}/player/config/config.json"
     queue_json_path = F"{utils.local_work('appdata_path')}/player/list_files/queue.json"
 
     config_music_data = utils.manipulate_json(config_music_path, 'load')
-    
-    blacklist = config_music_data["blacklist"]
-    
-    max_duration = int(config_music_data["max_duration"])
-
     queue_data = utils.manipulate_json(queue_json_path, 'load')
     
+    blacklist = config_music_data["blacklist"]
+    max_duration = int(config_music_data["max_duration"])
+
     last_key = str(max(map(int, queue_data.keys()), default=0) + 1) if queue_data else "1"
 
     def start_process(user_input):
         
         try:
+            toast(f"Processando pedido {user_input} - {redem_by_user}")
+
             if not any(item in user_input for item in blacklist):
 
                 response = get_video_info(user_input)
 
-                music_name, video_url, music_length = response.title, response.url, response.length
+                if response == "404":
 
-                if music_length < max_duration:
+                    data_append = {
+                        "type": "music",
+                        "message": utils.replace_all(utils.messages_file_load("music_process_error"), aliases),
+                        "user_input": "",
+                    }
 
-                    queue_data[last_key] = {"MUSIC": video_url, "USER": redem_by_user, "MUSIC_NAME": music_name}
-                    utils.manipulate_json(queue_json_path, 'save', queue_data)
-
-                    aliases = {"{username}": redem_by_user, "{user_input}": video_url, "{music}": music_name}
-                    
-                    data_append = {"type": "event", "message": utils.replace_all(utils.messages_file_load("music_added_to_queue"), aliases), "user_input": ""}
                     append_notice(data_append)
-
+                
                 else:
-                    music_name_short = textwrap.shorten(music_name, width=13, placeholder="...")
-                    aliases = {"{max_duration}": str(max_duration), "{username}": str(redem_by_user),
-                               "{user_input}": str(user_input), "{music}": str(music_name),
-                               "{music_short}": str(music_name_short)}
-                    
-                    data_append = {"type": "event", "message": utils.replace_all(utils.messages_file_load("music_length_error"), aliases), "user_input": ""}
-                    append_notice(data_append)
+
+                    music_name, video_url, music_length = response.title, response.url, response.length
+
+                    if music_length < max_duration:
+
+                        queue_data[last_key] = {
+                            "MUSIC": video_url,
+                            "USER": redem_by_user, 
+                            "MUSIC_NAME": music_name
+                        }
+
+                        utils.manipulate_json(queue_json_path, 'save', queue_data)
+
+                        aliases = {
+                            "{username}": redem_by_user, 
+                            "{user_input}": video_url, 
+                            "{music}": music_name
+                        }
+                        
+                        data_append = {
+                            "type": "music", 
+                            "message": utils.replace_all(utils.messages_file_load("music_added_to_queue"), aliases), 
+                            "user_input": ""
+                        }
+
+                        append_notice(data_append)
+
+                    else:
+
+                        music_name_short = textwrap.shorten(music_name, width=13, placeholder="...")
+
+                        aliases = {
+                            "{max_duration}": str(max_duration), 
+                            "{username}": str(redem_by_user),
+                            "{user_input}": str(user_input),
+                            "{music}": str(music_name),
+                            "{music_short}": str(music_name_short)
+                        }
+                        
+                        data_append = {
+                            "type": "music", 
+                            "message": utils.replace_all(utils.messages_file_load("music_length_error"), aliases), 
+                            "user_input": ""
+                        }
+                        append_notice(data_append)
 
             else:
 
                 music_name_short = textwrap.shorten(music_name, width=13, placeholder="...")
-                aliases = {"{username}": str(redem_by_user), "{user_input}": str(user_input),
-                           "{music}": str(music_name), "{music_short}": str(music_name_short)}
+                aliases = {
+                    "{username}": str(redem_by_user),
+                    "{user_input}": str(user_input),
+                    "{music}": str(music_name),
+                    "{music_short}": str(music_name_short)
+                }
                 
-                data_append = {"type": "event", "message": utils.replace_all(utils.messages_file_load("music_blacklist"), aliases), "user_input": ""}
+                data_append = {
+                    "type": "music",
+                    "message": utils.replace_all(utils.messages_file_load("music_blacklist"), aliases), 
+                    "user_input": ""
+                }
                 append_notice(data_append)
 
         except Exception as e:
 
             utils.error_log(e)
-            aliases = {"{username}": str(redem_by_user), "{user_input}": str(user_input)}
-            data_append = {"type": "event", "message": utils.replace_all(utils.messages_file_load("music_add_error"), aliases), "user_input": ""}
+
+            aliases = {
+                "{username}": str(redem_by_user), 
+                "{user_input}": str(user_input)
+            }
+
+            data_append = {
+                "type": "music", 
+                "message": utils.replace_all(utils.messages_file_load("music_add_error"), aliases), 
+                "user_input": ""
+            }
+
             append_notice(data_append)
 
     def convert_address(original_address):
@@ -2305,7 +2326,11 @@ def process_redem_music(user_input, redem_by_user):
         if "youtube" in user_input or "youtu" in user_input:
             start_process(convert_address(user_input))
         else:
-            data_append = {"type": "STATUS_MUSIC_CONFIRM", "message": utils.messages_file_load("music_link_youtube"), "user_input": ""}
+            data_append = {
+                "type": "music", 
+                "message": utils.messages_file_load("music_link_youtube"),
+                "user_input": ""
+            }
             append_notice(data_append)
     else:
         start_process(user_input)
@@ -2962,7 +2987,7 @@ def commands_module(data) -> None:
                     
                     if sr_config_py('get-status','null') == 1:
 
-                        threading.Thread(target=process_redem_music, args=(user_input, username,), daemon=True).start()
+                        threading.Thread(target=music_process, args=(user_input, username,), daemon=True).start()
                         
                     else:
                         
@@ -3236,10 +3261,10 @@ def commands_module(data) -> None:
             else:
 
                 toast("O nome já está na lista")
-
+                
                 data_append = {
                     "type": "command",
-                    "message": utils.messages_file_load("response_namein_queue"),
+                    "message": utils.replace_all(utils.messages_file_load("response_namein_queue"),aliases),
                     "user_input": "",
                 }
 
@@ -3265,7 +3290,7 @@ def commands_module(data) -> None:
 
                     number = match.group(1)
 
-                    response = response.replace(match.group(0), ', '.join(queue_data[:number]))
+                    response = response.replace(match.group(0), ', '.join(queue_data[:int(number)]))
 
 
                 data_append = {
@@ -4512,6 +4537,7 @@ def webview_start_app(app_mode):
             tiktok_auth,
             tts_command,
             userdata_py,
+            balance_command
         )
 
         webview.start(storage_path=utils.local_work("datadir"),private_mode=True,debug=debug_status,http_server=True,http_port=7000)

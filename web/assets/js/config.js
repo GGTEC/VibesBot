@@ -1237,9 +1237,7 @@ function command_cost(type){
 
 function command_cost_get(type,value){
     
-    var checkbox = document.getElementById(`command-cost-status-${type}`);
-
-    if (checkbox.checked){
+    if (value == 1){
         document.getElementById(`command-costdiv-${type}`).hidden = false
     } else {
         document.getElementById(`command-costdiv-${type}`).hidden = true

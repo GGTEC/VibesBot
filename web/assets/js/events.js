@@ -18,46 +18,38 @@ function append_notice(data){
 
     var colorEvents = data.color_events;
     var dataShowEvents = data.data_show;
-
-    var showEvents = data.show_events;
-    var showEventsChat = data.show_events_chat;
-    var showCommands = data.show_commands;
-    var showCommandsChat = data.show_commands_chat;
-    var showFollow = data.show_follow;
-    var showFollowChat = data.show_follow_chat;
-    var showLikes = data.show_likes;
-    var showLikesChat = data.show_likes_chat;
-    var showGifts = data.show_gifts;
-    var showGiftsChat = data.show_gifts_chat;
-    var showChest = data.show_chest;
-    var showChestChat = data.show_chest_chat;
-    var showShare = data.show_share;
-    var showShareChat = data.show_share_chat;
-    var showJoin = data.show_join;
-    var showJoinChat = data.show_join_chat;
-    var showStartGoal = data.show_start_goal;
-    var showStartGoalChat = data.show_start_goal_chat;
-    var showEndGoal = data.show_end_goal;
-    var showEndGoalChat = data.show_end_goal_chat;
-
+    
     var type_message = data.type_event;
 
     const variableMappings = {
-      "command": showCommands,
-      "event": showEvents,
-      "follow": showFollow,
-      "like": showLikes,
-      "gift": showGifts,
-      "chest": showChest,
-      "share": showShare,
-      "join": showJoin,
-      "goal_start" : showStartGoal,
-      "goal_end": showEndGoal,
+      "command": data.show_commands,
+      "music": data.show_music,
+      "event": data.show_events,
+      "follow": data.show_follow,
+      "like": data.show_likes,
+      "gift": data.show_gifts,
+      "chest": data.show_chest,
+      "share": data.show_share,
+      "join": data.show_join,
+      "goal_start" : data.show_start_goal,
+      "goal_end": data.show_end_goal,
+    };
+
+    const variableMappingsChat = {
+      "command": data.show_commands_chat,
+      "music": data.show_music_chat,
+      "event": data.show_events_chat,
+      "follow": data.show_follow_chat,
+      "like": data.show_likes_chat,
+      "gift": data.show_gifts_chat,
+      "chest": data.show_chest_chat,
+      "share": data.show_share_chat,
+      "join": data.show_join_chat,
+      "goal_start" : data.show_start_goal_chat,
+      "goal_end": data.show_end_goal_chat,
     };
 
     if (variableMappings[type_message] === 1) {
-
-
 
       var time_chat = document.createElement("span");
       time_chat.setAttribute('data-passed',chat_time)
@@ -95,22 +87,8 @@ function append_notice(data){
 
       }
 
-
-
     }
 
-    const variableMappingsChat = {
-      "command": showCommandsChat,
-      "event": showEventsChat,
-      "follow": showFollowChat,
-      "like": showLikesChat,
-      "gift": showGiftsChat,
-      "chest": showChestChat,
-      "share": showShareChat,
-      "join": showJoinChat,
-      "goal_start" : showStartGoalChat,
-      "goal_end": showEndGoalChat,
-    };
 
     if (variableMappingsChat[type_message] === 1) {
 
@@ -262,6 +240,7 @@ async function start_events_log(div_id) {
 
           var showEvents = EventsParse["show-events"];
           var showCommands = EventsParse["show-commands"];
+          var showMusic = EventsParse["show-music"];
           var showFollow = EventsParse["show-follow"];
           var showLikes = EventsParse["show-likes"];
           var showGifts = EventsParse["show-gifts"];
@@ -306,6 +285,7 @@ async function start_events_log(div_id) {
           div_event.appendChild(message_div);
 
           const variableMappings = {
+            "music": showMusic,
             "command": showCommands,
             "event": showEvents,
             "follow": showFollow,

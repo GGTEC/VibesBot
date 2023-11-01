@@ -63,6 +63,8 @@ async function giveaway_js(event,type_id) {
 
             giveaway_command_edit.hidden = false
 
+            command_cost_get('giveaway',giveaway_parse.cost_status)
+
             command_giveaway_status.checked = giveaway_parse.status == 1 ? true : false;
             command_giveaway_cost_status.checked = giveaway_parse.cost_status == 1 ? true : false;
             command_giveaway_command.value = giveaway_parse.command

@@ -194,6 +194,8 @@ async function queue_js(type_id,item){
             
             queue_command_edit.hidden = false       
 
+            command_cost_get('queue',queue_parse.cost_status)
+
             command_queue_cost_status.checked = queue_parse.cost_status == 1 ? true : false;
             command_queue_status.checked = queue_parse.status == 1 ? true : false;
             command_queue_command.value = queue_parse.command
