@@ -122,9 +122,13 @@ function show_config_div(div_id) {
         sr_config_js('event','get')
     } else if (div_id == "chat-config-div"){
         chat_config('get')
+        ttk_gift('get_points')
     } else if (div_id == "events-config-div"){
         event_log_config('get')
+    } else if (div_id == "userdata-div"){
+        userdata_js('get')
     }
+
 
     document.getElementById("config-div").hidden = true;
     document.getElementById(div_id).hidden = false;
@@ -230,8 +234,7 @@ async function sr_config_js(event,type_id){
         var command_player_status = document.getElementById('command-player-status');
         var command_player_delay = document.getElementById('command-player-delay');
         var command_player_cost_status = document.getElementById('command-cost-status-player'); 
-        var command_player_cost = document.getElementById('command-cost-player'); 
-        var command_player_cost_type = document.getElementById("command-cost-type-player");
+        var command_player_cost = document.getElementById('command-cost-player');
 
         var command_data_parse = await window.pywebview.api.sr_config_py(type_id,select_command_player.value)
 
@@ -252,9 +255,6 @@ async function sr_config_js(event,type_id){
             $("#command-player-perm").selectpicker('val', command_data_parse.user_level);
             $("#command-player-perm").selectpicker("refresh");
 
-            $("#command-cost-type-player").selectpicker('val', command_data_parse.cost_type);
-            $("#command-cost-type-player").selectpicker("refresh");
-
         }
 
     } else if (type_id == 'save_command') {
@@ -268,7 +268,6 @@ async function sr_config_js(event,type_id){
         var command_player_delay = document.getElementById('command-player-delay');
         var command_player_cost_status = document.getElementById('command-cost-status-player'); 
         var command_player_cost = document.getElementById('command-cost-player'); 
-        var command_player_cost_type = document.getElementById("command-cost-type-player");
 
         var roles = []; 
 
@@ -284,7 +283,6 @@ async function sr_config_js(event,type_id){
             user_level: roles,
             status:command_player_status,
             cost: command_player_cost.value,
-            cost_type: command_player_cost_type.value,
             cost_status: command_player_cost_status
         }
 
@@ -387,7 +385,7 @@ async function sr_config_js(event,type_id){
     } 
 }
 
-function setElementState(elementId, value) {
+async function setElementState(elementId, value) {
 
     var element = document.getElementById(elementId);
 
@@ -427,6 +425,7 @@ async function get_event_state(element){
         setElementState('show-event',data_parse["show-event"])
         setElementState('show-event-chat',data_parse["show-event-chat"])
         setElementState('show-event-html',data_parse["show-event-html"])
+        setElementState('show-event-alert',data_parse["show-event-alert"])
 
     }
 }   
@@ -472,8 +471,9 @@ async function event_log_config(type_id){
         data["type_id"] = type_id;
         data["type"] = element.value;
         data["show-event"] = document.getElementById('show-event').checked ? 1 : 0;
-        data["show-event-chat"] = document.getElementById('show-event-chat').checked ? 1 : 0;;
-        data["show-event-html"] = document.getElementById('show-event-html').checked ? 1 : 0;;
+        data["show-event-chat"] = document.getElementById('show-event-chat').checked ? 1 : 0;
+        data["show-event-html"] = document.getElementById('show-event-html').checked ? 1 : 0;
+        data["show-event-alert"] = document.getElementById('show-event-alert').checked ? 1 : 0;
 
         window.pywebview.api.event_log(JSON.stringify(data));
 
@@ -642,6 +642,15 @@ async function ttk_modal(button){
 
 }
 
+async function ttk_modal_points(button){
+
+    var id = button.getAttribute('data-id');
+    var gift_id_inp = document.getElementById('ttk-gift-id-point');
+    gift_id_inp.value = id
+    ttk_gift('modal-points')
+
+}
+
 async function ttk_gift(type_id){
 
     if (type_id == "get"){
@@ -668,6 +677,8 @@ async function ttk_gift(type_id){
 
                     const item = gift_data[key];
                     
+                    
+                    var gift_id = key
                     var gift_name = item.name
                     var gift_name_br = item.name_br
                     var diamonds = item.value
@@ -676,7 +687,7 @@ async function ttk_gift(type_id){
 
                     button_config.innerText = "Configurar";
                     button_config.classList.add('bnt','bt-submit')
-                    button_config.setAttribute('data-id', `${gift_name}`)
+                    button_config.setAttribute('data-id', `${gift_id}`)
                     button_config.setAttribute('onclick', `ttk_modal(this)`)
 
                     dataTableData.push([
@@ -729,8 +740,88 @@ async function ttk_gift(type_id){
             global_gift_volume.value = rec_data.volume;
         }
         
+    } else if (type_id == "get_points"){
+
+        data = {
+            type_id : "get",
+        }
+
+        var data = JSON.stringify(data);
+
+        var rec = await window.pywebview.api.tiktok_gift(data);
+    
+        if (rec) {
+
+            rec_data = JSON.parse(rec)
+
+            var dataTableData = [];
+
+            var gift_data = rec_data.gifts
+
+            for (const key in gift_data) {
+
+                if (gift_data.hasOwnProperty(key)) {
+
+                    const item = gift_data[key];
+                    
+                    var gift_id = key
+                    var gift_name = item.name
+                    var gift_name_br = item.name_br
+                    var points = item.points
+                    
+                    var button_config = document.createElement("button");
+
+                    button_config.innerText = "Configurar";
+                    button_config.classList.add('bnt','bt-submit')
+                    button_config.setAttribute('data-id', `${gift_id}`)
+                    button_config.setAttribute('onclick', `ttk_modal_points(this)`)
+
+                    dataTableData.push([
+                        gift_name,
+                        gift_name_br,
+                        points,
+                        button_config.outerHTML
+                    ]);
+
+                }
+            }
+
+
+            if ($.fn.DataTable.isDataTable("#giftlist_points_table")) {
+
+                $('#giftlist_points_table').DataTable().clear().draw();
+                $('#giftlist_points_table').DataTable().destroy();
+            }
+
+            var table = $('#giftlist_points_table').DataTable( {
+                destroy: true,
+                scrollX: true,
+                scrollY: '300px',
+                paging: false,
+                ordering:  true,
+                retrieve : false,
+                processing: true,
+                responsive: false,
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/pt-BR.json'
+                },
+                columns: [
+                    { title: 'ID',"searchable": true },
+                    { title: 'Nome' },
+                    { title: 'Pontos' },
+                    { title: 'Ação' }
+                ]
+            } );
+
+            for (var i = 0; i < dataTableData.length; i++) {
+                table.row.add(dataTableData[i]).draw();
+            }
+
+        }
+        
     } else if (type_id == "modal"){
 
+        var gift_name = document.getElementById('gift-name');
         var gift_sound = document.getElementById('file-select-sound-gift');
         var gift_status = document.getElementById('gift-sound-status');
         var gift_volume_sound = document.getElementById('audio-volume-ttk-gift');
@@ -751,6 +842,7 @@ async function ttk_gift(type_id){
 
             $("#gift-modal").modal("show");
 
+            gift_name.value = gift_rec_data.name
             gift_sound.value = gift_rec_data.audio
             gift_status.checked = gift_rec_data.status == 1 ? true : false;
             gift_volume_sound.value = gift_rec_data.volume;
@@ -760,8 +852,57 @@ async function ttk_gift(type_id){
 
         
         
+    } else if (type_id == "modal-points"){
+
+        var gift_points = document.getElementById('gift-point');
+        var gift_points_status = document.getElementById('gift-global-point-status');
+        var gift_id_inp_point = document.getElementById('ttk-gift-id-point');
+
+        data = {
+            type_id : "get_gift_info",
+            id : gift_id_inp_point.value
+        }
+
+        var data = JSON.stringify(data);
+
+        var gift_data = await window.pywebview.api.tiktok_gift(data);
+
+        if (gift_data){
+
+            gift_rec_data = JSON.parse(gift_data)
+
+            $("#gift-points-modal").modal("show");
+
+            gift_points_status.checked = gift_rec_data.points_status == 1 ? true : false;
+            gift_points.value = gift_rec_data.points;
+
+            document.getElementById('save-gift-points').setAttribute('onclick',`ttk_gift('save_point_gift')`)
+        }
+        
+    } else if (type_id == "save_point_gift"){ 
+
+        var gift_points = document.getElementById('gift-point');
+        var gift_points_status = document.getElementById('gift-global-point-status');
+
+        var gift_status = gift_points_status.checked ? 1 : 0;
+
+        var gift_id_inp = document.getElementById('ttk-gift-id-point');
+
+        data = {
+            type_id : "save_point_gift",
+            id : gift_id_inp.value,
+            status: gift_status,
+            points : gift_points.value
+        }
+
+        var data = JSON.stringify(data);
+
+        window.pywebview.api.tiktok_gift(data)
+        gift_id_inp.value = ''
+
     } else if (type_id == "save_sound_gift"){ 
 
+        var gift_name = document.getElementById('gift-name');
         var gift_sound = document.getElementById('file-select-sound-gift')
         var gift_status = document.getElementById('gift-sound-status')
         var gift_volume_sound = document.getElementById('audio-volume-ttk-gift')
@@ -773,6 +914,7 @@ async function ttk_gift(type_id){
         data = {
             type_id : "save_sound_gift",
             id : gift_id_inp.value,
+            name: gift_name.value,
             status: gift_status,
             sound_loc : gift_sound.value,
             sound_volume : gift_volume_sound.value 
@@ -1084,7 +1226,6 @@ async function tts_command(type_id){
     var prefix = document.getElementById('command-tts-prefix');
     var cost_status = document.getElementById('command-cost-status-tts'); 
     var cost = document.getElementById('command-cost-tts'); 
-    var cost_type = document.getElementById("command-cost-type-tts");
  
     if (type_id == 'get'){
 
@@ -1113,9 +1254,6 @@ async function tts_command(type_id){
 
             $("#user-level-tts").selectpicker('val', rec_parse.user_level);
             $("#user-level-tts").selectpicker("refresh");
-
-            $("#command-cost-type-tts").selectpicker('val', rec_parse.cost_type);
-            $("#command-cost-type-tts").selectpicker("refresh");
     
         }
 
@@ -1139,7 +1277,6 @@ async function tts_command(type_id){
             delay: delay.value,
             user_level: roles,
             cost: cost.value,
-            cost_type: cost_type.value,
             cost_status: cost_status
         }
 
@@ -1152,22 +1289,27 @@ async function tts_command(type_id){
 
 async function balance_command(type_id){
 
+    var command_type = document.getElementById('command-balance-select');
+
     var command = document.getElementById('balance-command');
     var delay = document.getElementById('balance-delay');
     var status = document.getElementById('command-balance-status');
     var cost_status = document.getElementById('command-cost-status-balance'); 
-    var cost = document.getElementById('command-cost-balance'); 
-    var cost_type = document.getElementById("command-cost-type-balance");
- 
+    var cost = document.getElementById('command-cost-balance');
+
+
     if (type_id == 'get'){
+
+        document.getElementById("form-div-balance").hidden = false
 
         data = {
             type_id : 'get',
+            command : command_type.value
         }
 
         var data = JSON.stringify(data);
 
-        var rec = await window.pywebview.api.tts_command(data);
+        var rec = await window.pywebview.api.balance_command(data);
     
         if (rec) {
 
@@ -1180,13 +1322,9 @@ async function balance_command(type_id){
             status.checked = rec_parse.status == 1 ? true : false;
             cost_status.checked = rec_parse.cost_status == 1 ? true : false;
             cost.value = rec_parse.cost;
-            
 
             $("#user-level-balance").selectpicker('val', rec_parse.user_level);
             $("#user-level-balance").selectpicker("refresh");
-
-            $("#command-cost-type-balance").selectpicker('val', rec_parse.cost_type);
-            $("#command-cost-type-balance").selectpicker("refresh");
     
         }
 
@@ -1202,25 +1340,23 @@ async function balance_command(type_id){
 
         data = {
             type_id : 'save',
+            command_type : command_type.value,
             status : status,
             command : command.value,
             delay: delay.value,
             user_level: roles,
             cost: cost.value,
-            cost_type: cost_type.value,
             cost_status: cost_status
         }
+
 
         var data = JSON.stringify(data);
 
         window.pywebview.api.balance_command(data)
+        
+        document.getElementById("form-div-balance").hidden = true
 
     }
-}
-
-function show_userdata_modal(){
-    $("#userdata-modal").modal("show");
-    userdata_js('get')
 }
 
 function command_cost(type){
@@ -1243,4 +1379,94 @@ function command_cost_get(type,value){
         document.getElementById(`command-costdiv-${type}`).hidden = true
     }
 
+}
+
+async function rank_js(type_id){
+
+    var rankStatusCheckbox = document.getElementById('rank-status');
+    var rankIntervalInput = document.getElementById('rank-interval');
+    
+    var likesRankBackgroundTextInput = document.getElementById('likes-rank-background-text');
+    var likesRankBackgroundOpacityRange = document.getElementById('likes-rank-background-opacity');
+    var giftsRankBackgroundTextInput = document.getElementById('gifts-rank-background-text');
+    var giftsRankBackgroundOpacityRange = document.getElementById('gifts-rank-background-opacity');
+    var sharesRankBackgroundTextInput = document.getElementById('shares-rank-background-text');
+    var sharesRankBackgroundOpacityRange = document.getElementById('shares-rank-background-opacity');
+    var pointsRankBackgroundTextInput = document.getElementById('points-rank-background-text');
+    var pointsRankBackgroundOpacityRange = document.getElementById('points-rank-background-opacity');
+
+    var likesRankBackgroundOpacitySpan = document.getElementById('likes-rank-background-span');
+    var giftsRankBackgroundOpacitySpan = document.getElementById('gifts-rank-background-span');
+    var sharesRankBackgroundOpacitySpan = document.getElementById('shares-rank-background-span');
+    var pointsRankBackgroundOpacitySpan = document.getElementById('points-rank-background-span');
+
+    var LikesrangeOp = document.getElementById('rangevaluelikesrankopacity');
+    var giftsrangeOp = document.getElementById('rangevaluegiftsrankopacity'); 
+    var sharesrangeOp = document.getElementById('rangevaluesharesrankopacity');
+    var pointsrangeOp = document.getElementById('rangevaluepointsrankopacity');
+
+    var rankstatus = rankStatusCheckbox.checked;
+
+    if (type_id == 'get'){
+
+        data = {
+            type_id : 'get',
+        }
+
+        var data = JSON.stringify(data);
+
+        var rec = await window.pywebview.api.ranks_config(data);
+    
+        if (rec) {
+
+            rec_parse = JSON.parse(rec)
+
+            rankStatusCheckbox.checked = rec_parse.status ? true : false
+
+            rankIntervalInput.value = rec_parse.interval;
+
+            likesRankBackgroundTextInput.value = rec_parse.likes_bg;
+            likesRankBackgroundOpacityRange.value = rec_parse.likes_op;
+
+            giftsRankBackgroundTextInput.value = rec_parse.gifts_bg;
+            giftsRankBackgroundOpacityRange.value = rec_parse.gifts_op;
+            
+            sharesRankBackgroundTextInput.value = rec_parse.shares_bg;
+            sharesRankBackgroundOpacityRange.value = rec_parse.shares_op;
+
+            pointsRankBackgroundTextInput.value = rec_parse.points_bg;
+            pointsRankBackgroundOpacityRange.value = rec_parse.points_op;
+
+            likesRankBackgroundOpacitySpan.style.backgroundColor = rec_parse.likes_bg;
+            giftsRankBackgroundOpacitySpan.style.backgroundColor = rec_parse.gifts_bg;
+            sharesRankBackgroundOpacitySpan.style.backgroundColor = rec_parse.shares_bg;
+            pointsRankBackgroundOpacitySpan.style.backgroundColor = rec_parse.points_bg;
+
+            LikesrangeOp.innerHTML = rec_parse.likes_bg;
+            giftsrangeOp.innerHTML = rec_parse.gifts_op;
+            sharesrangeOp.innerHTML = rec_parse.shares_bg;
+            pointsrangeOp.innerHTML = rec_parse.points_bg;
+        
+        }
+
+    } else if (type_id == 'save'){
+
+        data = {
+            type_id : 'save',
+            status : rankstatus,
+            interval : rankIntervalInput.value,
+            likes_bg : likesRankBackgroundTextInput.value,
+            likes_op : likesRankBackgroundOpacityRange.value,
+            gifts_bg : giftsRankBackgroundTextInput.value,
+            gifts_op : giftsRankBackgroundOpacityRange.value,
+            shares_bg: sharesRankBackgroundTextInput.value,
+            shares_op: sharesRankBackgroundOpacityRange.value,
+            points_bg: pointsRankBackgroundTextInput.value,
+            points_op: pointsRankBackgroundOpacityRange.value
+        }
+
+        var data = JSON.stringify(data);
+
+        window.pywebview.api.ranks_config(data)
+    }
 }

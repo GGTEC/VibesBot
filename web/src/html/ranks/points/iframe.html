@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body style="overflow: hidden;">
+  <iframe id="myiframe" src="" frameborder="false" style="width: 100%;height: 100vh;"></iframe>
+  <script>
+    var iframe = document.getElementById('myiframe');
+    var socket;
+
+    let ConectionClosed = false
+    
+    function connectWebSocket() {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        return;
+      }
+
+      socket = new WebSocket("ws://localhost:7688");
+
+      socket.onopen = function (event) {
+        
+        socket.send(JSON.stringify(message = { type: "rank_points" }))
+
+      };
+
+      socket.onmessage = function (event) {
+
+        if (event.data === 'ping') {
+
+          socket.send(JSON.stringify(message = { type: "pong" }))
+
+        } else {
+
+          var data_parse = JSON.parse(event.data);
+
+          if (data_parse.type === 'rank_points') {
+
+            iframe.contentDocument.documentElement.innerHTML = data_parse.html;
+
+          } else if (data_parse.type == 'close') { ConectionClosed = true }
+        }
+      };
+
+      socket.onclose = function (error) {
+        if (ConectionClosed == false) { reconnectWebSocket(); }
+      };
+
+    }
+
+    function reconnectWebSocket() {
+      if (!socket || socket.readyState === WebSocket.CLOSED) {
+        setTimeout(function () { connectWebSocket(); }, 3000);
+      }
+    }
+
+    connectWebSocket();
+  </script>
+</body>
+
+</html>

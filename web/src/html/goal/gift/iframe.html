@@ -14,23 +14,24 @@
 
           var socket;
         
+          let ConectionClosed = false
+
           function connectWebSocket() {
+            
             if (socket && socket.readyState === WebSocket.OPEN) {
-              console.log("Já está conectado ao servidor");
               return;
             }
         
             socket = new WebSocket("ws://localhost:7688");
         
             socket.onopen = function(event) {
-              console.log("Conectado ao servidor");
-              socket.send('gift');
+              socket.send(JSON.stringify(message = {type: "gift"}))
             };
         
             socket.onmessage = function(event) {
                 if (event.data === 'ping') {
                   
-                    socket.send('pong');
+                  socket.send(JSON.stringify(message = {type: "pong"}))
 
                 } else {
 
@@ -61,28 +62,22 @@
                         value.textContent = `${value1}/${value2}`
                       }
 
-                    }
+                    } else if (data_parse.type == 'close'){ConectionClosed = true}
                 }
             };
         
             socket.onclose = function(error) {
-              console.error("Erro na conexão WebSocket:", error);
-              // Realizar a lógica de reconexão aqui, se desejado
-              reconnectWebSocket();
+              if (ConectionClosed == false){reconnectWebSocket();}
             };
+
           }
         
           function reconnectWebSocket() {
             if (!socket || socket.readyState === WebSocket.CLOSED) {
-              // Esperar um intervalo antes de tentar reconectar
-              setTimeout(function() {
-                console.log("Tentando reconectar...");
-                connectWebSocket();
-              }, 3000); // Tempo de espera em milissegundos (3 segundos no exemplo)
+              setTimeout(function() {connectWebSocket();}, 3000);
             }
           }
         
-          // Iniciar a conexão WebSocket
           connectWebSocket();
         </script>
     </body>

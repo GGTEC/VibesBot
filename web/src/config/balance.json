@@ -1,14 +1,52 @@
-{
-    "status": 1,
-    "command" : "!voz",
-    "user_level": [
-          "spec",
-          "follow",
-          "gifts"
-    ],
-    "delay": "5",
-    "last_use": 0,
-    "cost" : 0,
-    "cost_status" : 0,
-    "cost_type" : "None"
+{   
+    "user_balance" : {
+        "command" : "!saldo",
+        "status": 1,
+        "user_level": [
+              "spec",
+              "follow"
+        ],
+        "delay": "5",
+        "last_use": 0,
+        "cost" : 0,
+        "cost_status" : 0,
+        "cost_type" : "None"
+    },
+    "mod_balance" : {
+        "command" : "!baluser",
+        "status": 1,
+        "user_level": [
+              "spec",
+              "follow"
+        ],
+        "delay": "5",
+        "last_use": 0,
+        "cost" : 0,
+        "cost_status" : 0,
+        "cost_type" : "None"
+    },
+    "mod_balance_take" : {
+        "command" : "!baltake",
+        "status": 1,
+        "user_level": [
+              "moderador"
+        ],
+        "delay": "5",
+        "last_use": 0,
+        "cost" : 0,
+        "cost_status" : 0,
+        "cost_type" : "None"
+    },
+    "mod_balance_give" : {
+        "command" : "!balgive",
+        "status": 1,
+        "user_level": [
+              "moderador"
+        ],
+        "delay": "5",
+        "last_use": 0,
+        "cost" : 0,
+        "cost_status" : 0,
+        "cost_type" : "None"
+    }
 }

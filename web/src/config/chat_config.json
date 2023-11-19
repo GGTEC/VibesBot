@@ -3,12 +3,13 @@
       "chat-color-border": 1,
       "chat-name-select": "Green",
       "chat-border-select": "Green",
+      "show-user-picture" : 0,
       "font-size": "18",
       "wrapp-message": 1,
       "data-show": 1,
       "type-data": "current",
       "time-format": "%H:%M",
       "like-role": "10000",
-      "gift-role": "1000000",
-      "share-role" : ""
+      "gift-role": "100",
+      "share-role" : "100"
 }

@@ -357,11 +357,13 @@ body {
 }
 
 .internal-top {
+  position: relative;
   display: flex;
   justify-content: space-between !important;
   height: 7%;
   padding: 1%;
   background-color:#000 !important;
+  z-index: 1;
 }
 
 .internal-top span {
@@ -422,6 +424,10 @@ body {
 
 .dropdown-item.active, .dropdown-item:active {
   background-color: #710299 !important;
+}
+
+.bootstrap-select.bs-container{
+  z-index: 1100 !important;
 }
 
 .bootstrap-select .dropdown-toggle:focus, .bootstrap-select>select.mobile-device:focus+.dropdown-toggle {
@@ -1609,4 +1615,284 @@ input[type=color] {
   width: 100%;
   margin-top: 5%;
   margin-bottom: 5%;
+}
+
+
+#iframe-likes .progress-outer {
+  background: #000000;
+  padding: 0px 10px 10px 10px;
+  border: 3px solid #3f0365;
+  position: relative;
+}
+
+#iframe-likes .progress {
+  height: 20px;
+  background: #ffffff;
+  border-radius: 0;
+  box-shadow: none;
+  margin-top: 10px;
+  overflow: visible
+}
+
+#iframe-likes .progress-bar {
+  width: 50%;
+  height: 20px;
+  background-color: #3f0365;
+  position: relative;
+  overflow: unset;
+  -webkit-animation: animate-positive 2s;
+  animation: animate-positive 2s
+}
+
+#iframe-likes .progress-title {
+  margin-top: 5px;
+  font-size: 25px;
+  font-weight: 500;
+  color: rgb(250, 250, 250);
+}
+
+#iframe-likes .progress .progress-bar:after {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  background: #ffffff;
+  position: absolute;
+  top: -10px;
+  bottom: -10px;
+  right: -5px;
+  z-index: 10;
+  transform: rotate(30deg)
+}
+
+
+#iframe-diamonds .progress-outer {
+  background: #000000;
+  padding: 0px 10px 10px 10px;
+  border: 3px solid #3f0365;
+  position: relative;
+}
+
+#iframe-diamonds .progress {
+  height: 20px;
+  background: #ffffff;
+  border-radius: 0;
+  box-shadow: none;
+  margin-top: 10px;
+  overflow: visible
+}
+
+#iframe-diamonds .progress-bar {
+  width: 50%;
+  height: 20px;
+  background-color: #3f0365;
+  position: relative;
+  overflow: unset;
+  -webkit-animation: animate-positive 2s;
+  animation: animate-positive 2s
+}
+
+#iframe-diamonds .progress-title {
+  margin-top: 5px;
+  font-size: 25px;
+  font-weight: 500;
+  color: rgb(250, 250, 250);
+}
+
+#iframe-diamonds .progress .progress-bar:after {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  background: #ffffff;
+  position: absolute;
+  top: -10px;
+  bottom: -10px;
+  right: -5px;
+  z-index: 10;
+  transform: rotate(30deg)
+}
+
+
+#iframe-follows .progress-outer {
+  background: #000000;
+  padding: 0px 10px 10px 10px;
+  border: 3px solid #3f0365;
+  position: relative;
+}
+
+#iframe-follows .progress {
+  height: 20px;
+  background: #ffffff;
+  border-radius: 0;
+  box-shadow: none;
+  margin-top: 10px;
+  overflow: visible
+}
+
+#iframe-follows .progress-bar {
+  width: 50%;
+  height: 20px;
+  background-color: #3f0365;
+  position: relative;
+  overflow: unset;
+  -webkit-animation: animate-positive 2s;
+  animation: animate-positive 2s
+}
+
+#iframe-follows .progress-title {
+  margin-top: 5px;
+  font-size: 25px;
+  font-weight: 500;
+  color: rgb(250, 250, 250);
+}
+
+#iframe-follows .progress .progress-bar:after {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  background: #ffffff;
+  position: absolute;
+  top: -10px;
+  bottom: -10px;
+  right: -5px;
+  z-index: 10;
+  transform: rotate(30deg)
+}
+
+
+#iframe-shares .progress-outer {
+  background: #000000;
+  padding: 0px 10px 10px 10px;
+  border: 3px solid #3f0365;
+  position: relative;
+}
+
+#iframe-shares .progress {
+  height: 20px;
+  background: #ffffff;
+  border-radius: 0;
+  box-shadow: none;
+  margin-top: 10px;
+  overflow: visible
+}
+
+#iframe-shares .progress-bar {
+  width: 50%;
+  height: 20px;
+  background-color: #3f0365;
+  position: relative;
+  overflow: unset;
+  -webkit-animation: animate-positive 2s;
+  animation: animate-positive 2s
+}
+
+#iframe-shares .progress-title {
+  margin-top: 5px;
+  font-size: 25px;
+  font-weight: 500;
+  color: rgb(250, 250, 250);
+}
+
+#iframe-shares .progress .progress-bar:after {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  background: #ffffff;
+  position: absolute;
+  top: -10px;
+  bottom: -10px;
+  right: -5px;
+  z-index: 10;
+  transform: rotate(30deg)
+}
+
+#iframe-gifts .progress-outer {
+  background: #000000;
+  padding: 0px 10px 10px 10px;
+  border: 3px solid #3f0365;
+  position: relative;
+}
+
+#iframe-gifts .progress {
+  height: 20px;
+  background: #ffffff;
+  border-radius: 0;
+  box-shadow: none;
+  margin-top: 10px;
+  overflow: visible
+}
+
+#iframe-gifts .progress-bar {
+  width: 50%;
+  height: 20px;
+  background-color: #3f0365;
+  position: relative;
+  overflow: unset;
+  -webkit-animation: animate-positive 2s;
+  animation: animate-positive 2s
+}
+
+#iframe-gifts .progress-title {
+  margin-top: 5px;
+  font-size: 25px;
+  font-weight: 500;
+  color: rgb(250, 250, 250);
+}
+
+#iframe-gifts .progress .progress-bar:after {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  background: #ffffff;
+  position: absolute;
+  top: -10px;
+  bottom: -10px;
+  right: -5px;
+  z-index: 10;
+  transform: rotate(30deg)
+}
+
+#iframe-specs .progress-outer {
+  background: #000000;
+  padding: 0px 10px 10px 10px;
+  border: 3px solid #3f0365;
+  position: relative;
+}
+
+#iframe-specs .progress {
+  height: 20px;
+  background: #ffffff;
+  border-radius: 0;
+  box-shadow: none;
+  margin-top: 10px;
+  overflow: visible
+}
+
+#iframe-specs .progress-bar {
+  width: 50%;
+  height: 20px;
+  background-color: #3f0365;
+  position: relative;
+  overflow: unset;
+  -webkit-animation: animate-positive 2s;
+  animation: animate-positive 2s
+}
+
+#iframe-specs .progress-title {
+  margin-top: 5px;
+  font-size: 25px;
+  font-weight: 500;
+  color: rgb(250, 250, 250);
+}
+
+#iframe-specs .progress .progress-bar:after {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  background: #ffffff;
+  position: absolute;
+  top: -10px;
+  bottom: -10px;
+  right: -5px;
+  z-index: 10;
+  transform: rotate(30deg)
 }

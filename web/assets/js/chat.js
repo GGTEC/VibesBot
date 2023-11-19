@@ -1,26 +1,3 @@
-function pass_message(message_to){
-
-    if (message_to.startsWith('/me')){
-
-        message_ret = message_to.replace("/me", "<i>");
-        message_ret = message_ret + "</i>";
-
-        return message_ret
-
-    } else if (message_to.startsWith('\x01ACTION')){  
-
-        message_ret = message_to.replace("\x01ACTION", "<i>");
-        message_ret = message_ret.replace("\x01", "</i>");
-
-        return message_ret
-
-    } else {
-
-        return message_to
-
-    }
-}
-
 
 async function chat_config(type_config){
 
@@ -43,6 +20,12 @@ async function chat_config(type_config){
     var like_role = document.getElementById('like_role');
     var share_role = document.getElementById('share_role');
 
+    var gift_points = document.getElementById('gift_points');
+    var like_points = document.getElementById('like_points');
+    var share_points = document.getElementById('share_points');
+    var follow_points = document.getElementById('follow_points');
+    var show_profile_pic = document.getElementById('show-profile-picture');
+
     rangevalue_config.innerHTML = slider_font.value + 'px';
 
 
@@ -53,6 +36,8 @@ async function chat_config(type_config){
 
         data_show = data_show.checked ? 1 : 0;
         chat_newline = chat_newline.checked ? 1 : 0;
+
+        show_profile_pic = show_profile_pic.checked ? 1 : 0;
 
         data = {
             chat_color_name : chat_color_name,
@@ -67,9 +52,15 @@ async function chat_config(type_config){
             gift_role : gift_role.value,
             like_role : like_role.value,
             share_role: share_role.value,
+            gift_points: gift_points.value,
+            like_points: like_points.value,
+            share_points: share_points.value,
+            follow_points: follow_points.value,
+            show_profile_pic: show_profile_pic,
         }
 
         var formData = JSON.stringify(data);
+
         window.pywebview.api.chat_config(formData,type_config);
         
     } else if (type_config == 'get'){
@@ -79,13 +70,15 @@ async function chat_config(type_config){
         if (chat_data_parse){
 
             chat_data_parse = JSON.parse(chat_data_parse)
-
+            
             chat_color_name.checked = chat_data_parse.chat_color_name == 1 ? true : false;
             chat_color_border.checked = chat_data_parse.chat_color_border == 1 ? true : false;
 
             data_show.checked = chat_data_parse.data_show == 1 ? true : false;
             
             chat_newline.checked = chat_data_parse.wrapp_message == 1 ? true : false;
+
+            show_profile_pic.checked = chat_data_parse.show_profile_pic == 1 ? true : false;
             
             slider_font.value = chat_data_parse.font_size;
             rangevalue_config.innerHTML = chat_data_parse.font_size + 'px';
@@ -94,6 +87,11 @@ async function chat_config(type_config){
             gift_role.value = chat_data_parse.gift_role;
             like_role.value = chat_data_parse.like_role;
             share_role.value = chat_data_parse.share_role;
+
+            gift_points.value = chat_data_parse.gift_points;
+            like_points.value = chat_data_parse.like_points;
+            share_points.value = chat_data_parse.share_points;
+            follow_points.value = chat_data_parse.follow_points;
 
             $("#select-color-name").selectpicker('val', chat_data_parse.chat_name_select);
             $("#select-color-boder").selectpicker('val', chat_data_parse.chat_border_select);
@@ -182,10 +180,12 @@ function append_message(message_data_parse){
         
         if (div_chat != null){
 
+            var show_user_picture = message_data_parse.show_user_picture;
+            var user_picture_url = message_data_parse.profile_pic;
             var chat_color_border = message_data_parse.chat_color_border;
             var chat_color_name = message_data_parse.chat_color_name;
-            var select_color_border = message_data_parse.select_color_border;
-            var select_color_name = message_data_parse.select_color_name;
+            var select_color_border = message_data_parse.chat_border_select;
+            var select_color_name = message_data_parse.chat_name_select;
             var chat_newline = message_data_parse.wrapp_message;
             var text_size = message_data_parse.font_size;
             var chat_data = message_data_parse.data_show;
@@ -197,10 +197,9 @@ function append_message(message_data_parse){
             var badges = message_data_parse.badges;
 
     
-            color_rec = chat_color_name === 1 ? select_color_name : "white";
-            border_color = chat_color_border === 1 ? select_color_border : '#4f016c';
-            
-            var div = document.createElement("div");
+            var color_rec = chat_color_name == 1 ? select_color_name : "white";
+            var border_color = chat_color_border == 1 ? select_color_border : '#4f016c';
+
     
             if (type_data == 'passed'){
 
@@ -225,13 +224,13 @@ function append_message(message_data_parse){
             var username = document.createElement("span");
             username.id = 'user-chat';
             username.innerHTML = user_rec;
+            username.style.color = `${color_rec}`;
             username.setAttribute('onclick','pywebview.api.open_py("user","'+user_id+'")');
 
             var separator = document.createElement("span");
             separator.innerHTML = ' :';
 
             var span_username = document.createElement("span");
-            span_username.style.color = color_rec;
             span_username.style.cursor = 'pointer';
 
             span_username.appendChild(username);
@@ -253,21 +252,49 @@ function append_message(message_data_parse){
             span_message.innerHTML = message_rec;
             
             var new_line = document.createElement("br");
-    
-            div.id = 'chat-message-block'
-            div.classList.add('chat-message', 'chat-block-color');
-            div.style.fontSize = text_size + "px";
-            div.style.border = "3px solid "+ border_color + "";
+            
+            var div_message_block = document.createElement("div");
 
-            chat_data == 1 ? div.appendChild(time_chat) : null;
-    
-            div.appendChild(span_username);
-    
-            chat_newline == 1 ? div.appendChild(new_line) : null;
-    
-            div.appendChild(span_message);
+            var padding_start = show_user_picture == 1 ? "ps-0"  : null;
 
-            div_chat.appendChild(div);
+            div_message_block.id = 'chat-message-block'
+            div_message_block.classList.add('row','chat-message', 'chat-block-color',padding_start);
+            div_message_block.style.border = "3px solid "+ border_color + "";
+
+            var div_message = document.createElement("div");
+
+            div_message.id = 'message_block';
+            div_message.classList.add('col','ps-0');
+            div_message.style.fontSize = text_size + "px";
+
+
+            var div_profile_pic = document.createElement("div");
+
+            div_profile_pic.id = 'message_pic';
+            div_profile_pic.classList.add('col-2');
+            
+            var img_pic = document.createElement("img"); 
+            img_pic.classList.add('img-responsive','w-100','img-fluid');
+            img_pic.src = user_picture_url
+            img_pic.style.width = '70px'
+
+            div_profile_pic.appendChild(img_pic)
+            
+            
+
+            chat_data == 1 ? div_message.appendChild(time_chat) : null;
+    
+            div_message.appendChild(span_username);
+    
+            chat_newline == 1 ? div_message.appendChild(new_line) : null;
+    
+            div_message.appendChild(span_message);
+
+            show_user_picture == 1 ? div_message_block.appendChild(div_profile_pic) : null;
+
+            div_message_block.appendChild(div_message)
+
+            div_chat.appendChild(div_message_block);
 
             div_chat.scrollTop = div_chat.scrollHeight;
             if (div_chat.childNodes.length > 100) {
@@ -280,18 +307,18 @@ function append_message(message_data_parse){
 
 function append_message_out(message_data_parse){
 
-
-
     var div_chat_out = document.getElementById('chat-block-out');
 
     var type_message = message_data_parse.type
 
     if (type_message == 'PRIVMSG'){
 
+        var show_user_picture = message_data_parse.show_user_picture;
+        var user_picture_url = message_data_parse.profile_pic;
         var chat_color_border = message_data_parse.chat_color_border;
         var chat_color_name = message_data_parse.chat_color_name;
-        var select_color_border = message_data_parse.select_color_border;
-        var select_color_name = message_data_parse.select_color_name;
+        var select_color_border = message_data_parse.chat_border_select;
+        var select_color_name = message_data_parse.chat_name_select;
         var chat_newline = message_data_parse.wrapp_message;
         var text_size = message_data_parse.font_size;
         var chat_data = message_data_parse.data_show;
@@ -301,11 +328,11 @@ function append_message_out(message_data_parse){
         var user_id = message_data_parse.user_id;
         var message_rec = message_data_parse.message;
         var badges = message_data_parse.badges;
-        
-        color_rec = chat_color_name === 1 ? select_color_name : "white";
-        border_color = chat_color_border === 1 ? select_color_border : '#4f016c';
-        
-        var div = document.createElement("div");
+
+
+        var color_rec = chat_color_name == 1 ? select_color_name : "white";
+        var border_color = chat_color_border == 1 ? select_color_border : '#4f016c';
+
 
         if (type_data == 'passed'){
 
@@ -324,19 +351,19 @@ function append_message_out(message_data_parse){
             time_chat.id = 'time_chat';
             time_chat.classList.add("message-time-current");
             time_chat.innerHTML = chat_time;
-            
+
         }
 
         var username = document.createElement("span");
         username.id = 'user-chat';
         username.innerHTML = user_rec;
+        username.style.color = `${color_rec}`;
         username.setAttribute('onclick','pywebview.api.open_py("user","'+user_id+'")');
 
         var separator = document.createElement("span");
         separator.innerHTML = ' :';
 
         var span_username = document.createElement("span");
-        span_username.style.color = color_rec;
         span_username.style.cursor = 'pointer';
 
         span_username.appendChild(username);
@@ -358,22 +385,51 @@ function append_message_out(message_data_parse){
         span_message.innerHTML = message_rec;
         
         var new_line = document.createElement("br");
+        
+        var div_message_block = document.createElement("div");
 
-        div.id = 'chat-message-block'
-        div.classList.add('chat-message', 'chat-block-color');
-        div.style.fontSize = text_size + "px";
-        div.style.border = "3px solid "+ border_color + "";
+        var padding_start = show_user_picture == 1 ? "ps-0"  : null;
 
-        chat_data == 1 ? div.appendChild(time_chat) : null;
+        div_message_block.id = 'chat-message-block'
+        div_message_block.classList.add('row','chat-message', 'chat-block-color',padding_start);
+        div_message_block.style.border = "3px solid "+ border_color + "";
 
-        div.appendChild(span_username);
+        var div_message = document.createElement("div");
 
-        chat_newline == 1 ? div.appendChild(new_line) : null;
+        div_message.id = 'message_block';
+        div_message.classList.add('col','ps-0');
+        div_message.style.fontSize = text_size + "px";
 
-        div.appendChild(span_message);
+
+        var div_profile_pic = document.createElement("div");
+
+        div_profile_pic.id = 'message_pic';
+        div_profile_pic.classList.add('col-2');
+        
+        var img_pic = document.createElement("img"); 
+        img_pic.classList.add('img-responsive','w-100','img-fluid');
+        img_pic.src = user_picture_url
+        img_pic.style.width = '70px'
+
+        div_profile_pic.appendChild(img_pic)
+        
+        
+
+        chat_data == 1 ? div_message.appendChild(time_chat) : null;
+
+        div_message.appendChild(span_username);
+
+        chat_newline == 1 ? div_message.appendChild(new_line) : null;
+
+        div_message.appendChild(span_message);
+
+        show_user_picture == 1 ? div_message_block.appendChild(div_profile_pic) : null;
+
+        div_message_block.appendChild(div_message)
+
 
         if (div_chat_out != null){
-            div_chat_out.appendChild(div);
+            div_chat_out.appendChild(div_message_block);
             div_chat_out.scrollTop = div_chat_out.scrollHeight;
             if (div_chat_out.childNodes.length > 100) {
                 div_chat_out.removeChild(div_chat_out.firstChild);

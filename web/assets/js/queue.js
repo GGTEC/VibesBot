@@ -181,8 +181,8 @@ async function queue_js(type_id,item){
         var command_queue_command = document.getElementById('command-queue-command');
         var command_queue_delay = document.getElementById('command-queue-delay');
         var command_queue_cost_status = document.getElementById('command-cost-status-queue'); 
-        var command_queue_cost = document.getElementById('command-cost-queue'); 
-        var command_queue_cost_type = document.getElementById("command-cost-type-queue");
+        var command_queue_cost = document.getElementById('command-cost-queue');
+        var command_queue_spend_status = document.getElementById('command-queue-spend-status');
 
         var queue_command_edit = document.getElementById('command_queue_form');
 
@@ -193,6 +193,17 @@ async function queue_js(type_id,item){
             queue_parse = JSON.parse(queue_parse)
             
             queue_command_edit.hidden = false       
+
+            if (command_queue_select.value == "add_queue"){
+
+                document.getElementById("queue-spend").hidden = false
+                command_queue_spend_status.checked = queue_parse.spend_user == 1 ? true : false;
+
+            } else {
+
+                document.getElementById("queue-spend").hidden = true
+                
+            }
 
             command_cost_get('queue',queue_parse.cost_status)
 
@@ -205,9 +216,6 @@ async function queue_js(type_id,item){
             $("#command-queue-perm").selectpicker('val',queue_parse.user_level)
             $("#command-queue-perm").selectpicker("refresh");
 
-            $("#command-cost-type-queue").selectpicker('val', queue_parse.cost_type);
-            $("#command-cost-type-queue").selectpicker("refresh");
-
         }
 
     } else if (type_id == 'save_commands') {
@@ -219,11 +227,13 @@ async function queue_js(type_id,item){
         var command_queue_delay = document.getElementById('command-queue-delay');
 
         var command_queue_cost_status = document.getElementById('command-cost-status-queue'); 
-        var command_queue_cost = document.getElementById('command-cost-queue'); 
-        var command_queue_cost_type = document.getElementById("command-cost-type-queue");
-
+        var command_queue_cost = document.getElementById('command-cost-queue');
+        
+        var command_queue_spend_status = document.getElementById('command-queue-spend-status');
         var command_status = command_queue_status.checked ? 1 : 0;
         var command_cost_status = command_queue_cost_status.checked ? 1 : 0;
+        
+        var status_spend = command_queue_spend_status.checked ? 1 : 0;
         
         var roles = []; 
 
@@ -235,10 +245,10 @@ async function queue_js(type_id,item){
             type_command: command_queue_select.value,
             command: command_queue_command.value,
             status: command_status,
+            status_spend:  status_spend,
             delay: command_queue_delay.value,
             user_level: roles,
             cost: command_queue_cost.value,
-            cost_type: command_queue_cost_type.value,
             cost_status: command_cost_status
         }
 

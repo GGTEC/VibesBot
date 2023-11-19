@@ -7,29 +7,33 @@
         <title>Document</title>
     </head>
     <body style="overflow: hidden;">
-        <iframe id="myiframe" src="" frameborder="false" style="width: 100%;height: 100vh;"></iframe>
+
+        <iframe id="myiframe" src="" frameborder="false" style="width: 100%;height: 100vh;padding: 0%;"></iframe>
         <script>
           
           var iframe = document.getElementById('myiframe');
 
           var socket;
         
+          let ConectionClosed = false
+
           function connectWebSocket() {
             if (socket && socket.readyState === WebSocket.OPEN) {
-              console.log("Já está conectado ao servidor");
               return;
             }
         
             socket = new WebSocket("ws://localhost:7688");
         
             socket.onopen = function(event) {
-              console.log("Conectado ao servidor");
-              socket.send('event');
+              socket.send(JSON.stringify(message = {type: "event"}))
             };
         
             socket.onmessage = function(event) {
+
                 if (event.data === 'ping') {
-                    socket.send('pong');
+                  
+                    socket.send(JSON.stringify(message = {type: "pong"}))
+
                 } else {
 
                   var data_parse = JSON.parse(event.data);
@@ -38,31 +42,68 @@
 
                       var iframeDocument = iframe.contentDocument;
 
-                        iframeDocument.documentElement.innerHTML = data_parse.html;
+                      var parser = new DOMParser();
+                      var htmlDocument = parser.parseFromString(data_parse.html, 'text/html');
+                      var eventBlocks = htmlDocument.getElementsByClassName('enter');
 
+                      
+
+                      if (!iframeDocument.__styleImported) {
+
+                        var originalHead = htmlDocument.head
+
+                        var importedHead = iframeDocument.importNode(originalHead, true);
+
+                        iframeDocument.head.replaceWith(importedHead);
+
+                        iframeDocument.__styleImported = true;
                       }
+                      
+                      for (var i = 0; i < eventBlocks.length; i++) {
+
+                          var eventBlock = eventBlocks[i];
+                          eventBlock.style.fontFamily= "'Kanit'"
+                          iframeDocument.body.appendChild(eventBlock);
+                      }
+
+                  } else if (data_parse.type == 'close'){ConectionClosed = true}
                 }
             };
         
             socket.onclose = function(error) {
-              console.error("Erro na conexão WebSocket:", error);
-              // Realizar a lógica de reconexão aqui, se desejado
-              reconnectWebSocket();
+              if (ConectionClosed == false){reconnectWebSocket();}
             };
           }
         
           function reconnectWebSocket() {
             if (!socket || socket.readyState === WebSocket.CLOSED) {
-              // Esperar um intervalo antes de tentar reconectar
               setTimeout(function() {
                 console.log("Tentando reconectar...");
                 connectWebSocket();
-              }, 3000); // Tempo de espera em milissegundos (3 segundos no exemplo)
+              }, 3000);
             }
           }
         
-          // Iniciar a conexão WebSocket
           connectWebSocket();
+
+          function checkBlocks() {
+
+              var iframeDocument = iframe.contentDocument;
+
+              var blocks = iframeDocument.querySelectorAll('.enter');
+
+              blocks.forEach(function (block) {
+
+                block.addEventListener('animationend', function handleAnimationEnd() {
+
+                  if (block.parentNode) {
+                    block.parentNode.removeChild(block);
+                  }
+                  block.removeEventListener('animationend', handleAnimationEnd);
+                });
+            });
+          }
+          setInterval(checkBlocks, 1000);
         </script>
     </body>
 </html>

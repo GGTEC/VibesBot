@@ -8,7 +8,6 @@ function show_commands_div(div_id) {
         commands_fun('get_list');
     } else if (div_id ==  'default-commands-div'){
         tts_command('get')
-        balance_command('get')
     }
 
     document.getElementById("commands-div").hidden = true;
@@ -30,7 +29,6 @@ async function commands_fun(type_id){
         var seletor = document.getElementById('command-audio-status');
         var div = document.getElementById('command-audio-div');
         var cost = document.getElementById('command-cost-create'); 
-        var cost_type = document.getElementById("command-cost-type");
         var cost_status = document.getElementById("command-cost-status-create");
         var cost_status = cost_status.checked ? 1 : 0;
 
@@ -50,7 +48,6 @@ async function commands_fun(type_id){
             user_level: roles,
             sound: document.getElementById('sound-command').value,
             cost: cost.value,
-            cost_type: cost_type.value,
             cost_status: cost_status
         };
     
@@ -72,7 +69,6 @@ async function commands_fun(type_id){
         var seletor_edit = document.getElementById('command-audio-status-edit');
         var div_edit = document.getElementById('command-audio-div-edit');
         var cost = document.getElementById('command-cost-edit'); 
-        var cost_type = document.getElementById("command-cost-type-edit");
         var cost_status = document.getElementById("command-cost-status-edit");
         
 
@@ -97,7 +93,6 @@ async function commands_fun(type_id){
             sound: sound,
             user_level: roles,
             cost: cost.value,
-            cost_type: cost_type.value,
             cost_status: cost_status
             
         };
@@ -185,7 +180,6 @@ async function commands_fun(type_id){
         var seletor_edit = document.getElementById('command-audio-status-edit');
         var div_edit = document.getElementById('command-audio-div-edit');
         var cost = document.getElementById('command-cost-edit'); 
-        var cost_type = document.getElementById("command-cost-type-edit");
         var cost_status = document.getElementById("command-cost-status-edit");
         var status = document.getElementById("command-simple-status")
 
@@ -225,9 +219,6 @@ async function commands_fun(type_id){
 
             $("#user-level-command-edit").selectpicker('val', edit_level);
             $("#user-level-command-edit").selectpicker("refresh");
-
-            $("#command-cost-type-edit").selectpicker('val', command_info_parse.cost_type);
-            $("#command-cost-type-edit").selectpicker("refresh");
 
 
         }

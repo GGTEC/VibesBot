@@ -10,6 +10,3 @@ class auth_data:
     
     def SESSIONID(self):
         return self.data['SESSIONID']
-
-    def SIDGUARD(self):
-        return self.data['SIDGUARD']

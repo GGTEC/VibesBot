@@ -18,8 +18,10 @@ import yt_dlp
 import datetime
 import re
 import tkinter.messagebox as messagebox
-import sk
+import shutil
 
+from WsClient import WebSocketClient
+from sk import WebSocketServer
 from lockfile import LockManager
 from yt_dlp import DownloadError
 from io import BytesIO
@@ -31,24 +33,21 @@ from tkinter import messagebox
 from tkinter import filedialog as fd
 from random import randint
 from discord_webhook import DiscordWebhook, DiscordEmbed
-
-from tiktokcon import TikTokLiveThread
-
-
 import pygame
+
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 
-global caching, loaded_status, window, window_chat_open, window_chat, window_events, window_events_open, reconn
+global caching, loaded_status, main_window, main_window_open, window_chat_open, window_chat, window_events, window_events_open, server, vibesjsClose
 
-reconn = False
 caching = False
 loaded_status = False
+main_window_open = False
 window_chat_open = False
 window_events_open = False
+vibesjsClose = False
 
 lock_manager = LockManager()
 lock_manager.check()
-
 
 def play_sound(audio, volume):
 
@@ -60,61 +59,78 @@ def play_sound(audio, volume):
 
 
 def toast(message):
-    window.evaluate_js(f"toast_notifc('{message}')")
+
+    if main_window_open:
+        main_window.evaluate_js(f"toast_notifc('{message}')")
 
 
 def append_notice(data_receive):
 
     try:
-        
+
         event_log_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","load")
+        
+        now = datetime.datetime.now()
+
+        new_event = {
+            "timestamp": str(now),
+            "type": data_receive['type'],
+            "message": data_receive['message'],
+            "user_input": data_receive['user_input']
+        }
+
+        event_log_data["event-list"].append(new_event)
+
+        if len(event_log_data["event-list"]) > 100:
+            event_log_data["event-list"] = event_log_data["event-list"][-100:]
+        
+        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","save",event_log_data)
+        
+
+        event_log_config_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log_config.json","load")
+
         chat_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/chat_config.json","load")
 
-        now = datetime.datetime.now()
+        event_log_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","load")
 
         data = {
             "message": data_receive["message"],
             "user_input": data_receive["user_input"],
-            "font_size": event_log_data["slider-font-events"],
+            "font_size": event_log_config_data["slider-font-events"],
             "font_size_chat": chat_data["font-size"],
-            "color_events": event_log_data["color-events"],
+            "color_events": event_log_config_data["color-events"],
             "data_time": now.strftime("%Y-%m-%d %H:%M:%S.%f"),
-            "data_show": event_log_data["data-show-events"],
+            "data_show": event_log_config_data["data-show-events"],
             "type_event": data_receive["type"],
-            "show_commands" : event_log_data["show-commands"],
-            "show_commands_chat" : event_log_data["show-commands-chat"],
-            "show_music" : event_log_data["show-music"],
-            "show_music_chat" : event_log_data["show-music-chat"],
-            "show_follow" : event_log_data["show-follow"],
-            "show_follow_chat" : event_log_data["show-follow-chat"],
-            "show_likes" : event_log_data["show-likes"],
-            "show_likes_chat" : event_log_data["show-likes-chat"],
-            "show_gifts" : event_log_data["show-gifts"],
-            "show_gifts_chat" : event_log_data["show-gifts-chat"],
-            "show_chest" : event_log_data["show-chest"],
-            "show_chest_chat" : event_log_data["show-chest-chat"],
-            "show_share" : event_log_data["show-share"],
-            "show_share_chat" : event_log_data["show-share-chat"],
-            "show_join" : event_log_data["show-join"],
-            "show_join_chat" : event_log_data["show-join-chat"],
-            "show_events" : event_log_data["show-events"],
-            "show_events_chat" : event_log_data["show-events-chat"],
-            "show_goal_start" : event_log_data["show-goal-start"],
-            "show_goal_start_chat" : event_log_data["show-goal-start-chat"],
-            "show_goal_end" : event_log_data["show-goal-end"],
-            "show_goal_end_chat" : event_log_data["show-goal-end-chat"],
+            "show_commands" : event_log_config_data["show-commands"],
+            "show_commands_chat" : event_log_config_data["show-commands-chat"],
+            "show_music" : event_log_config_data["show-music"],
+            "show_music_chat" : event_log_config_data["show-music-chat"],
+            "show_follow" : event_log_config_data["show-follow"],
+            "show_follow_chat" : event_log_config_data["show-follow-chat"],
+            "show_likes" : event_log_config_data["show-likes"],
+            "show_likes_chat" : event_log_config_data["show-likes-chat"],
+            "show_gifts" : event_log_config_data["show-gifts"],
+            "show_gifts_chat" : event_log_config_data["show-gifts-chat"],
+            "show_chest" : event_log_config_data["show-chest"],
+            "show_chest_chat" : event_log_config_data["show-chest-chat"],
+            "show_share" : event_log_config_data["show-share"],
+            "show_share_chat" : event_log_config_data["show-share-chat"],
+            "show_join" : event_log_config_data["show-join"],
+            "show_join_chat" : event_log_config_data["show-join-chat"],
+            "show_events" : event_log_config_data["show-events"],
+            "show_events_chat" : event_log_config_data["show-events-chat"],
+            "show_goal_start" : event_log_config_data["show-goal-start"],
+            "show_goal_start_chat" : event_log_config_data["show-goal-start-chat"],
+            "show_goal_end" : event_log_config_data["show-goal-end"],
+            "show_goal_end_chat" : event_log_config_data["show-goal-end-chat"],
             "event_list" : event_log_data["event-list"],
         }
 
-        event_log_data["event-list"].append(
-            f"{now} | {data_receive['type']} | {data_receive['message']} | {data_receive['user_input']}"
-        )
-        
-        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","save",event_log_data)
-
         if loaded_status:
-            
-            window.evaluate_js(f"append_notice({json.dumps(data, ensure_ascii=False)})")
+
+            if main_window_open:
+                main_window.evaluate_js(f"append_notice({json.dumps(data, ensure_ascii=False)})")
             
             if window_events_open:
                 window_events.evaluate_js(f"append_notice_out({json.dumps(data, ensure_ascii=False)})")
@@ -123,17 +139,17 @@ def append_notice(data_receive):
                 window_chat.evaluate_js(f"append_notice_chat({json.dumps(data, ensure_ascii=False)})")
 
             variableMappings = {
-                "command": event_log_data["show-commands-html"],
-                "music" : event_log_data["show-music-html"],
-                "event": event_log_data["show-events-html"],
-                "follow": event_log_data["show-follow-html"],
-                "like": event_log_data["show-likes-html"],
-                "gift": event_log_data["show-gifts-html"],
-                "chest": event_log_data["show-chest-html"],
-                "share": event_log_data["show-share-html"],
-                "join": event_log_data["show-join-html"],
-                "goal_start": event_log_data["show-goal-start-html"],
-                "goal_end": event_log_data["show-goal-end-html"]
+                "command": event_log_config_data["show-commands-html"],
+                "music" : event_log_config_data["show-music-html"],
+                "event": event_log_config_data["show-events-html"],
+                "follow": event_log_config_data["show-follow-html"],
+                "like": event_log_config_data["show-likes-html"],
+                "gift": event_log_config_data["show-gifts-html"],
+                "chest": event_log_config_data["show-chest-html"],
+                "share": event_log_config_data["show-share-html"],
+                "join": event_log_config_data["show-join-html"],
+                "goal_start": event_log_config_data["show-goal-start-html"],
+                "goal_end": event_log_config_data["show-goal-end-html"]
             }
 
             if variableMappings[data_receive["type"]]:
@@ -147,7 +163,7 @@ def append_notice(data_receive):
                     "html": utils.update_notif(data_update)
                 }
 
-                sk.broadcast_message(json.dumps(data_goal))
+                server.broadcast_message(json.dumps(data_goal))
 
     except Exception as e:
         
@@ -370,15 +386,6 @@ def send_discord_webhook(data):
         logging.error("Exception occurred", exc_info=True)
 
 
-def logout_auth():
-    
-    data = {"USERNAME": "", "SESSIONID": "", "SIDGUARD": ""}
-
-    utils.manipulate_json(f"{utils.local_work('appdata_path')}/auth/auth.json","save",data)
-
-    close()
-
-
 def event_log(data_save):
     
     data_save = json.loads(data_save)
@@ -387,13 +394,25 @@ def event_log(data_save):
     if type_id == "get":
         
         event_log_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","load")
+        event_log_config_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log_config.json","load")
 
         if event_log_data is not None:
 
             data = {
-                "slider-font-events" : event_log_data["slider-font-events"],
-                "color-events" : event_log_data["color-events"],
-                "data-show-events" : event_log_data["data-show-events"], 
+                "slider-font-events" : event_log_config_data["slider-font-events"],
+                "color-events" : event_log_config_data["color-events"],
+                "data-show-events" : event_log_config_data["data-show-events"], 
+                "show-commands" : event_log_config_data["show-commands"],
+                "show-music" : event_log_config_data["show-music"],
+                "show-follow" : event_log_config_data["show-follow"],
+                "show-likes" : event_log_config_data["show-likes"],
+                "show-gifts" : event_log_config_data["show-gifts"],
+                "show-chest" : event_log_config_data["show-chest"],
+                "show-share" : event_log_config_data["show-share"],
+                "show-join" : event_log_config_data["show-join"],
+                "show-events" : event_log_config_data["show-events"],
+                "show-goal-start" : event_log_config_data["show-goal-start"],
+                "show-goal-end" : event_log_config_data["show-goal-end"],
                 "event-list" : event_log_data["event-list"],
             }
             
@@ -403,17 +422,15 @@ def event_log(data_save):
         
         try:
             
-            event_log_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","load")
+            event_log_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log_config.json","load")
 
-            if event_log_data is not None:
-                
-                event_log_data["slider-font-events"] = data_save["slider-font-events"]
-                event_log_data["color-events"] = data_save["color-events"]
-                event_log_data["data-show-events"] = data_save["data-show-events"] 
+            event_log_data["slider-font-events"] = data_save["slider-font-events"]
+            event_log_data["color-events"] = data_save["color-events"]
+            event_log_data["data-show-events"] = data_save["data-show-events"] 
 
-                utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","save",event_log_data)
-                
-                toast("Salvo")
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log_config.json","save",event_log_data)
+            
+            toast("Salvo")
 
         except Exception as e:
             
@@ -422,21 +439,22 @@ def event_log(data_save):
 
     elif type_id == "get_state":
         
-        event_log_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","load")
+        event_log_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log_config.json","load")
 
         event_type =  data_save['type']
 
         data = {
             "show-event" : event_log_data[f"show-{event_type}"],
             "show-event-html" : event_log_data[f"show-{event_type}-html"],
-            "show-event-chat" : event_log_data[f"show-{event_type}-chat"]
+            "show-event-chat" : event_log_data[f"show-{event_type}-chat"],
+            "show-event-alert" : event_log_data[f"show-{event_type}-alert"]
         }
 
         return  json.dumps(data, ensure_ascii=False)
     
     elif type_id == "save_state":
         
-        event_log_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","load")
+        event_log_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log_config.json","load")
 
         try:
             event_type = data_save['type']
@@ -444,8 +462,9 @@ def event_log(data_save):
             event_log_data[f"show-{event_type}"] = data_save["show-event"]
             event_log_data[f"show-{event_type}-html"] = data_save["show-event-html"]
             event_log_data[f"show-{event_type}-chat"] = data_save["show-event-chat"]
+            event_log_data[f"show-{event_type}-alert"] = data_save["show-event-alert"]
 
-            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","save",event_log_data)
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log_config.json","save",event_log_data)
 
             toast("Salvo")
             
@@ -501,7 +520,6 @@ def commands_py(data_receive):
             sound = data["sound"]
             cost = data["cost"]
             cost_status = data["cost_status"]
-            cost_type = data["cost_type"]
 
             command_data = utils.manipulate_json(command_json_path, "load")
 
@@ -513,7 +531,6 @@ def commands_py(data_receive):
                     "user_level": user_level,
                     "delay": delay,
                     "sound": sound,
-                    "cost_type" : cost_type,
                     "cost" : cost,
                     "cost_status" : cost_status,
                     "last_use": 0,
@@ -537,7 +554,6 @@ def commands_py(data_receive):
             user_level = data["user_level"]
             cost = data["cost"]
             cost_status = data["cost_status"]
-            cost_type = data["cost_type"]
             command_type = "sound"
 
             command_data = utils.manipulate_json(command_json_path, "load", None)
@@ -551,7 +567,6 @@ def commands_py(data_receive):
                     "type": command_type,
                     "user_level": user_level,
                     "delay": delay,
-                    "cost_type" : cost_type,
                     "cost" : cost, 
                     "cost_status" : cost_status, 
                     "last_use": 0,
@@ -595,7 +610,6 @@ def commands_py(data_receive):
                 status = command_data[command]["status"]
                 sound = command_data[command]["sound"]
                 type_cmd = command_data[command]["type"]
-                cost_type = command_data[command]["cost_type"]
                 cost = command_data[command]["cost"]
                 cost_status = command_data[command]["cost_status"]
 
@@ -605,7 +619,6 @@ def commands_py(data_receive):
                     "edit_command": command,
                     "edit_level": user_level,
                     "edit_delay": delay,
-                    "edit_cost_type" : cost_type,
                     "edit_cost" : cost, 
                     "edit_cost_Status" : cost_status, 
                     "sound": sound,
@@ -694,7 +707,6 @@ def tts_command(data_receive):
                 "prefix": tts_command_data["prefix"],
                 "delay": tts_command_data["delay"],
                 "user_level" : tts_command_data["user_level"],
-                "cost_type" : tts_command_data["cost_type"],
                 "cost" : tts_command_data["cost"],
                 "cost_status" : tts_command_data["cost_status"]
             }
@@ -715,7 +727,6 @@ def tts_command(data_receive):
                 tts_command_data["prefix"] = data["prefix"]
                 tts_command_data["delay"] = data["delay"]
                 tts_command_data["user_level"] = data["user_level"]
-                tts_command_data["cost_type"] = data["cost_type"]
                 tts_command_data["cost"] = data["cost"]
                 tts_command_data["cost_status"] = data["cost_status"]
 
@@ -739,14 +750,15 @@ def balance_command(data_receive):
         
         if balance_command_data is not None:
             
+            command_info = balance_command_data[data["command"]]
+
             data = {
-                "command": balance_command_data["command"],
-                "status": balance_command_data["status"],
-                "delay": balance_command_data["delay"],
-                "user_level" : balance_command_data["user_level"],
-                "cost_type" : balance_command_data["cost_type"],
-                "cost" : balance_command_data["cost"],
-                "cost_status" : balance_command_data["cost_status"]
+                "command": command_info["command"],
+                "status": command_info["status"],
+                "delay": command_info["delay"],
+                "user_level" : command_info["user_level"],
+                "cost" : command_info["cost"],
+                "cost_status" : command_info["cost_status"]
             }
 
             data_dump = json.dumps(data, ensure_ascii=False)
@@ -758,15 +770,16 @@ def balance_command(data_receive):
         try:
             balance_command_data = utils.manipulate_json(balance_json_path, "load")
 
-            if balance_command_data is not None:
+            command_info = balance_command_data[data["command_type"]]
+            
+            if command_info is not None:
                 
-                balance_command_data["command"] = data["command"]
-                balance_command_data["status"] = data["status"]
-                balance_command_data["delay"] = data["delay"]
-                balance_command_data["user_level"] = data["user_level"]
-                balance_command_data["cost_type"] = data["cost_type"]
-                balance_command_data["cost"] = data["cost"]
-                balance_command_data["cost_status"] = data["cost_status"]
+                command_info["command"] = data["command"]
+                command_info["status"] = data["status"]
+                command_info["delay"] = data["delay"]
+                command_info["user_level"] = data["user_level"]
+                command_info["cost"] = data["cost"]
+                command_info["cost_status"] = data["cost_status"]
 
                 utils.manipulate_json(balance_json_path, "save", balance_command_data)
 
@@ -778,10 +791,11 @@ def balance_command(data_receive):
 
 def giveaway_py(type_id, data_receive):
 
-    giveaway_config_path = (f"{utils.local_work('appdata_path')}/giveaway/config.json")
-    giveaway_names_path = (f"{utils.local_work('appdata_path')}/giveaway/names.json")
-    giveaway_backup_path = (f"{utils.local_work('appdata_path')}/giveaway/backup.json")
-    giveaway_result_path = ( f"{utils.local_work('appdata_path')}/giveaway/result.json")
+    giveaway_config_path = f"{utils.local_work('appdata_path')}/giveaway/config.json"
+    giveaway_commands_path = f"{utils.local_work('appdata_path')}/giveaway/commands.json"
+    giveaway_names_path = f"{utils.local_work('appdata_path')}/giveaway/names.json"
+    giveaway_backup_path = f"{utils.local_work('appdata_path')}/giveaway/backup.json"
+    giveaway_result_path =  f"{utils.local_work('appdata_path')}/giveaway/result.json"
 
     if type_id == "get_config":
 
@@ -802,8 +816,9 @@ def giveaway_py(type_id, data_receive):
 
     elif type_id == "get_commands":
 
-        giveaway_commands_data = utils.manipulate_json(f"{giveaway_names_path}/{data_receive}.json", "load", None)
-
+        giveaway_commands_data = utils.manipulate_json(f"{giveaway_commands_path}", "load", None)
+        giveaway_commands_data = giveaway_commands_data[f"{data_receive}"]
+        
         if giveaway_commands_data is not None:
 
             data = {
@@ -812,7 +827,6 @@ def giveaway_py(type_id, data_receive):
                 "delay": giveaway_commands_data["delay"],
                 "last_use": giveaway_commands_data["last_use"],
                 "user_level": giveaway_commands_data["user_level"],
-                "cost_type" : giveaway_commands_data["cost_type"],
                 "cost" : giveaway_commands_data["cost"],
                 "cost_status" : giveaway_commands_data["cost_status"]
             }
@@ -881,19 +895,20 @@ def giveaway_py(type_id, data_receive):
 
         try:
 
-            giveaway_commands_data = utils.manipulate_json(f"{giveaway_names_path}/{type_command}.json", "load", None)
+            giveaway_commands_data = utils.manipulate_json(f"{giveaway_commands_path}", "load", None)
+            giveaway_command = giveaway_commands_data[f'{type_command}']
 
-            giveaway_commands_data["command"] = data["command"]
-            giveaway_commands_data["status"] = data["status"]
-            giveaway_commands_data["delay"] = data["delay"]
-            giveaway_commands_data["user_level"] = data["user_level"]
-            giveaway_commands_data["cost_type"] = data["cost_type"]
-            giveaway_commands_data["cost"] = data["cost"]
-            giveaway_commands_data["cost_status"] = data["cost_status"]
+            giveaway_command["command"] = data["command"]
+            giveaway_command["status"] = data["status"]
+            giveaway_command["delay"] = data["delay"]
+            giveaway_command["user_level"] = data["user_level"]
+            giveaway_command["cost"] = data["cost"]
+            giveaway_command["cost_status"] = data["cost_status"]
 
-            utils.manipulate_json(f"{giveaway_names_path}/{type_command}.json","save",giveaway_commands_data)
+            utils.manipulate_json(f"{giveaway_commands_path}","save",giveaway_commands_data)
 
             toast("success")
+
         except Exception as e:
             utils.error_log(e)
             toast("error")
@@ -1112,19 +1127,32 @@ def queue(type_id, data_receive):
     elif type_id == "get_commands":
 
         try:
-            json_commands_path = f"{utils.local_work('appdata_path')}/queue/commands.json"
-            command_queue_data = utils.manipulate_json(json_commands_path, "load")
+            command_queue_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/commands.json", "load")
+            config_queue_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/config.json", "load")
 
-            data = {
-                "command": command_queue_data[data_receive]["command"],
-                "status": command_queue_data[data_receive]["status"],
-                "delay": command_queue_data[data_receive]["delay"],
-                "last_use": command_queue_data[data_receive]["last_use"],
-                "user_level": command_queue_data[data_receive]["user_level"],
-                "cost_type" : command_queue_data[data_receive]["cost_type"],
-                "cost" : command_queue_data[data_receive]["cost"],
-                "cost_status" : command_queue_data[data_receive]["cost_status"]
-            }
+            if data_receive == "add_queue":
+
+                data = {
+                    "command": command_queue_data[data_receive]["command"],
+                    "status": command_queue_data[data_receive]["status"],
+                    "spend_user" : config_queue_data['spend_user_balance'],
+                    "delay": command_queue_data[data_receive]["delay"],
+                    "last_use": command_queue_data[data_receive]["last_use"],
+                    "user_level": command_queue_data[data_receive]["user_level"],
+                    "cost" : command_queue_data[data_receive]["cost"],
+                    "cost_status" : command_queue_data[data_receive]["cost_status"]
+                }
+            else:
+
+                data = {
+                    "command": command_queue_data[data_receive]["command"],
+                    "status": command_queue_data[data_receive]["status"],
+                    "delay": command_queue_data[data_receive]["delay"],
+                    "last_use": command_queue_data[data_receive]["last_use"],
+                    "user_level": command_queue_data[data_receive]["user_level"],
+                    "cost" : command_queue_data[data_receive]["cost"],
+                    "cost_status" : command_queue_data[data_receive]["cost_status"]
+                }
 
             return json.dumps(data, ensure_ascii=False)
 
@@ -1138,8 +1166,8 @@ def queue(type_id, data_receive):
 
         try:
 
-            json_commands_path = f"{utils.local_work('appdata_path')}/queue/commands.json"
-            command_queue_data = utils.manipulate_json(json_commands_path, "load")
+            command_queue_data = utils.manipulate_json( f"{utils.local_work('appdata_path')}/queue/commands.json", "load")
+            config_queue_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/config.json", "load")
 
             type_command = data_received["type_command"]
 
@@ -1149,12 +1177,16 @@ def queue(type_id, data_receive):
                 "delay": data_received["delay"],
                 "last_use": command_queue_data[type_command]["last_use"],
                 "user_level": data_received["user_level"],
-                "cost_type" : data_received["cost_type"],
                 "cost" : data_received["cost"],
                 "cost_status" : data_received["cost_status"]
             }
 
-            utils.manipulate_json(json_commands_path, "save", command_queue_data)
+            if type_command == "add_queue":
+                config_queue_data['spend_user_balance'] = data_received["status_spend"]
+
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/config.json", "save", config_queue_data)
+                
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/commands.json", "save", command_queue_data)
 
             toast("success")
 
@@ -1341,6 +1373,56 @@ def discord_config(data_discord_save, mode, type_id):
         return json.dumps(data_get, ensure_ascii=False)
 
 
+def ranks_config(data):
+    
+    data_receive = json.loads(data)
+
+    type_id = data_receive["type_id"]
+
+    config_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/rank.json", "load")
+    
+    if type_id == "get":
+
+        data = {
+            "status": config_data["status"],
+            "interval": config_data["interval"],
+            "likes_bg": config_data["likes_bg"],
+            "likes_op": config_data["likes_op"],
+            "gifts_bg": config_data["gifts_bg"],
+            "gifts_op": config_data["gifts_op"],
+            "shares_bg": config_data["shares_bg"],
+            "shares_op": config_data["shares_op"],
+            "points_bg": config_data["points_bg"],
+            "points_op": config_data["points_op"]
+        }
+
+        return  json.dumps(data, ensure_ascii=False)
+
+    elif type_id == "save":
+
+        try:
+
+            config_data["status"] = data_receive['status']
+            config_data["interval"] = data_receive['interval']
+            config_data["likes_bg"] = data_receive['likes_bg']
+            config_data["likes_op"] = data_receive['likes_op']
+            config_data["gifts_bg"] = data_receive['gifts_bg']
+            config_data["gifts_op"] = data_receive['gifts_op']
+            config_data["shares_bg"] = data_receive['shares_bg']
+            config_data["shares_op"] = data_receive['shares_op']
+            config_data["points_bg"] = data_receive['points_bg']
+            config_data["points_op"] = data_receive['points_op']
+
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/rank.json", "save",config_data)
+
+            toast("success")
+
+        except Exception as e:
+
+            toast("error")
+            utils.error_log(e)
+
+
 def tiktok_auth(data_receive):
 
     data_receive = json.loads(data_receive)
@@ -1350,7 +1432,6 @@ def tiktok_auth(data_receive):
 
     data["USERNAME"] = data_receive["username"]
     data["SESSIONID"] = data_receive["sessionid"]
-    data["SIDGUARD"] = data_receive["sidguard"]
 
     utils.manipulate_json(auth_json_path, "save", data)
 
@@ -1367,6 +1448,8 @@ def tiktok_auth(data_receive):
     
     webhook_login.add_embed(embed_login)
     webhook_login.execute() 
+
+    start_websocket_CS()
         
     return True
 
@@ -1434,7 +1517,7 @@ def tiktok_gift(data_receive):
             "volume" : ttk_data_gifts["volume"],
             "sound" : ttk_data_gifts["audio"],
             "gifts": ttk_data_gifts["gifts"]
-            }
+        }
 
         return json.dumps(data, ensure_ascii=False)
 
@@ -1444,6 +1527,7 @@ def tiktok_gift(data_receive):
 
             gift_id = data_receive["id"]
 
+            ttk_data_gifts["gifts"][gift_id]["name_br"] = data_receive["name"]
             ttk_data_gifts["gifts"][gift_id]["status"] = data_receive["status"]
             ttk_data_gifts["gifts"][gift_id]["audio"] = data_receive["sound_loc"]
             ttk_data_gifts["gifts"][gift_id]["volume"] = data_receive["sound_volume"]
@@ -1457,14 +1541,35 @@ def tiktok_gift(data_receive):
             utils.error_log(e)
             toast("error")
 
+    elif type_id == "save_point_gift":
+
+        try:
+
+            gift_id = data_receive["id"]
+
+            ttk_data_gifts["gifts"][gift_id]["points-global"] = data_receive["status"]
+            ttk_data_gifts["gifts"][gift_id]["points"] = data_receive["points"]
+
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/gifts.json", "save", ttk_data_gifts)
+
+            toast("success")
+
+        except Exception as e:
+
+            utils.error_log(e)
+            toast("error")
+
     elif type_id == "get_gift_info":
 
         gift_id = data_receive["id"]
-
+        
         data = {
+            "name" : ttk_data_gifts["gifts"][gift_id]["name_br"],
             "audio": ttk_data_gifts["gifts"][gift_id]["audio"],
             "status": ttk_data_gifts["gifts"][gift_id]["status"],
             "volume": ttk_data_gifts["gifts"][gift_id]["volume"],
+            "points_status": ttk_data_gifts["gifts"][gift_id]["points-global"],
+            "points": ttk_data_gifts["gifts"][gift_id]["points"],
         }
 
         return json.dumps(data, ensure_ascii=False)
@@ -1587,7 +1692,25 @@ def tiktok_goal(data):
             goal_data[goal_type]["sound_file"] = data["sound_file"]
             goal_data[goal_type]["sound_volume"] = data["sound_volume"]
 
+            if goal_type == "max_viewer":
+                current = goal_data[goal_type][f"total_viewer"]
+            else:
+                current = goal_data[goal_type][f"total_{goal_type}"]
+
+            data_goal = {
+                "type": "update_goal",
+                "type_goal": goal_type,
+                "html": utils.update_goal({"type_id": "update_goal", "type_goal": goal_type}),
+                "current": int(current),
+                "goal": int(data["goal"]), 
+            }
+
+            server.broadcast_message(json.dumps(data_goal))
+        
+
             utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json", "save", goal_data)
+
+            toast("success")
 
         except Exception as e:
             utils.error_log(e)
@@ -1793,7 +1916,6 @@ def sr_config_py(type_id, data_receive):
                 "delay": commands_music_data[data_receive]["delay"],
                 "last_use": commands_music_data[data_receive]["last_use"],
                 "user_level": commands_music_data[data_receive]["user_level"],
-                "cost_type" : commands_music_data[data_receive]["cost_type"],
                 "cost" : commands_music_data[data_receive]["cost"],
                 "cost_status" : commands_music_data[data_receive]["cost_status"]
             }
@@ -1844,7 +1966,6 @@ def sr_config_py(type_id, data_receive):
                 "delay": data["delay"],
                 "last_use": commands_music_data[type_command]["last_use"],
                 "user_level": data["user_level"],
-                "cost_type" : data["cost_type"],
                 "cost" : data["cost"],
                 "cost_status" : data["cost_status"]
             }
@@ -1907,7 +2028,7 @@ def update_check(type_id):
             response_json = json.loads(response.text)
             version = response_json["tag_name"]
 
-            if version != "1.1.1":
+            if version != "1.3.0":
                 
                 return True
 
@@ -2045,7 +2166,8 @@ def start_play(link, user):
             with open(f"{utils.local_work('datadir')}/web/src/player/images/album.png", "wb") as album_art_local:
                 album_art_local.write(req.get(music_thumb).content)
 
-            window.evaluate_js(f"update_image()")
+            if main_window_open:
+                main_window.evaluate_js(f"update_image()")
 
             if download_music(music_link):
 
@@ -2060,9 +2182,10 @@ def start_play(link, user):
                     "artist": music_artist,
                 }
 
-                sk.broadcast_message(json.dumps({"type": "music", "html": utils.update_music(music_data)}))
+                server.broadcast_message(json.dumps({"type": "music", "html": utils.update_music(music_data)}))
 
-                window.evaluate_js(f"update_music_name('{music_name}', '{music_artist}')")
+                if main_window_open:
+                    main_window.evaluate_js(f"update_music_name('{music_name}', '{music_artist}')")
 
                 aliases = {
                     "{music_name}": music_name,
@@ -2070,8 +2193,8 @@ def start_play(link, user):
                     "{music_artist}": music_artist,
                     "{username}": user,
                 }
-
-                window.evaluate_js(f"player('play', 'http://localhost:7000/src/player/cache/music.webm', '1')")
+                if main_window_open:
+                    main_window.evaluate_js(f"player('play', 'http://localhost:7000/src/player/cache/music.webm', '1')")
 
                 toast(f"Reproduzindo {music_name_short} - {music_artist}")
 
@@ -2133,7 +2256,7 @@ def loopcheck():
             queue_path = f"{utils.local_work('appdata_path')}/player/list_files/queue.json"
             config_path = f"{utils.local_work('appdata_path')}/player/config/config.json"
             
-            if loaded_status:
+            if loaded_status and main_window_open:
                 
                 playlist_data = utils.manipulate_json(playlist_path, "load")
                 playlist_execute_data = utils.manipulate_json(config_path, "load")
@@ -2145,7 +2268,8 @@ def loopcheck():
                 check_have_playlist = any(playlist_data.keys())
                 check_have_queue = any(queue_data.keys())
 
-                playing = window.evaluate_js(f"player('playing', 'none', 'none')")
+                if main_window_open:
+                    playing = main_window.evaluate_js(f"player('playing', 'none', 'none')")
                 
                 if not caching and playing == "False":
 
@@ -2185,8 +2309,8 @@ def loopcheck():
                             time.sleep(3)
                     else:
                         time.sleep(3)
-                        
-                        window.evaluate_js(f"update_music_name('Aguardando', 'Aguardando')")
+                        if main_window_open:
+                            main_window.evaluate_js(f"update_music_name('Aguardando', 'Aguardando')")
 
                 time.sleep(3)
                 
@@ -2345,10 +2469,16 @@ def open_py(type_id, link_profile):
         webbrowser.open(link_profile, new=0, autoraise=True)
 
     elif type_id == "appdata":
+
         try:
+
             path = utils.local_work("appdata_path")
-            subprocess.Popen(f"explorer '{path}\\VibesBot\\web'")
+            path = os.path.normpath(path)
+
+            subprocess.Popen(f"explorer {path}")
+
         except subprocess.CalledProcessError as e:
+
             utils.error_log(e)
             toast("Ocorreu um erro.")
 
@@ -2374,7 +2504,7 @@ def open_py(type_id, link_profile):
         webbrowser.open("https://discord.gg/utm5NZq", new=0, autoraise=True)
 
     elif type_id == "wiki":
-        webbrowser.open("https://ggtec.netlify.app/apps/re/", new=0, autoraise=True)
+        webbrowser.open("https://ggtec.netlify.app/apps/vb/", new=0, autoraise=True)
 
     elif type_id == "debug-get":
         
@@ -2402,6 +2532,8 @@ def chat_config(data_save, type_config):
 
     chat_file_path = f"{utils.local_work('appdata_path')}/config/chat_config.json"
 
+    points_data_load = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/points.json","load")
+
     if type_config == "save":
 
         try:
@@ -2421,21 +2553,35 @@ def chat_config(data_save, type_config):
                 "font-size": data_received["font_size"],
                 "gift-role": data_received["gift_role"],
                 "like-role": data_received["like_role"],
-                "share-role": data_received["share_role"]
+                "share-role": data_received["share_role"],
+                "gift-points": data_received["gift_points"],
+                "like-points": data_received["like_points"],
+                "share-points": data_received["share_points"],
+                "follow-points": data_received["follow_points"],
+                "show-user-picture": data_received["show_profile_pic"]
+            })
+
+            points_data_load.update({
+                "gifts": float(data_received["gift_points"]),
+                "likes": float(data_received["like_points"]),
+                "shares": float(data_received["share_points"]),
+                "follow": float(data_received["follow_points"])
             })
 
             utils.manipulate_json(chat_file_path, "save", chat_data)
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/points.json", "save", points_data_load)
+
             toast("success")
 
         except Exception as e:
             utils.error_log(e)
             toast("error")
 
-
     elif type_config == "get":
 
         chat_data = utils.manipulate_json(chat_file_path, "load")
-
+        points_data_load = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/points.json","load")
+        
         chat_data_return = {
             "chat_color_name": chat_data.get("chat-color-name"),
             "chat_color_border": chat_data.get("chat-color-border"),
@@ -2448,9 +2594,14 @@ def chat_config(data_save, type_config):
             "wrapp_message": chat_data.get("wrapp-message"),
             "gift_role": chat_data.get("gift-role"),
             "like_role": chat_data.get("like-role"),
-            "share_role": chat_data.get("share-role")
+            "share_role": chat_data.get("share-role"),
+            "show_profile_pic" : chat_data.get("show-user-picture"), 
+            "gift_points": points_data_load.get("gifts"),
+            "like_points": points_data_load.get("likes"),
+            "share_points": points_data_load.get("shares"),
+            "follow_points": points_data_load.get("follow")
         }
-
+        
         return json.dumps(chat_data_return, ensure_ascii=False)
 
 
@@ -2495,31 +2646,91 @@ def userdata_py(type_id, username):
 
     elif type_id == "remove":
 
-        user_data_load = utils.manipulate_json(user_data_file_path, "load")
+        try:
 
-        if username in user_data_load:
+            user_data_load = utils.manipulate_json(user_data_file_path, "load")
 
-            del user_data_load[username]
+            if username in user_data_load:
+
+                del user_data_load[username]
+                
+                utils.manipulate_json(user_data_file_path, "save", user_data_load)
+
+                toast("Nome removido")
+
+                return True
             
-            utils.manipulate_json(user_data_file_path, "save", user_data_load)
+        except Exception as e:
 
-            toast("Nome removido")
+            toast("erro")
+            utils.error_log(e)
+        
+            return True
+
+    elif type_id == "save":
+
+        try:
+            userdata = utils.manipulate_json(user_data_file_path, "load")
+
+            data_received = json.loads(username)
+            
+            userdata[data_received["userid"]] = {
+                "display_name": data_received["username"],
+                "roles": data_received["roles"],
+                "likes": data_received["likes"],
+                "shares": data_received["shares"],
+                "gifts": data_received["gifts"],
+                "points" : data_received["points"],
+                "profile_pic" : user_data_file_path[data_received["userid"]]["profile_pic"],
+            }
+
+            utils.manipulate_json(user_data_file_path, "save",userdata)
+
+            toast("success")
+
+        except Exception as e:
+
+            toast("erro")
+            utils.error_log(e)
+
+    elif type_id == "backup":
+         
+        try:
+
+            user_data_load = utils.manipulate_json(user_data_file_path, "load")
+
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/user_info/users_database_backup.json", "save", user_data_load)
+
+
+        except Exception as e:
+            utils.error_log(e)
+
+    elif type_id == "restore_backup":
+
+        try:
+            user_data_load = utils.manipulate_json(f"{utils.local_work('appdata_path')}/user_info/users_database_backup.json",'load')
+            
+            with open(user_data_file_path, 'w', encoding='utf-8') as or_file:
+                json.dump(user_data_load, or_file, indent=4)
+
+        except Exception as e:
+            utils.error_log(e)
 
 
 def commands_module(data) -> None:
 
-    def check_cost(user, cost, type_cost, status):
+    def check_cost(user, cost, status):
 
         user_data_load = utils.manipulate_json(f"{utils.local_work('appdata_path')}/user_info/users_database.json","load")
 
         if status:
 
-            value_user = int(user_data_load[user][type_cost])
+            value_user = float(user_data_load[user]["points"])
 
-            if int(value_user) >= int(cost):
+            if float(value_user) >= float(cost):
 
-                value_user = int(value_user) - int(cost)
-                user_data_load[user][type_cost] = value_user
+                value_user = float(value_user) - float(cost)
+                user_data_load[user]["points"] = value_user
 
                 utils.manipulate_json(f"{utils.local_work('appdata_path')}/user_info/users_database.json","save",user_data_load)
 
@@ -2528,6 +2739,19 @@ def commands_module(data) -> None:
                 return False
         else:
             return True
+
+    def give_balance(user, cost):
+
+        user_data_load = utils.manipulate_json(f"{utils.local_work('appdata_path')}/user_info/users_database.json","load")
+
+        value_user = float(user_data_load[user]["points"])
+
+        value_user = float(value_user) + float(cost)
+        user_data_load[user]["points"] = value_user
+
+        utils.manipulate_json(f"{utils.local_work('appdata_path')}/user_info/users_database.json","save",user_data_load)
+
+        return True
 
     def check_perm(user_list, command_list):
         
@@ -2564,18 +2788,16 @@ def commands_module(data) -> None:
 
     user_roles = user_data_load[user]["roles"]
 
-    command_string = message_text
-    command_lower = command_string.lower()
+    command_string = message_text.lower()
 
-    if len(command_string.split()) > 1:
+    if len(re.split(r'\s+', command_string, maxsplit=1)) > 1:
 
-        split_command = command_string.split(maxsplit=1)
-        command, sufix = split_command
+        command, sufix = re.split(r'\s+', command_string, maxsplit=1)
         
     else:
 
         sufix = None
-        command = command_lower.strip()
+        command = command_string.strip()
 
     prefix = command[0]
 
@@ -2593,7 +2815,44 @@ def commands_module(data) -> None:
         "{value}": str(sufix),
     }
 
+    def send_error_level(commandinfo):
+
+        user_level = commandinfo["user_level"]
+
+        if isinstance(user_level, str):
+            result = user_level.strip("[]").replace("'", "")
+            user_level = result.split(", ")
+
+        user_level_string = ""
+
+        if len(user_level) == 1:
+            user_level_string = user_level[0]
+        elif len(user_level) == 2:
+            user_level_string = f"{user_level[0]} ou {user_level[1]}"
+        else:
+            for i in range(len(user_level) - 1):
+                user_level_string += user_level[i] + ", "
+            user_level_string += "ou " + user_level[-1]
+
+        aliases = {
+            '{username}': str(user),
+            '{user_level}' : str(user_level_string),
+            '{command}' : str(command)
+        }
+
+        message_error = utils.replace_all(utils.messages_file_load('error_user_level'),aliases)
+        
+        data_append = {
+            "type": "command",
+            "message": message_error,
+            "user_input": sufix,
+        }
+
+        append_notice(data_append)
+
     def check_status(command_info, aliases):
+
+        user_data_load = utils.manipulate_json(f"{utils.local_work('appdata_path')}/user_info/users_database.json","load")
 
         data_append = {
             "type": "command",
@@ -2608,7 +2867,6 @@ def commands_module(data) -> None:
         delay = int(command_info["delay"])
         last_use = command_info["last_use"]
         cost = command_info["cost"]
-        cost_type = command_info["cost_type"]
         cost_status = command_info["cost_status"]
 
         message_delay, check_time, current = utils.check_delay(delay, last_use)
@@ -2619,26 +2877,33 @@ def commands_module(data) -> None:
             
                 if check_time:
                     
-                    if check_cost(user, cost, cost_type, cost_status):
+                    if "moderator" in user_level:
                         
-                        return current, 'None', True
+                        return current, 'None', True,  'ok'
                     
                     else:
+                        
+                        if check_cost(user, cost, cost_status):
+                            
+                            return current, 'None', True,  'ok'
+                        
+                        else:
+                            value_user = int(user_data_load[user]["points"])
 
-                        aliases = {
-                            "{cost}" : str(cost),
-                            "{cost_type}"  : str(cost_type),
-                            "{username}" : str(username)
-                        }
-                                                    
-                        message_error = utils.replace_all(utils.messages_file_load("command_cost"), aliases)
+                            aliases = {
+                                "{cost}" : str(cost),
+                                "{username}" : str(username),
+                                "{balance}" : str(value_user)
+                            }
+                                                        
+                            message_error = utils.replace_all(utils.messages_file_load("command_cost"), aliases)
 
-                        return current, message_error, False
+                            return current, message_error, False, 'cost'
                 else:
 
                     message_error = message_delay
 
-                    return current, message_error, False
+                    return current, message_error, False, 'delay'
                 
             else:
 
@@ -2651,13 +2916,13 @@ def commands_module(data) -> None:
 
                 message_error = utils.replace_all(utils.messages_file_load("error_user_level"), aliases)
 
-                return current, message_error, False
+                return current, message_error, False, 'level'
 
         else:
             
             message_error = utils.replace_all(utils.messages_file_load("command_disabled"), aliases)
 
-            return current, message_error, False
+            return current, message_error, False, 'disabled'
 
     def play_sound():
         
@@ -2682,7 +2947,7 @@ def commands_module(data) -> None:
 
             command_info = command_data[command]
 
-            current, message_error, status = check_status(command_info, aliases)
+            current, message_error, status, type_error = check_status(command_info, aliases)
 
             if status:
                     
@@ -2695,19 +2960,25 @@ def commands_module(data) -> None:
 
             else:
 
-                data_append = {
-                    "type": "command",
-                    "message": message_error,
-                    "user_input": "",
-                }
+                if type_error == "level":
 
-                append_notice(data_append)
+                    send_error_level(command_info)
+
+                else:
+
+                    data_append = {
+                        "type": "command",
+                        "message": message_error,
+                        "user_input": sufix,
+                    }
+
+                    append_notice(data_append)
                 
         elif compare_strings(command, command_data_giveaway["add_user"]["command"]):
 
             command_info = command_data_giveaway["add_user"]
 
-            current, message_error, status = check_status(command_info, aliases)
+            current, message_error, status, type_error = check_status(command_info, aliases)
 
             if status:
 
@@ -2718,6 +2989,15 @@ def commands_module(data) -> None:
                     data = {"new_name": user_input.strip(), "user_level": "mod"}
                     giveaway_py("add_user", data)
 
+                else:
+
+                    data_append = {
+                        "type": "command",
+                        "message": utils.replace_all(utils.messages_file_load("command_sufix"), aliases),
+                        "user_input": "",
+                    }
+
+                    append_notice(data_append)
 
                 command_info["last_use"] = current
 
@@ -2725,39 +3005,40 @@ def commands_module(data) -> None:
 
             else:
 
-                data_append = {
-                    "type": "command",
-                    "message": message_error,
-                    "user_input": "",
-                }
+                if type_error == "level":
 
-                append_notice(data_append)
+                    send_error_level(command_info)
+
+                else:
+
+                    data_append = {
+                        "type": "command",
+                        "message": message_error,
+                        "user_input": sufix,
+                    }
+
+                    append_notice(data_append)
 
         elif compare_strings(command, command_data_player["volume"]["command"]):
 
             command_info = command_data_player["volume"]
 
-            current, message_error, status = check_status(command_info, aliases)
+            current, message_error, status, type_error = check_status(command_info, aliases)
 
             if status:
 
-                prefix_volume = command_info["command"]
+                if sufix:
 
-                volume_value_command = command_lower.split(prefix_volume.lower())
+                    if sufix.isdigit():
 
-                if len(volume_value_command) > 1 and volume_value_command[1] != "":
-
-                    volume_value_command = volume_value_command[1]
-
-                    if volume_value_command.strip().isdigit():
-
-                        volume_value_int = int(volume_value_command)
+                        volume_value_int = int(sufix)
 
                         if volume_value_int in range(0, 101):
 
                             volume_value = volume_value_int / 100
 
-                            window.evaluate_js(f"player('volume', 'none', {volume_value})")
+                            if main_window_open:
+                               main_window.evaluate_js(f"player('volume', 'none', {volume_value})")
 
                             aliases_commands = {
                                 "{username}": str(user),
@@ -2773,6 +3054,7 @@ def commands_module(data) -> None:
                             append_notice(data_append)
 
                         else:
+                            
                             aliases_commands = {
                                 "{username}": user,
                                 "{volume}": str(volume_value_int),
@@ -2798,9 +3080,10 @@ def commands_module(data) -> None:
 
                 else:
 
-                    volume_atual = window.evaluate_js(
-                        f"player('get_volume', 'none', 'none')"
-                    )
+                    if main_window_open:
+                        volume_atual = main_window.evaluate_js(
+                            f"player('get_volume', 'none', 'none')"
+                        )
 
                     aliases_commands = {
                         "{username}": str(user),
@@ -2821,19 +3104,25 @@ def commands_module(data) -> None:
 
             else:
                 
-                data_append = {
-                    "type": "command",
-                    "message": message_error,
-                    "user_input": "",
-                }
+                if type_error == "level":
 
-                append_notice(data_append)
+                    send_error_level(command_info)
+
+                else:
+
+                    data_append = {
+                        "type": "command",
+                        "message": message_error,
+                        "user_input": sufix,
+                    }
+
+                    append_notice(data_append)
 
         elif compare_strings(command, command_data_player["skip"]["command"]):
 
             command_info = command_data_player["skip"]
 
-            current, message_error, status = check_status(command_info, aliases)
+            current, message_error, status, type_error = check_status(command_info, aliases)
 
             if status:
 
@@ -2844,13 +3133,14 @@ def commands_module(data) -> None:
                 skip_mod = config_data_player["skip_mod"]
                 skip_users = config_data_player["skip_users"]
 
-                playing = window.evaluate_js(f"player('playing', 'none', 'none')")
+                if main_window_open:
+                    playing = main_window.evaluate_js(f"player('playing', 'none', 'none')")
 
                 if not playing == "False":
                     
                     if "moderator" in user_roles and skip_mod == 1:
-                        
-                        window.evaluate_js(f"player('stop', 'none', 'none')")
+                        if main_window_open:
+                            main_window.evaluate_js(f"player('stop', 'none', 'none')")
 
                         aliases_commands = {
                             "{username}": str(user),
@@ -2893,7 +3183,8 @@ def commands_module(data) -> None:
 
                             if int(skip_requests) == skip_votes:
 
-                                window.evaluate_js(f"player('stop', 'none', 'none')")
+                                if main_window_open:
+                                    main_window.evaluate_js(f"player('stop', 'none', 'none')")
 
                                 aliases_commands = {
                                     "{username}": str(user),
@@ -2962,19 +3253,25 @@ def commands_module(data) -> None:
             
             else:
 
-                data_append = {
-                    "type": "command",
-                    "message": message_error,
-                    "user_input": "",
-                }
+                if type_error == "level":
 
-                append_notice(data_append)
+                    send_error_level(command_info)
+
+                else:
+
+                    data_append = {
+                        "type": "command",
+                        "message": message_error,
+                        "user_input": sufix,
+                    }
+
+                    append_notice(data_append)
         
         elif compare_strings(command, command_data_player['request']['command']):
 
             command_info = command_data_player['request']
 
-            current, message_error, status = check_status(command_info, aliases)
+            current, message_error, status, type_error = check_status(command_info, aliases)
 
             if status:
 
@@ -3016,19 +3313,25 @@ def commands_module(data) -> None:
 
             else:
                 
-                data_append = {
-                    "type": "command",
-                    "message": message_error,
-                    "user_input": sufix,
-                }
+                if type_error == "level":
 
-                append_notice(data_append)
+                    send_error_level(command_info)
 
-        elif compare_strings(command,command_data_player['atual']['command']):
+                else:
+
+                    data_append = {
+                        "type": "command",
+                        "message": message_error,
+                        "user_input": sufix,
+                    }
+
+                    append_notice(data_append)
+
+        elif compare_strings(command, command_data_player['atual']['command']):
 
             command_info = command_data_player['atual']
 
-            current, message_error, status = check_status(command_info, aliases)
+            current, message_error, status, type_error = check_status(command_info, aliases)
 
             if status:
                            
@@ -3051,19 +3354,25 @@ def commands_module(data) -> None:
 
             else:
 
-                data_append = {
-                    "type": "command",
-                    "message": message_error,
-                    "user_input": sufix,
-                }
+                if type_error == "level":
 
-                append_notice(data_append)
+                    send_error_level(command_info)
 
-        elif compare_strings(command,command_data_player['next']['command']):
+                else:
+
+                    data_append = {
+                        "type": "command",
+                        "message": message_error,
+                        "user_input": sufix,
+                    }
+
+                    append_notice(data_append)
+
+        elif compare_strings(command, command_data_player['next']['command']):
 
             command_info = command_data_player['next']
 
-            current, message_error, status = check_status(command_info, aliases)
+            current, message_error, status, type_error = check_status(command_info, aliases)
 
             if status:
 
@@ -3139,56 +3448,113 @@ def commands_module(data) -> None:
 
             else:
 
-                data_append = {
-                    "type": "command",
-                    "message": message_error,
-                    "user_input": sufix,
-                }
+                if type_error == "level":
 
-                append_notice(data_append)
+                    send_error_level(command_info)
+
+                else:
+
+                    data_append = {
+                        "type": "command",
+                        "message": message_error,
+                        "user_input": sufix,
+                    }
+
+                    append_notice(data_append)
 
         elif compare_strings(command, command_data_queue["add_queue"]["command"]):
             
             command_info = command_data_queue["add_queue"]
 
-            current, message_error, status = check_status(command_info, aliases)
+            current, message_error, status, type_error = check_status(command_info, aliases)
 
             if status:
 
-                if sufix != "":
+                if sufix:
+
+                    command, username = re.split(r'\s+', message_text, maxsplit=1)
+            
+                    queue_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/queue.json","load")
                     
-                    queue_file_path = f"{utils.local_work('appdata_path')}/queue/queue.json"
+                    queue_config = utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/config.json","load")
+                    
+                    user_found = next((user for user, data in user_data_load.items() if data["display_name"] == username), None)
+                    
+                    if user_found:
 
-                    queue_data = utils.manipulate_json(queue_file_path,"load")
+                        usercheck_username = user_data_load[user_found]["display_name"]
 
-                    if sufix not in queue_data:
+                        if usercheck_username not in queue_data:
 
-                        queue_data.append(sufix)
+                            if queue_config['spend_user_balance'] == 1:
 
-                        utils.manipulate_json(queue_file_path,"save",queue_data)
+                                cost = command_data_queue["self_add_queue"]["cost"]
 
-                        toast("Nome adicionado")
+                                check = check_cost(user_found, cost, 1)
 
-                        data_append = {
-                            "type": "command",
-                            "message": utils.replace_all(utils.messages_file_load("response_add_queue"),aliases),
-                            "user_input": "",
-                        }
+                                if check:
+                                        
+                                        queue_data.append(usercheck_username)
 
-                        append_notice(data_append)
+                                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/queue.json","save",queue_data)
 
+                                        toast("Nome adicionado")
+
+                                        data_append = {
+                                            "type": "command",
+                                            "message": utils.replace_all(utils.messages_file_load("response_add_queue"),aliases),
+                                            "user_input": "",
+                                        }
+
+                                        append_notice(data_append)
+                                else:
+
+                                    data_append = {
+                                        "type": "command",
+                                        "message": utils.replace_all(utils.messages_file_load("balance_user_insuficient"),aliases),
+                                        "user_input": "",
+                                    }
+
+                                    append_notice(data_append)
+
+
+                            else:
+
+                                queue_data.append(usercheck_username)
+
+                                utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/queue.json","save",queue_data)
+
+                                toast("Nome adicionado")
+
+                                data_append = {
+                                    "type": "command",
+                                    "message": utils.replace_all(utils.messages_file_load("response_add_queue"),aliases),
+                                    "user_input": "",
+                                }
+
+                                append_notice(data_append)
+
+                        else:
+
+                            toast("O nome já está na lista")
+
+                            data_append = {
+                                "type": "command",
+                                "message": utils.messages_file_load("response_namein_queue"),
+                                "user_input": "",
+                            }
+
+                            append_notice(data_append)
                     else:
 
-                        toast("O nome já está na lista")
-
                         data_append = {
                             "type": "command",
-                            "message": utils.messages_file_load("response_namein_queue"),
+                            "message": utils.replace_all(utils.messages_file_load("balance_user_not_found"),aliases),
                             "user_input": "",
                         }
 
                         append_notice(data_append)
-
+                        
                     command_data_queue["add_queue"]["last_use"] = current
 
                     utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/commands.json","save",command_data_queue)
@@ -3205,37 +3571,40 @@ def commands_module(data) -> None:
 
             else:
 
-                data_append = {
-                    "type": "command",
-                    "message": message_error,
-                    "user_input": sufix,
-                }
+                if type_error == "level":
 
-                append_notice(data_append)
+                    send_error_level(command_info)
+
+                else:
+
+                    data_append = {
+                        "type": "command",
+                        "message": message_error,
+                        "user_input": sufix,
+                    }
+
+                    append_notice(data_append)
 
         elif compare_strings(command, command_data_queue["self_add_queue"]["command"]):
             
             command_info = command_data_queue["self_add_queue"]
-
-            queue_file_path = f"{utils.local_work('appdata_path')}/queue/queue.json"
             
-            queue_data = utils.manipulate_json(queue_file_path,"load")
+            queue_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/queue.json","load")
             
             if username not in queue_data:
 
-                current, message_error, status = check_status(command_info, aliases)
+                current, message_error, status, type_error = check_status(command_info, aliases)
 
                 if status:
 
-
-
                     queue_data.append(username)
 
-                    utils.manipulate_json(queue_file_path,"save",queue_data)
+                    utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/queue.json","save",queue_data)
 
                     toast("Nome adicionado")
 
-                    window.evaluate_js(f"queue_js('get',Null)")
+                    if main_window_open:
+                        main_window.evaluate_js(f"queue_js('get',Null)")
 
                     data_append = {
                         "type": "command",
@@ -3251,13 +3620,20 @@ def commands_module(data) -> None:
 
                 else:
 
-                    data_append = {
-                        "type": "command",
-                        "message": message_error,
-                        "user_input": sufix,
-                    }
+                    if type_error == "level":
 
-                    append_notice(data_append)
+                        send_error_level(command_info)
+
+                    else:
+
+                        data_append = {
+                            "type": "command",
+                            "message": message_error,
+                            "user_input": sufix,
+                        }
+
+                        append_notice(data_append)
+
             else:
 
                 toast("O nome já está na lista")
@@ -3274,13 +3650,11 @@ def commands_module(data) -> None:
 
             command_info = command_data_queue["check_queue"]
 
-            current, message_error, status = check_status(command_info, aliases)
+            current, message_error, status, type_error = check_status(command_info, aliases)
 
             if status:
-
-                queue_file_path = f"{utils.local_work('appdata_path')}/queue/queue.json"
             
-                queue_data = utils.manipulate_json(queue_file_path,"load")
+                queue_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/queue.json","load")
 
                 response = utils.replace_all(str(utils.messages_file_load("response_get_queue")), aliases)
 
@@ -3303,58 +3677,72 @@ def commands_module(data) -> None:
 
                 command_data_queue["check_queue"]["last_use"] = current
 
-                utils.manipulate_json(f"{utils.local_work('appdata_path')}/tiktoktbot/web/src/queue/commands.json","save",command_data_queue)
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}queue/commands.json","save",command_data_queue)
 
             else:
                 
-                data_append = {
-                    "type": "command",
-                    "message": message_error,
-                    "user_input": sufix,
-                }
+                if type_error == "level":
 
-                append_notice(data_append)
+                    send_error_level(command_info)
+
+                else:
+
+                    data_append = {
+                        "type": "command",
+                        "message": message_error,
+                        "user_input": sufix,
+                    }
+
+                    append_notice(data_append)
 
         elif compare_strings(command, command_data_queue["rem_queue"]["command"]):
 
             command_info = command_data_queue["rem_queue"]
 
-            current, message_error, status = check_status(command_info, aliases)
+            current, message_error, status, type_error = check_status(command_info, aliases)
 
             if status:
          
-                if sufix != "":
+                if sufix:
 
-                    queue_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/queue.json","load")
+                    command, username = re.split(r'\s+', message_text, maxsplit=1)
 
-                    if sufix in queue_data:
+                    user_found = next((user for user, data in user_data_load.items() if data["display_name"] == username), None)
 
-                        queue_data.remove(sufix)
+                    if user_found:
 
-                        utils.manipulate_json( queue_file_path,"save", queue_data)
+                        queue_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/queue.json","load")
+                        
+                        usercheck_username = user_data_load[user_found]["display_name"]
 
-                        data_append = {
-                            "type": "command",
-                            "message": utils.replace_all(utils.messages_file_load("response_rem_queue"), aliases),
-                            "user_input": "",
-                        }
+                        if usercheck_username in queue_data:
 
-                        append_notice(data_append)
+                            queue_data.remove(usercheck_username)
 
-                    else:
-                        toast("O nome não está na lista")
+                            utils.manipulate_json( f"{utils.local_work('appdata_path')}/queue/queue.json","save", queue_data)
 
-                        data_append = {
-                            "type": "command",
-                            "message": utils.replace_all(utils.messages_file_load("response_noname_queue"), aliases),
-                            "user_input": "",
-                        }
+                            data_append = {
+                                "type": "command",
+                                "message": utils.replace_all(utils.messages_file_load("response_rem_queue"), aliases),
+                                "user_input": "",
+                            }
 
-                        append_notice(data_append)
+                            append_notice(data_append)
+
+                        else:
+                            toast("O nome não está na lista")
+
+                            data_append = {
+                                "type": "command",
+                                "message": utils.replace_all(utils.messages_file_load("response_noname_queue"), aliases),
+                                "user_input": "",
+                            }
+
+                            append_notice(data_append)
 
                     command_data_queue["rem_queue"]["last_use"] = current
 
-                    utils.manipulate_json(f"{utils.local_work('appdata_path')}/tiktoktbot/web/src/queue/commands.json","save",command_data_queue)
+                    utils.manipulate_json(f"{utils.local_work('appdata_path')}/queue/commands.json","save",command_data_queue)
 
                 else:
 
@@ -3368,19 +3756,25 @@ def commands_module(data) -> None:
 
             else:
 
-                data_append = {
-                    "type": "command",
-                    "message": message_error,
-                    "user_input": sufix,
-                }
+                if type_error == "level":
 
-                append_notice(data_append)
+                    send_error_level(command_info)
+
+                else:
+
+                    data_append = {
+                        "type": "command",
+                        "message": message_error,
+                        "user_input": sufix,
+                    }
+
+                    append_notice(data_append)
 
         elif compare_strings(command, command_data_tts["command"]):
 
             command_info = command_data_tts
 
-            current, message_error, status = check_status(command_info, aliases)
+            current, message_error, status, type_error = check_status(command_info, aliases)
 
             if status:
 
@@ -3424,51 +3818,126 @@ def commands_module(data) -> None:
             
             else:
 
-                data_append = {
-                    "type": "command",
-                    "message": utils.replace_all(utils.messages_file_load("command_disabled"), aliases),
-                    "user_input": sufix,
-                }
+                if type_error == "level":
 
-                append_notice(data_append)
+                    send_error_level(command_info)
 
-        elif compare_strings(command, command_data_balance["command"]):
-
-            command_info = command_data_balance
-
-            current, message_error, status = check_status(command_info, aliases)
-
-            if status:
-
-                if sufix != None:
-
-                    likes = user_data_load[user]["likes"]
-                    gifts = user_data_load[user]["gifts"]
-                    shares = user_data_load[user]["shares"]
-
-                    aliases_balance = {
-                        "{likes}" : likes,
-                        "{gifts}" : gifts,
-                        "{shares}" : shares
-                    }
-
-                    response = utils.replace_all(utils.messages_file_load("balance"), aliases)
-                    response = utils.replace_all(response, aliases_balance)
+                else:
 
                     data_append = {
                         "type": "command",
-                        "message": response,
-                        "user_input": "",
+                        "message": message_error,
+                        "user_input": sufix,
                     }
 
                     append_notice(data_append)
 
-                    command_data_tts["last_use"] = current
+        elif compare_strings(command, command_data_balance["user_balance"]["command"]):
 
-                    utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/balance.json", command_data_balance, "save")
+            command_info = command_data_balance["user_balance"]
 
+            current, message_error, status, type_error = check_status(command_info, aliases)
 
+            if status:
 
+                likes = user_data_load[user]["likes"]
+                gifts = user_data_load[user]["gifts"]
+                shares = user_data_load[user]["shares"]
+                points = user_data_load[user]["points"]
+
+                aliases_balance = {
+                    "{likes}" : likes,
+                    "{gifts}" : gifts,
+                    "{shares}" : shares,
+                    "{points}" : points
+                }
+
+                response = utils.replace_all(utils.messages_file_load("balance"), aliases)
+                response = utils.replace_all(response, aliases_balance)
+
+                data_append = {
+                    "type": "command",
+                    "message": response,
+                    "user_input": "",
+                }
+
+                append_notice(data_append)
+
+                command_data_tts["last_use"] = current
+
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/balance.json", command_data_balance, "save")
+
+        
+            else:
+
+                if type_error == "level":
+
+                    send_error_level(command_info)
+
+                else:
+
+                    data_append = {
+                        "type": "command",
+                        "message": message_error,
+                        "user_input": sufix,
+                    }
+
+                    append_notice(data_append)
+
+        elif compare_strings(command, command_data_balance["mod_balance"]["command"]):
+
+            command_info = command_data_balance["mod_balance"]
+
+            current, message_error, status, type_error = check_status(command_info, aliases)
+
+            if status:
+
+                if sufix:
+
+                    command, username = re.split(r'\s+', message_text, maxsplit=1)
+
+                    user_found = next((user for user, data in user_data_load.items() if data["display_name"] == username), None)
+
+                    if user_found:
+
+                        usercheck_username = user_data_load[user_found]["display_name"]
+                        likes = user_data_load[user_found]["likes"]
+                        gifts = user_data_load[user_found]["gifts"]
+                        shares = user_data_load[user_found]["shares"]
+                        points = user_data_load[user_found]["points"]
+
+                        aliases_balance = {
+                            "{usercheck}" : usercheck_username,
+                            "{likes}" : likes,
+                            "{gifts}" : gifts,
+                            "{shares}" : shares,
+                            "{points}" : points
+                        }
+
+                        response = utils.replace_all(utils.messages_file_load("balance_moderator"), aliases)
+                        response = utils.replace_all(response, aliases_balance)
+
+                        data_append = {
+                            "type": "command",
+                            "message": response,
+                            "user_input": "",
+                        }
+
+                        append_notice(data_append)
+
+                        command_data_tts["last_use"] = current
+
+                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/balance.json", command_data_balance, "save")
+
+                    else:
+
+                        data_append = {
+                            "type": "command",
+                            "message": utils.replace_all(utils.messages_file_load("balance_user_not_found"), aliases),
+                            "user_input": sufix,
+                        }
+
+                        append_notice(data_append)
 
                 else:
 
@@ -3480,17 +3949,207 @@ def commands_module(data) -> None:
 
                     append_notice(data_append)
 
-            
             else:
 
-                data_append = {
-                    "type": "command",
-                    "message": utils.replace_all(utils.messages_file_load("command_disabled"), aliases),
-                    "user_input": sufix,
-                }
+                if type_error == "level":
 
-                append_notice(data_append)
+                    send_error_level(command_info)
 
+                else:
+
+                    data_append = {
+                        "type": "command",
+                        "message": message_error,
+                        "user_input": sufix,
+                    }
+
+                    append_notice(data_append)
+
+        elif compare_strings(command, command_data_balance["mod_balance_give"]["command"]):
+
+            command_info = command_data_balance["mod_balance_give"]
+
+            current, message_error, status, type_error = check_status(command_info, aliases)
+
+            if status:
+
+                command, username, value = re.split(r'\s+', message_text, maxsplit=2)
+
+                print(command , username, value)
+
+                if value.isdigit():
+                    
+                    user_found = next((user for user, data in user_data_load.items() if data["display_name"] == username), None)
+                    
+                    print(user_found)
+
+                    if user_found:
+
+                        usercheck_username = user_data_load[user_found]["display_name"]
+                        likes = user_data_load[user_found]["likes"]
+                        gifts = user_data_load[user_found]["gifts"]
+                        shares = user_data_load[user_found]["shares"]
+                        points = user_data_load[user_found]["points"]
+
+                        give_balance(user_found, value)
+
+                        aliases_balance = {
+                            "{usercheck}" : usercheck_username,
+                            "{likes}" : likes,
+                            "{gifts}" : gifts,
+                            "{shares}" : shares,
+                            "{points}" : points
+                        }
+
+                        response = utils.replace_all(utils.messages_file_load("balance_user_gived"), aliases)
+                        response = utils.replace_all(response, aliases_balance)
+
+                        data_append = {
+                            "type": "command",
+                            "message": response,
+                            "user_input": "",
+                        }
+
+                        append_notice(data_append)
+
+                        command_data_tts["last_use"] = current
+
+                        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/balance.json", command_data_balance, "save")
+
+                    else:
+
+                        data_append = {
+                            "type": "command",
+                            "message": utils.replace_all(utils.messages_file_load("balance_user_not_found"), aliases),
+                            "user_input": sufix,
+                        }
+
+                        append_notice(data_append)
+
+                else:
+
+                    data_append = {
+                        
+                        "type": "command",
+                        "message": utils.replace_all(utils.messages_file_load("command_root_sufix_number"), aliases),
+                        "user_input": "",
+                    }
+
+                    append_notice(data_append) 
+            
+                        
+            else:
+
+                if type_error == "level":
+
+                    send_error_level(command_info)
+
+                else:
+
+                    data_append = {
+                        "type": "command",
+                        "message": message_error,
+                        "user_input": sufix,
+                    }
+
+                    append_notice(data_append)
+
+        elif compare_strings(command, command_data_balance["mod_balance_take"]["command"]):
+
+            command_info = command_data_balance["mod_balance_take"]
+
+            current, message_error, status, type_error = check_status(command_info, aliases)
+
+            if status:
+
+                command, username, value = re.split(r'\s+', message_text, maxsplit=2)
+
+                if value.isdigit():
+                    
+                    user_found = next((user for user, data in user_data_load.items() if data["display_name"] == username), None)
+
+                    if user_found:
+
+                        usercheck_username = user_data_load[user_found]["display_name"]
+                        likes = user_data_load[user_found]["likes"]
+                        gifts = user_data_load[user_found]["gifts"]
+                        shares = user_data_load[user_found]["shares"]
+                        points = user_data_load[user_found]["points"]
+
+                        check = check_cost(username, value, 1)
+
+                        if check:
+
+                            aliases_balance = {
+                                "{usercheck}" : usercheck_username,
+                                "{likes}" : likes,
+                                "{gifts}" : gifts,
+                                "{shares}" : shares,
+                                "{points}" : points
+                            }
+
+                            response = utils.replace_all(utils.messages_file_load("balance_user_spended"), aliases)
+                            response = utils.replace_all(response, aliases_balance)
+
+                            data_append = {
+                                "type": "command",
+                                "message": response,
+                                "user_input": "",
+                            }
+
+                            append_notice(data_append)
+
+                            command_data_tts["last_use"] = current
+
+                            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/balance.json", command_data_balance, "save")
+
+                        else:
+
+                            data_append = {
+                    
+                                "type": "command",
+                                "message": utils.replace_all(utils.messages_file_load("balance_user_insuficient"), aliases),
+                                "user_input": "",
+                            }
+
+                            append_notice(data_append)
+                
+                    else:
+
+                        data_append = {
+                            "type": "command",
+                            "message": utils.replace_all(utils.messages_file_load("balance_user_not_found"), aliases),
+                            "user_input": sufix,
+                        }
+
+                        append_notice(data_append)
+
+                else:
+
+                    data_append = {
+                        
+                        "type": "command",
+                        "message": utils.replace_all(utils.messages_file_load("command_root_sufix_number"), aliases),
+                        "user_input": "",
+                    }
+
+                    append_notice(data_append) 
+  
+            else:
+
+                if type_error == "level":
+
+                    send_error_level(command_info)
+
+                else:
+
+                    data_append = {
+                        "type": "command",
+                        "message": message_error,
+                        "user_input": sufix,
+                    }
+
+                    append_notice(data_append)
 
     else:
 
@@ -3509,7 +4168,8 @@ def on_resize(width, height):
     min_height = 600
 
     if width < min_width or height < min_height:
-        window.resize(min_width, min_height)
+        if main_window_open:
+            main_window.resize(min_width, min_height)
 
 
 def loaded():
@@ -3530,63 +4190,197 @@ def loaded():
     return json.dumps(data, ensure_ascii=False)
 
 
+def looprank():
+
+    rank_config = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/rank.json", "load")
+
+    status_rank = rank_config['status']
+
+    while status_rank == 1:
+
+        rank_config = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/rank.json", "load")
+
+        status_rank = rank_config['status']
+
+        userdata = utils.manipulate_json(f"{utils.local_work('appdata_path')}/user_info/users_database.json", "load")
+
+        rank_likes = sorted(userdata.items(), key=lambda x:  int(x[1]["likes"]), reverse=True)[:10]
+
+        data = {
+            "type_id" : "likes",
+            "info" : rank_likes,
+        }
+
+        data_goal = {
+            "type": "rank_likes",
+            "html": utils.update_ranks(data),
+        }
+
+        server.broadcast_message(json.dumps(data_goal))
+        
+
+        rank_shares = sorted(userdata.items(), key=lambda x: int(x[1]["shares"]), reverse=True)[:10]
+
+        data = {
+            "type_id" : "shares",
+            "info" : rank_shares,
+        }
+
+        data_goal = {
+            "type": "rank_shares",
+            "html": utils.update_ranks(data),
+        }
+
+        server.broadcast_message(json.dumps(data_goal))
+
+        rank_gifts = sorted(userdata.items(), key=lambda x: int(x[1]["gifts"]), reverse=True)[:10]
+
+        data = {
+            "type_id" : "gifts",
+            "info" : rank_gifts,
+        }
+
+        data_goal = {
+            "type": "rank_gifts",
+            "html": utils.update_ranks(data),
+        }
+
+        server.broadcast_message(json.dumps(data_goal))
+
+        rank_points = sorted(userdata.items(), key=lambda x: int(x[1]["points"]), reverse=True)[:10]
+
+        data = {
+            "type_id" : "points",
+            "info" : rank_points,
+        }
+
+        data_goal = {
+            "type": "rank_points",
+            "html": utils.update_ranks(data),
+        }
+
+        server.broadcast_message(json.dumps(data_goal))
+
+        interval = int(rank_config['interval'])
+
+        if interval < 10:
+            
+            interval = 10
+
+        time.sleep(interval)
+
+
 def update_goal(goal_type, ammount):
     
-    goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
-    
-    if goal_data[goal_type]["status"] == 1:
-        
-        if int(ammount) >= int(goal_data[goal_type]["goal"]):
+    try:
+
+        goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
+
+        if goal_type == "total_follow" or goal_type == "total_share" or goal_type == "total_likes" or goal_type == "total_gifts" or goal_type == "total_diamonds":
+
+            if goal_type == "total_follow":
+
+                follows = int(goal_data["follow"]["total_follow"])
+                total_follow = int(ammount) + follows
+                goal_data["follow"]["total_follow"] = int(ammount) + total_follow
+
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json", "save", goal_data)
+
+                return total_follow
+
+            elif goal_type == "total_likes":
+
+                goal_data["likes"]["total_likes"] = int(ammount)
+
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json", "save", goal_data)
+
+                return True
+
+            elif goal_type == "total_share":
+
+                total_shares = int(goal_data["share"]["total_share"]) + int(ammount)
+                goal_data["share"]["total_share"] = total_shares
+
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json", "save", goal_data)
+
+                return total_shares
             
-            if goal_data[goal_type]["event"] == "double":
+            elif goal_type == "total_diamonds":  
+
+                total_diamonds = int(goal_data["diamonds"]["total_diamonds"]) + int(ammount)
+                goal_data["diamonds"]["total_diamonds"] = int(total_diamonds)
+
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json", "save", goal_data)
+
+                return total_diamonds
+
+            elif goal_type == "total_gifts":           
+
+                total_gifts = int(goal_data["gift"]["total_gifts"]) + int(ammount)
+                goal_data["gift"]["total_gifts"] = total_gifts
+
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json", "save", goal_data)
+
+                return total_shares
+
+        elif goal_data[goal_type]["status"] == 1:
+
+            if int(ammount) >= int(goal_data[goal_type]["goal"]):
                 
-                goal = int(goal_data[goal_type]["goal"]) * 2
-                goal_data[goal_type]["goal"] = goal
+                if goal_data[goal_type]["event"] == "double":
+                    
+                    goal = int(goal_data[goal_type]["goal"]) * 2
+                    goal_data[goal_type]["goal"] = goal
 
-            elif goal_data[goal_type]["event"] == "add":
-                
-                goal = int(goal_data[goal_type]["goal"]) + int(goal_data[goal_type]["goal_after"])
-                goal_data[goal_type]["goal"] = goal
+                elif goal_data[goal_type]["event"] == "add":
+                    
+                    goal = int(goal_data[goal_type]["goal"]) + int(goal_data[goal_type]["goal_after"])
+                    goal_data[goal_type]["goal"] = goal
 
-            elif goal_data[goal_type]["event"] == "multiply": 
+                elif goal_data[goal_type]["event"] == "multiply": 
 
-                goal = int(goal_data[goal_type]["goal"]) * int(goal_data[goal_type]["goal_after"])
-                goal_data[goal_type]["goal"] = goal
+                    goal = int(goal_data[goal_type]["goal"]) * int(goal_data[goal_type]["goal_after"])
+                    goal_data[goal_type]["goal"] = goal
+
+                else:
+                    
+                    if int(ammount) >= int(goal_data[goal_type]["goal"]):
+                        goal = int(goal_data[goal_type]["goal_after"])
+
+
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","save",goal_data)
+
+                if goal_data[goal_type]["sound_status"] == 1 and goal_data[goal_type]["sound_file"] != "":
+                    
+                    play_sound(goal_data[goal_type]["sound_file"],goal_data[goal_type]["sound_volume"])
+                    
+                data_goal = {
+                    "type": "update_goal",
+                    "type_goal": goal_type,
+                    "html": utils.update_goal({"type_id": "update_goal", "type_goal": goal_type}),
+                    "current": int(ammount),
+                    "goal": goal,
+                }
+                                
+                send_discord_webhook({'type_id' : 'goal_end', 'target':f'{goal}' ,'current' : f'{ammount}', 'goal_type' : {goal_type}})
 
             else:
-                
+
                 goal = int(goal_data[goal_type]["goal"])
 
-            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","save",goal_data)
+                data_goal = {
+                    "type": "update_goal",
+                    "type_goal": goal_type,
+                    "html": utils.update_goal({"type_id": "update_goal", "type_goal": goal_type}),
+                    "current": int(ammount),
+                    "goal": goal, 
+                }
 
-            if goal_data[goal_type]["sound_status"] == 1 and goal_data[goal_type]["sound_file"] != "":
-                
-                play_sound(goal_data[goal_type]["sound_file"],goal_data[goal_type]["sound_volume"])
-                
-                
-            data_goal = {
-                "type": "update_goal",
-                "type_goal": goal_type,
-                "html": utils.update_goal({"type_id": "update_goal", "type_goal": goal_type}),
-                "current": int(ammount),
-                "goal": goal,
-            }
-                            
-            send_discord_webhook({'type_id' : 'goal_end', 'target':f'{goal}' ,'current' : f'{ammount}', 'goal_type' : {goal_type}})
+            server.broadcast_message(json.dumps(data_goal))
+        
+    except Exception as e:
 
-        else:
-            
-            goal = int(goal_data[goal_type]["goal"])
-
-            data_goal = {
-                "type": "update_goal",
-                "type_goal": goal_type,
-                "html": utils.update_goal({"type_id": "update_goal", "type_goal": goal_type}),
-                "current": int(ammount),
-                "goal": goal, 
-            }
-
-        sk.broadcast_message(json.dumps(data_goal))
+        utils.error_log(e)
 
 
 def update_roles(data):
@@ -3595,13 +4389,14 @@ def update_roles(data):
     chat_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/chat_config.json","load")
 
     type_id = data["type_id"]
-    user = data["user"]
+    user = data["user_id"]
 
     if user in user_data_load:
         
         roles = user_data_load[user]["roles"]
 
         if type_id == "likes":
+
             likes = int(data["likes"])
 
             if user in user_data_load:
@@ -3617,7 +4412,7 @@ def update_roles(data):
 
         elif type_id == "shares":
             
-            user = data["user"]
+            user = data["user_id"]
 
             if user in user_data_load:
                 if user_data_load[user]["shares"] != "":
@@ -3638,13 +4433,14 @@ def update_roles(data):
 
         elif type_id == "follow":
 
-            user = data["user"]
+            user = data["user_id"]
 
             if user in user_data_load and not "follow" in roles:
                 roles.append("follow")
 
         elif type_id == "gifts":
-            user = data["user"]
+            
+            user = data["user_id"]
             gifts = data["gifts"]
 
             if user in user_data_load:
@@ -3654,38 +4450,121 @@ def update_roles(data):
                 else:
                     user_data_load[user]["gifts"] = gifts
 
-                if not "gifts" in roles and int(user_data_load[user]["gifts"]) > int(
-                    chat_data["gift-role"]
-                ):
+                if not "gifts" in roles and int(user_data_load[user]["gifts"]) > int( chat_data["gift-role"]):
                     roles.append("gifts")
 
         utils.manipulate_json(f"{utils.local_work('appdata_path')}/user_info/users_database.json","save",user_data_load)
-
-
-def activity():
-
-    current_time = int(time.time())
-
-    activity_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/debug.json","load")
-
-    activity_data["activity"] = current_time
-
-    utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/debug.json","save", activity_data)
-
-
-async def on_comment(event):
-    
-    activity()
-
-    def add_user_database(data):
         
-        try:
-            role_mapping = {
-                "follow": "follow",
-                "moderator": "moderator",
-                "subscriber": "subscriber",
-            }
 
+def update_points(data):
+
+    user_data_load = utils.manipulate_json(f"{utils.local_work('appdata_path')}/user_info/users_database.json","load")
+    points_data_load = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/points.json","load")
+    ttk_data_gifts = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/gifts.json", "load")
+
+    type_id = data["type_id"]
+    user = data["user_id"]
+
+    if user in user_data_load:
+
+        if type_id == "likes":
+            
+            likes = int(data["likes"])
+
+            config_points = float(points_data_load["likes"])
+            user_points = float(user_data_load[user]["points"])
+
+            received_points = config_points * likes
+
+            user_data_load[user]["points"] = received_points + user_points
+
+        elif type_id == "shares":
+            
+            config_points = float(points_data_load["shares"])
+            user_points = float(user_data_load[user]["points"])
+
+            user_data_load[user]["points"] = config_points + user_points
+
+        elif type_id == "follow":
+
+            user = data["user"]
+
+            config_points = float(points_data_load["follow"])
+            user_points = float(user_data_load[user]["points"]) + config_points
+            user_data_load[user]["points"] = float(user_points)
+
+        elif type_id == "gifts":
+            
+            user = data["user"]
+            gifts = data["gifts"]
+            gift_id = data["gift_id"]
+
+            gits_data = ttk_data_gifts['gifts']
+
+            gift_global_status = gits_data[gift_id]['points-global']
+
+            if int(gift_global_status) == 1:
+
+                config_points = float(points_data_load["gifts"])
+                user_points = float(user_data_load[user]["points"])
+                
+            else:
+
+                config_points = float(gits_data[gift_id]['points'])
+                user_points = float(user_data_load[user]["points"])
+
+            received_points = config_points * gifts
+
+            user_data_load[user]["points"] = float(received_points + user_points)
+
+    utils.manipulate_json(f"{utils.local_work('appdata_path')}/user_info/users_database.json","save", user_data_load)
+
+
+def show_alert(data):
+
+    config_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log_config.json","load")
+
+    variableMappings = {
+        "command": config_data["show-commands-alert"],
+        "music" : config_data["show-music-alert"],
+        "event": config_data["show-events-alert"],
+        "follow": config_data["show-follow-alert"],
+        "like": config_data["show-likes-alert"],
+        "gift": config_data["show-gifts-alert"],
+        "chest": config_data["show-chest-alert"],
+        "share": config_data["show-share-alert"],
+        "join": config_data["show-join-alert"],
+        "goal_start": config_data["show-goal-start-alert"],
+        "goal_end": config_data["show-goal-end-alert"]
+    }
+
+    if variableMappings[data["type"]]:
+
+        data_update = {
+            "img" : data['profile_pic'],
+            "message" : data['message']
+        }
+
+        data_goal = {
+            "type": "alert",
+            "html": utils.update_alert(data_update)
+        }
+
+        server.broadcast_message(json.dumps(data_goal))
+
+
+def add_user_database(data):
+    
+    try:
+        role_mapping = {
+            "follow": "follow",
+            "moderator": "moderator",
+            "subscriber": "subscriber",
+        }
+
+
+        if utils.check_file(f"{utils.local_work('appdata_path')}/user_info/users_database.json"):
+            
             user_data_load = utils.manipulate_json(f"{utils.local_work('appdata_path')}/user_info/users_database.json","load")
 
             if data["user_id"] not in user_data_load:
@@ -3703,6 +4582,8 @@ async def on_comment(event):
                         "likes": 0,
                         "shares": 0,
                         "gifts": 0,
+                        "points" : 0,
+                        "profile_pic" : data["profile_pic"]
                     }
             else:
                 
@@ -3722,25 +4603,148 @@ async def on_comment(event):
                     "likes": user_data_load[data["user_id"]]["likes"],
                     "shares": user_data_load[data["user_id"]]["shares"],
                     "gifts": user_data_load[data["user_id"]]["gifts"],
+                    "points" : user_data_load[data["user_id"]]["points"],
+                    "profile_pic" : user_data_load[data["user_id"]]["profile_pic"]
                 }
-
                 
             utils.manipulate_json(f"{utils.local_work('appdata_path')}/user_info/users_database.json","save",user_data_load)
 
-        except Exception as e:
-            utils.error_log(e)
+            userdata_py('backup',"null")
 
-    username = event.user.nickname
-    userid = event.user.unique_id
-    comment = event.comment
-    follower = event.user.is_following
-    moderator = event.user.is_moderator     
-    badges_list = event.user.badges
-    top_gifter = event.user.is_top_gifter
-    subscriber = event.user.is_subscriber
-    
-    
+        else:
+            userdata_py('restore_backup',"null") 
+
+    except Exception as e:
+        utils.error_log(e)
+
+
+def on_connect(event):
+
+    event = utils.DictDot(event)
+
+    new_room = event.room_id
+    total_follows = event.followers
+    new_gift_info = event.giftdata
+
+    gift_data = json.loads(new_gift_info)
+
+    goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
+    room_id_store = goal_data['room']
+
     try:
+        if room_id_store != new_room:
+
+            utils.update_dict_gifts(gift_data)
+
+            goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
+
+            goal_data["follow"]["total_follow"] = int(total_follows)
+
+            goal_data['room'] = new_room
+
+            goal_data["diamonds"]["total_diamonds"] = 0
+            goal_data["gift"]["total_gifts"] = 0
+            goal_data["share"]["total_share"] = 0
+            goal_data["max_viewer"]["total_viewer"] = 0
+            goal_data["likes"]["total_likes"] = 0
+
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","save",goal_data)
+
+            like_list = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/likes.json","load")
+            
+            like_list = {
+                "likes" : {
+                    
+                }
+            }
+            
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/likes.json","save",like_list)
+
+            share_list = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/shares.json","load")
+            
+            share_list = {
+                "shares" : {
+                    
+                }
+            }
+            
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/shares.json","save",share_list)
+            
+            join_list = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/joins.json","load")
+            
+            join_list = [] 
+            
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/joins.json","save",join_list)
+
+            data_append = {
+                "type": "event",
+                "message": utils.messages_file_load(f"event_ttk_connect"),
+                "user_input": "",
+            }
+            
+            append_notice(data_append)
+            
+            send_discord_webhook({"type_id": "live_start"})
+
+        else:
+            
+            data_append = {
+                "type": "event",
+                "message": utils.messages_file_load(f"event_ttk_connect"),
+                "user_input": "",
+            }
+            
+            append_notice(data_append)
+
+    except Exception as e:
+        utils.error_log(e)
+
+
+def on_disconnect(event):
+
+    event = utils.DictDot(event)
+
+    message_event = utils.messages_file_load("event_ttk_disconected")
+
+    data_append = {
+        "type": "live_end",
+        "message": message_event,
+        "user_input": "",
+    }
+
+    append_notice(data_append)
+
+    if main_window_open:
+        main_window.evaluate_js(f"update_specs_tiktok('disconect')")
+
+    goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
+
+    goal_data["max_viewer"]["max_specs"] = 0
+    goal_data["diamonds"]["total_diamonds"] = 0
+    goal_data["share"]["total_shares"] = 0
+    goal_data["gift"]["total_gifts"] = 0
+
+    utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","save",goal_data)
+
+    send_discord_webhook({"type_id": "live_end"})
+
+
+def on_comment(event):
+    
+    event = utils.DictDot(event)
+
+    username = event.nickname
+    userid = event.unique_id
+    comment = event.comment
+    follower = event.is_following
+    moderator = event.is_moderator
+    subscriber = event.is_subscriber     
+    badges_list = event.badges_list
+    top_gifter = event.is_top_gifter
+    profilepic = event.profilePictureUrl
+
+    try:
+
         if comment != None and username != None and userid != None:
             
             chat_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/chat_config.json","load")
@@ -3758,27 +4762,61 @@ async def on_comment(event):
                 elif chat_data["type-data"] == "current":
                     
                     chat_time = now.strftime(format)
+
             else:
+
                 chat_time = ""
 
             badges = []
 
             if len(badges_list) > 0:
-                
+
                 for badge in badges_list:
                     
                     first_url = None
+                    
+                    if badge['type'] == "image":
 
-                    if badge.image and badge.image.urls:
-                        first_url = badge.image.urls[0]
+                        if "url" in badge:
+
+                            first_url = badge['url']
+
+                            badge_dict = {
+                                "label": '',
+                                "name": '',
+                                "first_url": first_url,
+                            }
+
+                            badges.append(badge_dict)
+                    
+                    elif "name" in badge:
                         
-                    badge_dict = {
-                        "label": badge.label,
-                        "name": badge.name,
-                        "first_url": first_url,
-                    }
+                        if badge['name'] == "Moderator":
 
-                    badges.append(badge_dict)
+                            badge_dict = {
+                                "label": '',
+                                "name": '',
+                                "first_url": "https://p16-webcast.tiktokcdn.com/webcast-va/moderater_badge_icon.png~tplv-obj.image",
+                            }
+
+                            badges.append(badge_dict)
+                            
+                        if badge['name'] == "New gifter":
+
+                            if "url" in badge:
+                            
+                                first_url = badge['url']
+
+                                badge_dict = {
+                                    "label": '',
+                                    "name": '',
+                                    "first_url": first_url,
+                                }
+
+                                badges.append(badge_dict)
+
+            if follower > 0:
+                follower = True
 
             data_res = {
                 "type": "PRIVMSG",
@@ -3790,12 +4828,14 @@ async def on_comment(event):
                 "follow": follower,
                 "moderator": moderator,
                 "subscriber": subscriber,
-                "top_gifter": top_gifter,    
+                "top_gifter": top_gifter,
+                "profile_pic" : profilepic,  
                 "font_size": chat_data["font-size"],
                 "chat_color_border": chat_data["chat-color-border"],
                 "chat_color_name": chat_data["chat-color-name"],
                 "chat_name_select": chat_data["chat-name-select"],
                 "chat_border_select": chat_data["chat-border-select"],
+                "show_user_picture": chat_data["show-user-picture"],
                 "wrapp_message": chat_data["wrapp-message"],
                 "data_show": chat_data["data-show"],
                 "chat_time": chat_time,
@@ -3804,7 +4844,9 @@ async def on_comment(event):
 
             add_user_database(data_res)
 
-            window.evaluate_js(f"append_message({json.dumps(data_res, ensure_ascii=False)})")
+            if main_window_open:
+
+                main_window.evaluate_js(f"append_message({json.dumps(data_res, ensure_ascii=False)})")
 
             if window_chat_open:
                 
@@ -3817,130 +4859,52 @@ async def on_comment(event):
         utils.error_log(e)
 
 
-async def on_connect(event):
-
-    activity()
-
-    new_room = tiktok_thread.client.room_id
-
-    if not reconn:
-
-        goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
-
-        room_id_store = goal_data['room']
-
-        if room_id_store != new_room:
-
-            goal_data['room'] = new_room
-
-            goal_data["diamonds"]["total_diamonds"] = 0
-            goal_data["gift"]["total_gifts"] = 0
-            goal_data["share"]["total_shares"] = 0
-            goal_data["max_viewer"]["total_viewer"] = 0
-            goal_data["follow"]["total_follow"] = 0
-            goal_data["likes"]["total_likes"] = 0
-
-            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","save",goal_data)
-
-            like_list = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/likes.json","load")
-            
-            like_list = {
-                "likes" : {
-                    
-                }
-            }
-            
-            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/likes.json","save",like_list)
-            
-            join_list = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/joins.json","load")
-            
-            join_list = [] 
-            
-            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/joins.json","save",join_list)
-
-            data_append = {
-                "type": "event",
-                "message": utils.messages_file_load(f"event_ttk_connect"),
-                "user_input": "",
-            }
-            
-            append_notice(data_append)
-
-            toast("Conectado ao chat do TikTok.")
-            
-            send_discord_webhook({"type_id": "live_start"})
-
-    else:
-        
-        toast('Reconectado.')
-
-
-async def on_disconnect(event):
+def on_like(event):
     
-    activity()
-
-    message_event = utils.messages_file_load("event_ttk_disconected")
-
-    data_append = {
-        "type": "live_end",
-        "message": message_event,
-        "user_input": "",
-    }
-
-    append_notice(data_append)
-
-    window.evaluate_js(f"update_specs_tiktok('disconect')")
-
-    goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
-
-    goal_data["max_viewer"]["max_specs"] = 0
-    goal_data["diamonds"]["total_diamonds"] = 0
-    goal_data["share"]["total_shares"] = 0
-    goal_data["gift"]["total_gifts"] = 0
-
-    utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","save",goal_data)
-
-    send_discord_webhook({"type_id": "live_end"})
-
-
-async def on_like(event):
-    
-    activity()
+    event = utils.DictDot(event)
 
     event_config_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_not.json", "load")
     like_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/likes.json","load")
-    goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
 
     try:
-        
-        username = event.user.nickname
-        user_id = event.user.unique_id
+
+        username = event.nickname
+        userid = event.uniqueId
         likes_send = event.likes
         total_likes = event.total_likes
+        follower = event.is_following
+        moderator = event.is_moderator
+        subscriber = event.is_subscriber    
+        profilePictureUrl = event.profilePictureUrl
         
         like_list = like_data["likes"]
         
-        send_discord_webhook({"type_id": "like", "username" : username, "likes_send" : likes_send, "total_likes" : total_likes})
-        
-        if user_id not in like_list:
+        if userid not in like_list:
             
             current_time = int(time.time())
             
-            like_list[user_id] = current_time
+            like_list[userid] = current_time
             
             utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/likes.json","save",like_data)
             
             aliases = {
                 "{username}": username,
+                "{user}" : userid,
+                "{likes}" : likes_send,
+                "{total_likes}" :total_likes
             }
             
             data_append = {
                 "type": "like",
                 "message": utils.replace_all(utils.messages_file_load("event_ttk_like"), aliases),
                 "user_input": "",
+                "profile_pic": profilePictureUrl
             }
-            
+
+            show_alert(data_append)
             append_notice(data_append)
+
+            send_discord_webhook({"type_id": "like", "username" : username, "likes_send" : likes_send, "total_likes" : total_likes})
 
             if event_config_data["ttk_like"]["sound"] == 1:
                 
@@ -3953,13 +4917,13 @@ async def on_like(event):
             
             delay = event_config_data["ttk_like"]["delay"]
 
-            last_like = like_list[user_id]
+            last_like = like_list[userid]
 
             message_delay, check_time, current = utils.check_delay(delay, last_like)
 
             if check_time:
                 
-                like_list[user_id] = current
+                like_list[userid] = current
                 
                 utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/likes.json","save",like_data)
 
@@ -3972,56 +4936,50 @@ async def on_like(event):
                     "type": "like",
                     "message": utils.replace_all(utils.messages_file_load("event_ttk_like"),aliases),
                     "user_input": "",
+                    "profile_pic": profilePictureUrl
                 }
 
                 append_notice(data_append)
+                show_alert(data_append)
+                send_discord_webhook({"type_id": "like", "username" : username, "likes_send" : likes_send, "total_likes" : total_likes})
 
-        goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
-
-        goal_data["likes"]["total_likes"] = total_likes
-
-        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json", "save", goal_data)
-
-        update_goal("likes", total_likes)
-
-        data_roles = {
+        data_user = {
             "type_id": "likes",
-            "user": user_id,
-            "likes": likes_send,
+            "display_name": username,
+            "user_id": userid,
+            "user_name": username,
+            "follow": follower,
+            "moderator": moderator,
+            "subscriber": subscriber,
+            "profile_pic": profilePictureUrl,
+            "likes": likes_send
         }
 
-        update_roles(data_roles)
+        add_user_database(data_user)
+        update_roles(data_user)
+        update_points(data_user)
 
-        aliases = {
-            "{username}": username,
-            "{amount}" : likes_send
-        }
-        
-        data = {
-            "goal": goal_data["likes"]["goal"],
-            "total": total_likes,
-            "user": utils.replace_all(utils.messages_file_load("event_ttk_like"),aliases)
-        }
+        return_likes = update_goal("total_likes", total_likes)
 
-        data_dump = json.dumps(data, ensure_ascii=False)
+        if return_likes:
 
-        window.evaluate_js(f"update_carousel_tiktok('likes',{data_dump})")
+            update_goal("likes", total_likes)
 
     except Exception as e:
         utils.error_log(e)
 
 
-async def on_join(event):
+def on_join(event):
     
-    activity()
+    event = utils.DictDot(event)
+
+    username = event.nickname
+    user_id = event.uniqueId
+    profilePictureUrl = event.profilePictureUrl
 
     join_list = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/joins.json","load")
 
-
-    if event.user != None:
-        
-        username = event.user.nickname
-        user_id = event.user.unique_id
+    if user_id != None:
 
         if user_id not in join_list:
             
@@ -4034,177 +4992,207 @@ async def on_join(event):
             data_append = {
                 "type": "join",
                 "message": utils.replace_all(utils.messages_file_load("event_ttk_join"), aliases),
-                "user_input": ""
+                "user_input": "",
+                "img" : profilePictureUrl
             }
             
+            show_alert(data_append)
             append_notice(data_append)
 
 
-async def on_gift(event):
-    
-    activity()
+def on_gift(event):
+
+    event = utils.DictDot(event)
 
     ttk_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/gifts.json","load")
+    goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
 
-    gift_name = event.gift.info.name
-    giftname_br = event.gift.info.name
-    gift_id = str(event.gift.id)
-    gift_diamonds = str(event.gift.info.diamond_count)
     gifts_data = ttk_data["gifts"]
     
-    user_id = event.user.unique_id
-    username = event.user.nickname
+    giftname_br = event.gift_name
+    gift_id = str(event.giftId)
+    gift_diamonds = event.gift_diamonds
+    userid = event.unique_id
+    username = event.nickname
+    streakable = event.streakable
+    streaking = event.streaking
+    giftcount = event.giftcount
+    follower = event.is_following
+    moderator = event.is_moderator
+    subscriber = event.is_subscriber  
+    profilePictureUrl = event.profilePictureUrl
 
     global_audio = ttk_data["audio"]
     global_status = ttk_data["status"]
     global_volume = ttk_data["volume"]
-        
+    
+
     try:
 
-        if isinstance(gift_name, tuple):
-            gift_name = gift_name[0]
-        
-        if gift_name in gifts_data:
-            giftname_br = gifts_data[gift_name]["name_br"]
-              
-        if event.gift.streakable and not event.gift.streaking:
-            
-            aliases = {
-                "{username}": username,
-                "{amount}": event.gift.count,
-                "{giftname}": giftname_br,
-                "{diamonds}": gift_diamonds,
-                "{id}": gift_id,
-            }
-            
-            send_discord_webhook({
-                "type_id": "gift", 
-                "username" : username, 
-                "gifts_send" : event.gift.count, 
-                "gift_name" : giftname_br,
-                "diamonds": gift_diamonds
-            })
+        if streakable and not streaking:
 
-            data_append = {
-                "type": "gift",
-                "message": utils.replace_all(utils.messages_file_load("event_ttk_gift"), aliases),
-                "user_input": "",
-            }
-            
-            append_notice(data_append)
+            if gift_id in gifts_data:
 
-            data_roles = {
-                "type_id": "gifts",
-                "user": user_id,
-                "gifts": event.gift.count,
-            }
+                if gifts_data[gift_id]["name_br"] != "":
+                    giftname_br = gifts_data[gift_id]["name_br"]
 
-            update_roles(data_roles)
-
-            goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
-            
-            if int(gift_id) == int(goal_data["gift"]["gift"]):
+                aliases = {
+                    "{username}": username,
+                    "{amount}": giftcount,
+                    "{giftname}": giftname_br,
+                    "{diamonds}": gift_diamonds,
+                    "{id}": gift_id,
+                }
                 
-                total_gifts = int(goal_data["gift"]["total_gifts"]) + int(event.gift.count)
-                goal_data["gift"]["total_gifts"] = total_gifts
-
-                utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json", "save", goal_data)
-
-                update_goal("gift", total_gifts)
-
-            goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
-
-            diamonds = int(gift_diamonds) * int(event.gift.count)
-            total_diamonds = int(goal_data["diamonds"]["total_diamonds"]) + int(diamonds)
-            goal_data["diamonds"]["total_diamonds"] = int(total_diamonds)
-
-            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json", "save", goal_data)
-            
-            update_goal("diamonds", total_diamonds)
-
-            
-            if gift_name in gifts_data:
-
-                audio = gifts_data[gift_name]["audio"]
-                volume = gifts_data[gift_name]["volume"]
-                status = gifts_data[gift_name]["status"]
+                data_discord = {
+                    "type_id": "gift", 
+                    "username" : username, 
+                    "gifts_send" : giftcount, 
+                    "gift_name" : giftname_br,
+                    "diamonds": gift_diamonds
+                }
                 
-                if status == 1:
-                    threading.Thread(target=play_sound,args=(audio,volume,),daemon=True,).start()
-                elif global_status == 1:
-                    threading.Thread(target=play_sound,args=(global_audio,global_volume,),daemon=True,).start()
-            else:
-                if global_status == 1:
-                    threading.Thread(target=play_sound,args=(global_audio,global_volume,),daemon=True,).start()
 
-        elif not event.gift.streakable:
+                data_append = {
+                    "type": "gift",
+                    "message": utils.replace_all(utils.messages_file_load("event_ttk_gift"), aliases),
+                    "user_input": "",
+                    "profile_pic" : profilePictureUrl
+                }
+
+                if int(gift_id) == int(goal_data["gift"]["gift"]):
                     
-            aliases = {
-                "{username}": username,
-                "{amount}": event.gift.count,
-                "{giftname}": giftname_br,
-                "{diamonds}": gift_diamonds,
-                "{id}": gift_id,
-            }
-            
-            send_discord_webhook({
-                "type_id": "gift", 
-                "username" : username, 
-                "gifts_send" : event.gift.count, 
-                "gift_name" : giftname_br,
-                "diamonds": gift_diamonds
-            })
-            
+                    return_gift = update_goal("total_gifts", giftcount)
 
-            data_append = {
-                "type": "gift",
-                "message": utils.replace_all(utils.messages_file_load("event_ttk_gift"), aliases),
-                "user_input": "",
-            }
+                    if return_gift:
 
-            append_notice(data_append)
-            
-            data_roles = {
-                "type_id": "gifts",
-                "user": user_id,
-                "gifts": event.gift.count,
-            }
+                        update_goal("gift", return_gift)
 
-            update_roles(data_roles)
-
-            goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
-
-            if int(gift_id) == int(goal_data["gift"]["gift"]):
+                diamonds = int(gift_diamonds) * int(giftcount)
                 
-                total_gifts = goal_data["gift"]["total_gifts"] + int(event.gift.count)
-                goal_data["gift"]["total_gifts"] = total_gifts
+                return_diamonds = update_goal("total_diamonds", diamonds)
 
-                utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","save",goal_data)
+                if return_diamonds:
 
-                update_goal("gift", total_gifts)
+                    update_goal("diamonds", return_diamonds)
 
-            goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
+
+                data_user = {
+                    "type_id": "gifts",
+                    "display_name": username,
+                    "user_id": userid,
+                    "user_name": username,
+                    "follow": follower,
+                    "moderator": moderator,
+                    "subscriber": subscriber,
+                    "profile_pic": profilePictureUrl,
+                    "gifts": giftcount,
+                    "gift_id" : gift_id,
+                }
+
+                add_user_database(data_user)
+
+                update_roles(data_user)
+                update_points(data_user)
+
+                send_discord_webhook(data_discord)
+                append_notice(data_append)
+                show_alert(data_append)
+
+                audio = gifts_data[gift_id]["audio"]
+                volume = gifts_data[gift_id]["volume"]
+                status = gifts_data[gift_id]["status"]
                 
-            diamonds = int(gift_diamonds)
-            total_diamonds = int(goal_data["diamonds"]["total_diamonds"]) + int(diamonds)
-            goal_data["diamonds"]["total_diamonds"] = total_diamonds
-
-            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","save",goal_data)
-
-            update_goal("diamonds", total_diamonds)
-            
-            if gift_name in gifts_data:
-
-                audio = gifts_data[gift_name]["audio"]
-                volume = gifts_data[gift_name]["volume"]
-                status = gifts_data[gift_name]["status"]
-                
-                if status == 1:
+                if status == 1 and audio != "":
                     threading.Thread(target=play_sound,args=(audio,volume,),daemon=True,).start()
-                elif global_status == 1:
+
+                elif global_status == 1 and global_audio != "":
                     threading.Thread(target=play_sound,args=(global_audio,global_volume,),daemon=True,).start()
             else:
-                if global_status == 1:
+
+                if global_status == 1 and global_audio != "":
+                    threading.Thread(target=play_sound,args=(global_audio,global_volume,),daemon=True,).start()
+
+        elif not streakable:
+
+            if gift_id in gifts_data:
+
+                if gifts_data[gift_id]["name_br"] != "":
+                    giftname_br = gifts_data[gift_id]["name_br"]
+
+                aliases = {
+                    "{username}": username,
+                    "{amount}": giftcount,
+                    "{giftname}": giftname_br,
+                    "{diamonds}": gift_diamonds,
+                    "{id}": gift_id,
+                }
+                
+                discord_data = {
+                    "type_id": "gift", 
+                    "username" : username, 
+                    "gifts_send" : giftcount, 
+                    "gift_name" : giftname_br,
+                    "diamonds": gift_diamonds
+                }
+                
+                data_append = {
+                    "type": "gift",
+                    "message": utils.replace_all(utils.messages_file_load("event_ttk_gift"), aliases),
+                    "user_input": "",
+                    "profile_pic" : profilePictureUrl
+                }
+                
+                data_user = {
+                    "type_id": "gifts",
+                    "display_name": username,
+                    "user_id": userid,
+                    "user_name": username,
+                    "follow": follower,
+                    "moderator": moderator,
+                    "subscriber": subscriber,
+                    "profile_pic": profilePictureUrl,
+                    "gifts": giftcount,
+                    "gift_id" : gift_id,
+                }
+
+                add_user_database(data_user)
+
+                if int(gift_id) == int(goal_data["gift"]["gift"]):
+                    
+                    return_gift = update_goal("total_gifts", giftcount)
+
+                    if return_gift:
+
+                        update_goal("gift", return_gift)
+
+                diamonds = int(gift_diamonds) * int(giftcount)
+                
+                return_diamonds = update_goal("total_diamonds", diamonds)
+
+                if return_diamonds:
+
+                    update_goal("diamonds", return_diamonds)
+
+                update_roles(data_user)
+                update_points(data_user)
+
+                send_discord_webhook(discord_data)
+                append_notice(data_append)
+                show_alert(data_append)
+
+                audio = gifts_data[gift_id]["audio"]
+                volume = gifts_data[gift_id]["volume"]
+                status = gifts_data[gift_id]["status"]
+                
+                if status == 1 and audio != "":
+                    threading.Thread(target=play_sound,args=(audio,volume,),daemon=True,).start()
+
+                elif global_status == 1 and global_audio != "":
+                    threading.Thread(target=play_sound,args=(global_audio,global_volume,),daemon=True,).start()
+            else:
+
+                if global_status == 1 and global_audio != "":
                     threading.Thread(target=play_sound,args=(global_audio,global_volume,),daemon=True,).start()
 
     except Exception as e:
@@ -4212,22 +5200,38 @@ async def on_gift(event):
         utils.error_log(e)
 
 
-async def on_follow(event):
-    
-    activity()
+def on_follow(event):
+
+    event = utils.DictDot(event)
 
     event_config_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_not.json", "load")
-    goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
     ttk_follows = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/follow.json","load")
 
-    username = event.user.nickname
-    user_id = event.user.unique_id
+    username = event.nickname
+    userid = event.uniqueId
+    follower = event.is_following
+    moderator = event.is_moderator
+    subscriber = event.is_subscriber  
+    profilePictureUrl = event.profilePictureUrl
 
     try:
         
-        if user_id not in ttk_follows:
-            
-            ttk_follows.append(user_id)
+        if userid not in ttk_follows:
+
+            data_user = {
+                "type_id": "follow",
+                "display_name": username,
+                "user_id": userid,
+                "user_name": username,
+                "follow": follower,
+                "moderator": moderator,
+                "subscriber": subscriber,
+                "profile_pic": profilePictureUrl
+            }
+
+            add_user_database(data_user)
+
+            ttk_follows.append(userid)
 
             utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/follow.json","save",ttk_follows)
 
@@ -4239,146 +5243,214 @@ async def on_follow(event):
                 "type": "follow",
                 "message": utils.replace_all(utils.messages_file_load("event_ttk_follow"), aliases),
                 "user_input": "",
+                "profile_pic" : profilePictureUrl
             }
-        
+
+            update_roles(data_user)
+
+            return_follow = update_goal("total_follow", int(1))
+            if return_follow:
+                update_goal("follow", int(return_follow))
+
             append_notice(data_append)
-            
+            show_alert(data_append)
+
             send_discord_webhook({"type_id": "follow", "username" : username})
 
             if event_config_data["ttk_follow"]["sound"] == 1:
-                
+
                 audio_path = event_config_data["ttk_follow"]["sound_loc"]
                 audio_volume = event_config_data["ttk_follow"]["sound_volume"]
 
                 threading.Thread(target=play_sound,args=(audio_path,audio_volume,),daemon=True).start()
 
-        data_roles = {"type_id": "follow", "user": user_id}
-
-        update_roles(data_roles)
-
-        goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
-
-        goal_data["follow"]["total_follow"] = event.total_followers
-
-        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json", "save", goal_data)
-
-        update_goal("follow", event.total_followers)
-
-        data = {"goal": goal_data["follow"]["goal"], "total": event.total_followers}
-
-        data_dump = json.dumps(data, ensure_ascii=False)
-
-        window.evaluate_js(f"update_carousel_tiktok('update_follows',{data_dump})")
-
     except Exception as e:
         utils.error_log(e)
 
 
-async def on_share(event):
+def on_share(event):
     
-    activity()
+    event = utils.DictDot(event)
 
     try:
         
-        user_id = event.user.unique_id
-        
+        userid = event.uniqueId
+        username = event.nickname
+        follower = event.is_following
+        moderator = event.is_moderator
+        subscriber = event.is_subscriber  
+        profilePictureUrl = event.profilePictureUrl
+
+
         event_config_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_not.json", "load")
-        
-        aliases = {"{username}": event.user.nickname}
 
-        goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
+        shares_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/shares.json","load")
+        shares_list = shares_data["shares"]
 
-        total_shares = int(goal_data["share"]["total_shares"]) + 1
-        goal_data["share"]["total_shares"] = int(total_shares)
-        
-        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","save",goal_data)
-
-        data_roles = {"type_id": "shares", "user": user_id}
-
-        goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
-
-        goal_data["share"]["total_share"] = total_shares
-
-        utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json", "save", goal_data)
-
-        update_roles(data_roles)
-        update_goal("share", total_shares)
-        send_discord_webhook({"type_id": "share", "username" : event.user.nickname})
-        
-        data_append = {
-            "type": "share",
-            "message":  utils.replace_all(utils.messages_file_load("event_ttk_share"), aliases),
-            "user_input": "",
+        aliases = {
+            "{username}": username,
+            "{user}" : userid
         }
-        
-        append_notice(data_append)
-        
-        if event_config_data["ttk_share"]["sound"] == 1:
+
+        data_user = {
+            "type_id": "shares",
+            "display_name": username,
+            "user_id": userid,
+            "user_name": username,
+            "follow": follower,
+            "moderator": moderator,
+            "subscriber": subscriber,
+            "profile_pic": profilePictureUrl,
+        }
+
+        add_user_database(data_user)
+
+        def update_user_share(userid):
+
+            data_roles = {
+                "type_id": "shares",
+                "username" : username, 
+                "user_id": userid,
+                "profile_pic" : profilePictureUrl
+            }
+
+            update_roles(data_roles)
+            update_points(data_roles)
+
+            return_share = update_goal("total_share", 1)
+
+            if return_share:
+                
+                update_goal("share", return_share)
+
+        if userid not in shares_list:
             
-            audio_path = event_config_data["ttk_share"]["sound_loc"]
-            audio_volume = event_config_data["ttk_share"]["sound_volume"]
+            current_time = int(time.time())
+            
+            shares_list[userid] = current_time
+            
+            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/shares.json", "save", shares_data)
 
-            threading.Thread(target=play_sound,args=(audio_path,audio_volume),daemon=True).start()
-        
-        
+            data_append = {
+                "type": "share",
+                "message":  utils.replace_all(utils.messages_file_load("event_ttk_share"), aliases),
+                "user_input": "",
+                "profile_pic" : profilePictureUrl
+            }
+            
+            append_notice(data_append)
+            show_alert(data_append)
+            
+            send_discord_webhook({"type_id": "share", "username" : username})
 
+        
+            if event_config_data["ttk_share"]["sound"] == 1:
+                
+                audio_path = event_config_data["ttk_share"]["sound_loc"]
+                audio_volume = event_config_data["ttk_share"]["sound_volume"]
+
+                threading.Thread(target=play_sound,args=(audio_path,audio_volume),daemon=True).start()
+        
+        else:
+
+            message_delay, check_time, current = utils.check_delay(event_config_data["ttk_share"]["delay"], shares_list[userid])
+
+            if check_time:
+                
+                shares_list[userid] = current
+                
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/shares.json","save", shares_data)
+
+                data_append = {
+                    "type": "share",
+                    "message":  utils.replace_all(utils.messages_file_load("event_ttk_share"), aliases),
+                    "user_input": "",
+                    "profile_pic" : profilePictureUrl
+                }
+
+                append_notice(data_append)
+                show_alert(data_append)
+
+                send_discord_webhook({"type_id": "share", "username" : username})
+
+        update_user_share(userid)
+                
     except Exception as e:
         utils.error_log(e)
 
 
-async def on_viewer_update(event):
+def on_viewer_update(event):
 
-    activity()
+    event = utils.DictDot(event)
+    
+    viewer_count = event.viewer_count
+    user_info = event.top_viewer
 
-    if event.viewer_count != None:
-        
-        if int(event.viewer_count) > int(1):
-            
+    user_info = utils.DictDot(user_info)
+    
+    try:
+        if viewer_count != None and int(viewer_count) > int(1):
+                
             goal_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","load")
 
             max_specs = int(goal_data["max_viewer"]["total_viewer"])
 
-            if int(event.viewer_count) > max_specs:
-                
-                goal_data["max_viewer"]["total_viewer"] = int(event.viewer_count)
-                update_goal("max_viewer", int(event.viewer_count))
+            if int(viewer_count) > max_specs:
+
+                goal_data["max_viewer"]["total_viewer"] = int(viewer_count)
+
+                update_goal("max_viewer", int(viewer_count))
+
+                utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","save",goal_data)
+
+            if user_info != None:
+
+                nickname = user_info.nickname
+                profilePictureUrl = user_info.profilePictureUrl
+                topGifterRank = user_info.topGifterRank
+                coinCount = user_info.coinCount
+
+                user_info = {
+                    "rank": topGifterRank,
+                    "user": nickname,
+                    "avatar": profilePictureUrl,
+                    "diamonds": coinCount,
+                }
+
+                data_dump = json.dumps(user_info, ensure_ascii=False)
+
+                if main_window_open:
+                    main_window.evaluate_js(f"update_carousel_tiktok('update_topspecs',{data_dump})")
+
+        if main_window_open:
+            main_window.evaluate_js(f"update_specs_tiktok({int(viewer_count)})")
+
+    except Exception as e:
+        utils.error_log(e)
 
 
-            utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/goal.json","save",goal_data)
-
-            window.evaluate_js(f"update_specs_tiktok({int(event.viewer_count)})")
-
-            topviewers = event.top_viewers
-
-            for item in topviewers:
-                
-                if item.user.nickname != None and item.rank == 1:
-                    
-                    avatar_list = item.user.avatar.urls
-                    avatar = avatar_list[0]
-                    username = item.user.nickname
-                    diamonds = item.coins_given
-                    rank = item.rank
-
-                    user_info = {
-                        "rank": rank,
-                        "user": username,
-                        "avatar": avatar,
-                        "diamonds": diamonds,
-                    }
-
-                    data_dump = json.dumps(user_info, ensure_ascii=False)
-
-                    window.evaluate_js(f"update_carousel_tiktok('update_topspecs',{data_dump})")
-
-
-async def on_envelope(event):
+def on_envelope(event):
     
-    activity()
+    event = utils.DictDot(event)
 
-    user = event.treasure_box_user.nickname
+    userId = event.userId
+    secUid = event.secUid
+    uniqueId = event.uniqueId
+    username = event.nickname
+    profilePictureUrl = event.profilePictureUrl
+    followRole = event.followRole
+    userBadges = event.userBadges
+    userDetails = event.userDetails
+    isModerator = event.isModerator
+    isNewGifter = event.isNewGifter
+    isSubscriber = event.isSubscriber
+    topGifterRank = event.topGifterRank
+    coinCount = event.coinCount
 
-    aliases = {"{username}": user}
+    aliases = {
+        "{username}": username,
+        "{coins}" : coinCount
+    }
 
     data_append = {
         "type": "chest",
@@ -4388,86 +5460,25 @@ async def on_envelope(event):
 
     append_notice(data_append)
     
-    send_discord_webhook({"type_id": "envelope", "username" : event.user.nickname})
+    send_discord_webhook({"type_id": "envelope", "username" : username})
 
 
-async def on_unknownevent(event):
-    
-    type_mess = event.type
-    binary_mess = event.binary
-    data_mess = event.data
+def on_error(event):
+
+    event = utils.DictDot(event)
 
     data_append = {
         "type": "event",
-        "message": f"Mensagem do tipo (UnknowEvent) recebida {type_mess}{binary_mess}{data_mess}",
+        "message": f"Erro : {event.message}",
         "user_input": "",
     }
 
     append_notice(data_append)
 
 
-async def on_error(error: Exception):
-    
-    data_append = {
-        "type": "event",
-        "message": f"Mensagem do tipo (Error) recebida {error}",
-        "user_input": "",
-    }
-
-    append_notice(data_append)
-
-
-listener_callbacks = {
-    "comment": on_comment,
-    "connect": on_connect,
-    "like": on_like,
-    "join": on_join,
-    "gift": on_gift,
-    "follow": on_follow,
-    "share": on_share,
-    "viewer_update": on_viewer_update,
-    "envelope": on_envelope,
-    "error": on_error,
-}
-
-
-tiktok_thread = TikTokLiveThread(listener_callbacks=listener_callbacks)
-tiktok_thread.callback_log(toast)
-
-
-def check_activity():
-
-    global reconn 
-
-    while True:
-
-        if loaded_status and tiktok_thread.is_running():
-
-            activity_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/debug.json","load")
-
-            activity_time = activity_data["activity"]
-
-            message_delay, check_time, current = utils.check_delay('120', activity_time)
-
-            if check_time:
-
-                toast("Reconectando chat")
-
-                reconn = True
-
-                tiktok_thread.close()
-                
-                time.sleep(10)
-
-                tiktok_thread.run()
-
-
-        time.sleep(10)
-
-        
 def webview_start_app(app_mode):
     
-    global window, window_chat, window_events, window_chat_open
+    global main_window, main_window_open, window_chat, window_events, window_chat_open
 
     def set_window_chat_open():
         
@@ -4493,6 +5504,12 @@ def webview_start_app(app_mode):
 
         window_events_open = False
 
+    def set_main_window_open():
+
+        global main_window_open
+
+        main_window_open = True
+
     debug_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/debug.json","load")
 
     debug_status = debug_data["debug"]
@@ -4505,12 +5522,13 @@ def webview_start_app(app_mode):
 
     if app_mode == "normal":
         
-        window = webview.create_window("VibesBot",f"{utils.local_work('datadir')}/web/index.html",width=1200,height=680,min_size=(1200, 680))
+        main_window = webview.create_window("VibesBot",f"{utils.local_work('datadir')}/web/index.html",width=1200,height=680,min_size=(1200, 680))
+    
+        main_window.events.loaded += set_main_window_open
+        main_window.events.closed += close
+        main_window.events.resized += on_resize
 
-        window.events.closed += close
-        window.events.resized += on_resize
-
-        window.expose(
+        main_window.expose(
             loaded,
             chat_config,
             open_py,
@@ -4537,7 +5555,8 @@ def webview_start_app(app_mode):
             tiktok_auth,
             tts_command,
             userdata_py,
-            balance_command
+            balance_command,
+            ranks_config
         )
 
         webview.start(storage_path=utils.local_work("datadir"),private_mode=True,debug=debug_status,http_server=True,http_port=7000)
@@ -4568,19 +5587,88 @@ def close():
     
     loaded_status = False
     
+    if utils.check_file(f"{utils.local_work('appdata_path')}/user_info/users_database.json"):
+        userdata_py('backup',"null")
+    
     if window_chat_open:
         window_chat.destroy()
 
     if window_events_open:
         window_events.destroy()
 
-    tiktok_thread.close()
+    wsclient.send(json.dumps({'type': 'Close','message' : 'Close'}, ensure_ascii=False))
+
+    wsclient.close()
+
+    server.close_servers()
 
     sys.exit(0)
 
 
-def start_app():
+def close_auth():
 
+    global loaded_status
+    
+    loaded_status = False
+    
+    if window_chat_open:
+        window_chat.destroy()
+
+    if window_events_open:
+        window_events.destroy()
+
+    if main_window_open:
+        main_window.destroy()
+
+    wsclient.send("close")
+    
+    sys.exit(0)
+
+
+def logout_auth():
+    
+    data = {"USERNAME": "", "SESSIONID": ""}
+
+    utils.manipulate_json(f"{utils.local_work('appdata_path')}/auth/auth.json","save",data)
+
+    close_auth()
+
+
+def start_websocket_CS():
+
+    global wsclient, server
+    
+    listener_callbacks = {
+        "comment_event": on_comment,
+        "connect_event": on_connect,
+        "like_event": on_like,
+        "join_event": on_join,
+        "gift_event": on_gift,
+        "follow_event": on_follow,
+        "share_event": on_share,
+        "viewer_event": on_viewer_update,
+        "envelope_event": on_envelope,
+        "error_event" : on_error
+    }
+
+    server = WebSocketServer('localhost', 7688)
+    server.run()
+
+    wsclient = WebSocketClient(callback_list=listener_callbacks,server_url='ws://127.0.0.1:7788')
+    wsclient.run()
+
+
+def start_node():
+
+    try:
+
+        subprocess.Popen('run.bat', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
+
+    except Exception as e:
+        utils.error_log(e)
+
+
+def start_app():
 
     def start_log_files():
 
@@ -4610,8 +5698,7 @@ def start_app():
         event_log_data = utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","load")
 
         if len(event_log_data["event-list"]) > 100:
-            event_list = event_log_data["event-list"][-100:]
-            event_log_data["event-list"] = event_list
+            event_log_data["event-list"] = event_log_data["event-list"][-100:]
 
         utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/event_log.json","save",event_log_data)
 
@@ -4622,7 +5709,12 @@ def start_app():
         like_data = {"likes": {}}
 
         utils.manipulate_json(f"{utils.local_work('appdata_path')}/config/likes.json","save",like_data)
-      
+        
+        if utils.check_file(f"{utils.local_work('appdata_path')}/user_info/users_database.json"):
+            userdata_py('backup',"null")
+        else:
+            userdata_py('restore_backup',"null") 
+
     if utils.compare_and_insert_keys():
 
         start_log_files()
@@ -4630,11 +5722,20 @@ def start_app():
         pygame.init()
         pygame.mixer.init()
 
-        threading.Thread(target=loopcheck, args=(), daemon=True).start()
-        threading.Thread(target=sk.start_server, args=("127.0.0.1", 7688), daemon=True).start()
-        threading.Thread(target=check_activity, args=(), daemon=True).start()
+        loop = threading.Thread(target=loopcheck, args=(), daemon=True)
+        loop.start()
 
-        tiktok_thread.run()
+        loop_r = threading.Thread(target=looprank, args=(), daemon=True)
+        loop_r.start()
+
+        runode= threading.Thread(target=start_node, args=(), daemon=True)
+        runode.start()
+
+        authdata = auth_data(f"{utils.local_work('appdata_path')}/auth/auth.json")
+        username = authdata.USERNAME()
+
+        if username != "":
+            start_websocket_CS()
 
         if getattr(sys, "frozen", False):
             utils.splash_close()
@@ -4646,7 +5747,6 @@ if lock_manager.already_running:
 
     error_message = "O programa já está em execução, aguarde."
     messagebox.showerror("Erro", error_message)
-    sys.exit(0)
 
 else:
     start_app()

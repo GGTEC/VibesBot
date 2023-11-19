@@ -110,12 +110,19 @@ window.addEventListener('pywebviewready',async function() {
         update_modal('get')
       }, 1000);
   
-      start_carousel()
   
-      progress_span.innerHTML = 'start info carroucel.'
+      connectWebSocket_likes();
+      connectWebSocket_diamonds();
+      connectWebSocket_folows();
+      connectWebSocket_specs();
+      connectWebSocket_shares();
+      connectWebSocket_gifts();
+
+      progress_span.innerHTML = 'ConnectWebsockets.'
       functionsExecuted++;
       progressBar_start.style.width = `${functionsExecuted * (100 / functionsCount)}%`; //atualize o progresso
-  
+      
+
       progress_span.innerHTML = 'remove loading.'
       functionsExecuted++;
       progressBar_start.style.width = `${functionsExecuted * (100 / functionsCount)}%`; //atualize o progresso
@@ -149,18 +156,6 @@ function start_selectpicker(){
     noneSelectedText : 'Selecione um item'
   });
 
-}
-
-function start_carousel(){
-
-  $('.carousel').flickity({
-    contain: true,
-    wrapAround: true,
-    autoPlay: true,
-    prevNextButtons: false,
-    pageDots: false,
-    setGallerySize: false
-  });
 }
 
 function start_scroll(){
@@ -247,6 +242,7 @@ function start_color_inputs(){
     ttk_goal('save_html')
   });
 
+
   $("#goal-bar-color-button").click(function(event) {
     $("#goal-bar-color").click();
   });
@@ -256,6 +252,7 @@ function start_color_inputs(){
     $("#goal-bar-color-text").val($(this).val())
     ttk_goal('save_html')
   });
+
 
   $("#goal-background-bar-color-button").click(function(event) {
     $("#goal-background-bar-color").click();
@@ -267,6 +264,7 @@ function start_color_inputs(){
     ttk_goal('save_html')
   });
 
+
   $("#goal-background-color-button").click(function(event) {
     $("#goal-background-color").click();
   });
@@ -274,8 +272,48 @@ function start_color_inputs(){
   $("#goal-background-color-text").change(function(event) {
     $("#goal-background-color-span").css('background-color',$(this).val());
     $("#goal-background-color-text").val($(this).val())
-    ttk_goal('save_html')
+    ranks_js('save','')
   });
+
+
+  $("#likes-rank-background-button").click(function(event) {
+    $("#likes-rank-background-color").click();
+  });
+
+  $("#likes-rank-background-color").change(function(event) {
+    $("#likes-rank-background-span").css('background-color',$(this).val());
+    $("#likes-rank-background-text").val($(this).val())
+  });
+
+  $("#gifts-rank-background-button").click(function(event) {
+    $("#gifts-rank-background-color").click();
+  });
+
+  $("#gifts-rank-background-color").change(function(event) {
+    $("#gifts-rank-background-span").css('background-color',$(this).val());
+    $("#gifts-rank-background-text").val($(this).val())
+  });
+
+
+  $("#shares-rank-background-button").click(function(event) {
+    $("#shares-rank-background-color").click();
+  });
+
+  $("#shares-rank-background-color").change(function(event) {
+    $("#shares-rank-background-span").css('background-color',$(this).val());
+    $("#shares-rank-background-text").val($(this).val())
+  });
+
+
+  $("#points-rank-background-button").click(function(event) {
+    $("#points-rank-background-color").click();
+  });
+
+  $("#points-rank-background-color").change(function(event) {
+    $("#points-rank-background-span").css('background-color',$(this).val());
+    $("#points-rank-background-text").val($(this).val())
+  });
+
 
 }
 
@@ -302,30 +340,6 @@ function update_carousel_tiktok(type_id,data){
     document.getElementById('avatar-rank').src = data.avatar
     document.getElementById('diamonds-rank').innerHTML = data.diamonds;
 
-
-  } else if(type_id == 'update_follows'){
-
-
-    var bar = document.getElementById("progress-bar-follow");
-    var progressValue = document.getElementById("progress-value-follow");
-
-    var value_perc = (Number(data.goal) / Number(data.total)) * 100;
-
-    bar.style.width = value_perc + "%";
-    progressValue.textContent = `${data.total}/${data.goal}`;
-
-  } else if(type_id == 'likes'){
-
-    var bar = document.getElementById("progress-bar-likes");
-    var progressValue = document.getElementById("progress-value-likes");
-    var progressTitle = document.getElementById("progress-title-likes");
-    var progressTitle_user = document.getElementById("progress-title-likes-user");
-
-    var value_perc = (Number(data.goal) / Number(data.total)) * 100;
-
-    bar.style.width = value_perc + "%";
-    progressValue.textContent = `${data.total}/${data.goal}`;
-    progressTitle_user.innerText = data.user
 
   }
 };
@@ -523,7 +537,7 @@ async function getFolder(id,type_id) {
   }
 }
 
-function start_scroll_event_log(){
+async function start_scroll_event_log(){
 
   const div_events_scroll = document.getElementById("div-events");
 
@@ -637,12 +651,83 @@ function start_scroll_event_log(){
   });
 }
 
+async function userdata_modal(type_id,user){
+
+  var usernameElement = document.getElementById("user-edit-username");
+  var useridElement = document.getElementById("user-edit-userid");
+  var likesElement = document.getElementById("user-edit-likes");
+  var giftsElement = document.getElementById("user-edit-gifts");
+  var sharesElement = document.getElementById("user-edit-shares");
+  var levelElement = document.getElementById("user-edit-roles");
+  var pointsElement = document.getElementById("user-edit-points");
+  var ButtonElement = document.getElementById("btn-save-useredit");
+
+  if (type_id == 'edit'){
+    
+    var userdata_parse = await window.pywebview.api.userdata_py('get','None')
+      
+    if (userdata_parse){
+      
+      userdata_parse = JSON.parse(userdata_parse)
+
+      data = userdata_parse[user]
+
+      $('#userdata-edit-modal').modal("show")
+
+      await sleep(1000)
+
+      usernameElement.value = data.display_name
+      useridElement.value = user
+      likesElement.value = data.likes
+      giftsElement.value = data.gifts
+      sharesElement.value = data.shares
+      pointsElement.value = data.points
+      ButtonElement.setAttribute("onclick", `userdata_modal('save','${user}')`);
+
+      $('#user-edit-roles').selectpicker('val',data.roles);
+      $('#user-edit-roles').selectpicker('refresh')
+
+
+
+    }
+  } else if (type_id == 'save'){
+
+      var roles = []; 
+
+      $('#user-edit-roles :selected').each(function(i, selected){ 
+          roles[i] = $(selected).val(); 
+      });
+
+      data = {
+        username : usernameElement.value,
+        userid : useridElement.value,
+        likes : likesElement.value,
+        gifts : giftsElement.value,
+        shares : sharesElement.value,
+        points : pointsElement.value,
+        roles: roles
+      }
+
+      window.pywebview.api.userdata_py('save',JSON.stringify(data));
+
+
+  } else if (type_id == 'remove'){
+
+
+    retunr = await window.pywebview.api.userdata_py('remove',user)
+
+    if (retunr){
+
+      userdata_js('get','null')
+
+    }
+
+}
+}
 
 async function userdata_js(type_id,data){
 
   if (type_id == "get"){
-
-      $('#userdata-modal').modal('show')
 
       var userdata_parse = await window.pywebview.api.userdata_py('get','None')
       
@@ -655,6 +740,7 @@ async function userdata_js(type_id,data){
               $('#userdata_table').DataTable().destroy();
           }
 
+
           var table = $('#userdata_table').DataTable( {
               pageLength: 8,
               autoWidth: true,
@@ -664,7 +750,7 @@ async function userdata_js(type_id,data){
               ordering:  true,
               retrieve : false,
               processing: true,
-              responsive: false,
+              responsive: true,
               lengthMenu: [
                   [10, 25, 50, -1],
                   [10, 25, 50, 'All'],
@@ -676,39 +762,45 @@ async function userdata_js(type_id,data){
 
 
           for (var key in userdata_parse) {
-              
+
               var removeBtn = document.createElement("button");
               removeBtn.classList.add("btn", "bt-submit", "p-1", "m-1");
               removeBtn.setAttribute("type", "button");
               removeBtn.setAttribute("title", "Remover usuário");
               removeBtn.setAttribute("data-toggle", "tooltip");
               removeBtn.setAttribute("data-bs-placement", "top");
-              removeBtn.setAttribute("onclick", `window.pywebview.api.userdata_py('remove','${userdata_parse[key].display_name}`);
+              removeBtn.setAttribute("onclick", `userdata_modal("remove",'${key}')`);
 
               var removeIcon = document.createElement("i");
               removeIcon.classList.add("fa-solid", "fa-user-xmark");
 
               removeBtn.appendChild(removeIcon);
 
+              var EditBtn = document.createElement("button");
+              EditBtn.classList.add("btn", "bt-submit", "p-1", "m-1");
+              EditBtn.setAttribute("type", "button");
+              EditBtn.setAttribute("title", "Editar usuário");
+              EditBtn.setAttribute("onclick", `userdata_modal('edit','${key}')`);
+
+              var EditIcon = document.createElement("i");
+              EditIcon.classList.add("fa-solid", "fa-user-pen");
+
+              EditBtn.appendChild(EditIcon);
+
+
               var row = table.row.add([
                 userdata_parse[key].display_name,
                 key,
                 userdata_parse[key].roles,
+                userdata_parse[key].points,
                 userdata_parse[key].likes,
                 userdata_parse[key].shares,
                 userdata_parse[key].gifts,
-                removeBtn.outerHTML
+                `${removeBtn.outerHTML}/${EditBtn.outerHTML}`
               ]);
 
               
             }
-
-          $('#userdata_table tfoot th').each(function () {
-              var title = $(this).text();
-              $(this).html('<input type="text" class="form-control bg-dark" placeholder="Procure em ' + title + '" />');
-          });
-
-          $('[data-toggle="tooltip"]').tooltip();
 
       }
 
@@ -718,6 +810,520 @@ async function userdata_js(type_id,data){
   }
 }
 
-function getCheckedValue(element) {
+async function getCheckedValue(element) {
   return element.checked ? 1 : 0;
 }
+
+var socket_likes;
+var socket_gifts;
+var socket_specs;
+var socket_diamonds;
+var socket_follow;
+var socket_shares;
+
+
+function connectWebSocket_likes() {
+
+  var iframe_likes = document.getElementById('iframe-likes');
+
+
+  if (socket_likes && socket_likes.readyState === WebSocket.OPEN) {
+    return;
+  }
+
+  socket_likes = new WebSocket("ws://localhost:7688");
+
+  socket_likes.onopen = function(event) {
+
+    message = {
+        type: "likes"
+    };
+
+    socket_likes.send(JSON.stringify(message))
+
+
+  };
+
+  socket_likes.onmessage = function(event) {
+
+
+      if (event.data === 'ping') {
+
+          message = {
+              type: "pong"
+          };
+
+          socket_likes.send(JSON.stringify(message))
+
+      } else {
+
+        var data_parse = JSON.parse(event.data);
+
+        if (data_parse.type === 'save_html') {
+
+          iframe_likes.innerHTML = "";
+
+          var temp_div = document.createElement('div');
+          temp_div.innerHTML = data_parse.html;
+
+          var temp_div_outer = temp_div.querySelector('.progress-outer');
+          iframe_likes.appendChild(temp_div_outer)
+        
+
+        } else if (data_parse.type === 'update_goal'){
+
+          if (data_parse.type_goal == 'likes'){
+
+            iframe_likes.innerHTML = "";
+
+            var temp_div = document.createElement('div');
+            temp_div.innerHTML = data_parse.html;
+
+            var temp_div_outer = temp_div.querySelector('.progress-outer');
+            iframe_likes.appendChild(temp_div_outer)
+
+            var bar = iframe_likes.querySelector('#progress-bar');
+            var value = iframe_likes.querySelector("#progress-value");
+
+            var value1 = data_parse.current
+            var value2 = data_parse.goal
+
+            var percent = (value1 / value2) * 100;
+
+            bar.style.width = percent + "%";
+
+            value.textContent = `${value1}/${value2}`
+          }
+
+          }
+      }
+  };
+
+  socket_likes.onclose = function(error) {
+    reconnectWebSocket_likes();
+  };
+}
+
+function reconnectWebSocket_likes() {
+  if (!socket_likes || socket_likes.readyState === WebSocket.CLOSED) {
+    setTimeout(function() {connectWebSocket_likes();}, 3000);
+  }
+}
+
+
+
+function connectWebSocket_diamonds() {
+
+  var iframe_diamonds = document.getElementById('iframe-diamonds');
+
+  if (socket_diamonds && socket_diamonds.readyState === WebSocket.OPEN) {
+    return;
+  }
+
+  socket_diamonds = new WebSocket("ws://localhost:7688");
+
+  socket_diamonds.onopen = function(event) {
+    
+    message = {
+        type: "diamonds"
+    };
+
+    socket_diamonds.send(JSON.stringify(message))
+  };
+
+  socket_diamonds.onmessage = function(event) {
+
+      if (event.data === 'ping') {
+
+          message = {
+              type: "pong"
+          };
+
+          socket_diamonds.send(JSON.stringify(message))
+
+      } else {
+
+        var data_parse = JSON.parse(event.data);
+
+        if (data_parse.type === 'save_html') {
+
+          iframe_diamonds.innerHTML = "";
+
+          var temp_div = document.createElement('div');
+          temp_div.innerHTML = data_parse.html;
+
+          var temp_div_outer = temp_div.querySelector('.progress-outer');
+          iframe_diamonds.appendChild(temp_div_outer)
+
+        } else if (data_parse.type === 'update_goal'){
+
+          if (data_parse.type_goal == 'diamonds'){
+
+              iframe_diamonds.innerHTML = "";
+
+              var temp_div = document.createElement('div');
+              temp_div.innerHTML = data_parse.html;
+
+              var temp_div_outer = temp_div.querySelector('.progress-outer');
+              iframe_diamonds.appendChild(temp_div_outer)
+
+              var bar = iframe_diamonds.querySelector('#progress-bar');
+              var value = iframe_diamonds.querySelector("#progress-value");
+
+              var value1 = data_parse.current
+              var value2 = data_parse.goal
+
+              var percent = (value1 / value2) * 100;
+
+              bar.style.width = percent + "%";
+
+              value.textContent = `${value1}/${value2}`
+            }
+
+          }
+      }
+  };
+
+  socket_diamonds.onclose = function(error) {
+    reconnectWebSocket_gifts();
+  };
+}
+
+function reconnectWebSocket_diamonds() {
+  if (!socket_diamonds || socket_diamonds.readyState === WebSocket.CLOSED) {
+    setTimeout(function() {connectWebSocket_gifts();}, 3000);
+  }
+}
+
+
+
+function connectWebSocket_folows() {
+
+  var iframe_follows = document.getElementById('iframe-follows');
+
+  if (socket_follow && socket_follow.readyState === WebSocket.OPEN) {
+    return;
+  }
+
+  socket_follow = new WebSocket("ws://localhost:7688");
+
+  socket_follow.onopen = function(event) {
+    message = {
+        type: "follow"
+    };
+
+    socket_follow.send(JSON.stringify(message))
+  };
+
+  socket_follow.onmessage = function(event) {
+
+      if (event.data === 'ping') {
+
+          message = {
+              type: "pong"
+          };
+
+          socket_follow.send(JSON.stringify(message))
+
+      } else {
+
+        var data_parse = JSON.parse(event.data);
+
+        if (data_parse.type === 'save_html') {
+
+          iframe_follows.innerHTML = "";
+
+          var temp_div = document.createElement('div');
+          temp_div.innerHTML = data_parse.html;
+
+          var temp_div_outer = temp_div.querySelector('.progress-outer');
+          iframe_follows.appendChild(temp_div_outer)
+
+        } else if (data_parse.type === 'update_goal'){
+
+          if (data_parse.type_goal == 'follow'){
+
+              iframe_follows.innerHTML = "";
+
+              var temp_div = document.createElement('div');
+              temp_div.innerHTML = data_parse.html;
+
+              var temp_div_outer = temp_div.querySelector('.progress-outer');
+              iframe_follows.appendChild(temp_div_outer)
+
+              var bar = iframe_follows.querySelector('#progress-bar');
+              var value = iframe_follows.querySelector("#progress-value");
+
+              var value1 = data_parse.current
+              var value2 = data_parse.goal
+
+              var percent = (value1 / value2) * 100;
+
+              bar.style.width = percent + "%";
+
+              value.textContent = `${value1}/${value2}`
+            }
+
+          }
+      }
+  };
+
+  socket_follow.onclose = function(error) {
+    reconnectWebSocket_folows();
+  };
+}
+
+function reconnectWebSocket_folows() {
+  if (!socket_follow || socket_follow.readyState === WebSocket.CLOSED) {
+    setTimeout(function() {connectWebSocket_folows();}, 3000);
+  }
+}
+
+
+function connectWebSocket_gifts() {
+
+  var iframe_gifts = document.getElementById('iframe-gifts');
+
+  if (socket_gifts && socket_gifts.readyState === WebSocket.OPEN) {
+    return;
+  }
+
+  socket_gifts = new WebSocket("ws://localhost:7688");
+
+  socket_gifts.onopen = function(event) {
+    message = {
+        type: "gift"
+    };
+
+    socket_gifts.send(JSON.stringify(message))
+  };
+
+  socket_gifts.onmessage = function(event) {
+
+      if (event.data === 'ping') {
+
+          message = {
+              type: "pong"
+          };
+
+          socket_gifts.send(JSON.stringify(message))
+
+      } else {
+
+        var data_parse = JSON.parse(event.data);
+
+        if (data_parse.type === 'save_html') {
+
+          iframe_gifts.innerHTML = "";
+
+          var temp_div = document.createElement('div');
+          temp_div.innerHTML = data_parse.html;
+
+          var temp_div_outer = temp_div.querySelector('.progress-outer');
+          iframe_gifts.appendChild(temp_div_outer)
+
+        } else if (data_parse.type === 'update_goal'){
+
+          if (data_parse.type_goal == 'gift'){
+
+            iframe_gifts.innerHTML = "";
+
+              var temp_div = document.createElement('div');
+              temp_div.innerHTML = data_parse.html;
+
+              var temp_div_outer = temp_div.querySelector('.progress-outer');
+              iframe_gifts.appendChild(temp_div_outer)
+
+              var bar = iframe_gifts.querySelector('#progress-bar');
+              var value = iframe_gifts.querySelector("#progress-value");
+
+              var value1 = data_parse.current
+              var value2 = data_parse.goal
+
+              var percent = (value1 / value2) * 100;
+
+              bar.style.width = percent + "%";
+
+              value.textContent = `${value1}/${value2}`
+            }
+
+          }
+      }
+  };
+
+  socket_gifts.onclose = function(error) {
+    reconnectWebSocket_gifts();
+  };
+}
+
+function reconnectWebSocket_gifts() {
+  if (!socket_gifts || socket_gifts.readyState === WebSocket.CLOSED) {
+    setTimeout(function() {connectWebSocket_gifts();}, 3000);
+  }
+}
+
+function connectWebSocket_specs() {
+
+  var iframe_specs = document.getElementById('iframe-specs');
+
+  if (socket_specs && socket_specs.readyState === WebSocket.OPEN) {
+    return;
+  }
+
+  socket_specs = new WebSocket("ws://localhost:7688");
+
+  socket_specs.onopen = function(event) {
+    message = {
+        type: "max_viewer"
+    };
+
+    socket_specs.send(JSON.stringify(message))
+  };
+
+  socket_specs.onmessage = function(event) {
+
+      if (event.data === 'ping') {
+
+          message = {
+              type: "pong"
+          };
+
+          socket_specs.send(JSON.stringify(message))
+
+      } else {
+
+        var data_parse = JSON.parse(event.data);
+
+        if (data_parse.type === 'save_html') {
+
+          iframe_specs.innerHTML = "";
+
+          var temp_div = document.createElement('div');
+          temp_div.innerHTML = data_parse.html;
+
+          var temp_div_outer = temp_div.querySelector('.progress-outer');
+          iframe_specs.appendChild(temp_div_outer)
+
+        } else if (data_parse.type === 'update_goal'){
+
+          if (data_parse.type_goal == 'max_viewer'){
+
+              iframe_specs.innerHTML = "";
+
+              var temp_div = document.createElement('div');
+              temp_div.innerHTML = data_parse.html;
+
+              var temp_div_outer = temp_div.querySelector('.progress-outer');
+              iframe_specs.appendChild(temp_div_outer)
+
+              var bar = iframe_specs.querySelector('#progress-bar');
+              var value = iframe_specs.querySelector("#progress-value");
+
+              var value1 = data_parse.current
+              var value2 = data_parse.goal
+
+              var percent = (value1 / value2) * 100;
+
+              bar.style.width = percent + "%";
+
+              value.textContent = `${value1}/${value2}`
+            }
+
+          }
+      }
+  };
+
+  socket_specs.onclose = function(error) {
+    reconnectWebSocket_specs();
+  };
+}
+
+function reconnectWebSocket_specs() {
+  if (!socket_specs || socket_specs.readyState === WebSocket.CLOSED) {
+    setTimeout(function() {connectWebSocket_specs();}, 3000);
+  }
+}
+
+function connectWebSocket_shares() {
+
+  var iframe_shares = document.getElementById('iframe-shares');
+
+  if (socket_shares && socket_shares.readyState === WebSocket.OPEN) {
+    return;
+  }
+
+  socket_shares = new WebSocket("ws://localhost:7688");
+
+  socket_shares.onopen = function(event) {
+    message = {
+        type: "share"
+    };
+
+    socket_shares.send(JSON.stringify(message))
+  };
+
+  socket_shares.onmessage = function(event) {
+
+      if (event.data === 'ping') {
+
+          message = {
+              type: "pong"
+          };
+
+          socket_specs.send(JSON.stringify(message))
+
+      } else {
+
+        var data_parse = JSON.parse(event.data);
+
+        if (data_parse.type === 'save_html') {
+
+          iframe_shares.innerHTML = "";
+
+          var temp_div = document.createElement('div');
+          temp_div.innerHTML = data_parse.html;
+
+          var temp_div_outer = temp_div.querySelector('.progress-outer');
+          iframe_shares.appendChild(temp_div_outer)
+
+        } else if (data_parse.type === 'update_goal'){
+
+          if (data_parse.type_goal == 'share'){
+
+              iframe_shares.innerHTML = "";
+
+              var temp_div = document.createElement('div');
+              temp_div.innerHTML = data_parse.html;
+
+              var temp_div_outer = temp_div.querySelector('.progress-outer');
+              iframe_shares.appendChild(temp_div_outer)
+
+              var bar = iframe_shares.querySelector('#progress-bar');
+              var value = iframe_shares.querySelector("#progress-value");
+
+              var value1 = data_parse.current
+              var value2 = data_parse.goal
+
+              var percent = (value1 / value2) * 100;
+
+              bar.style.width = percent + "%";
+
+              value.textContent = `${value1}/${value2}`
+            }
+
+          }
+      }
+  };
+
+  socket_shares.onclose = function(error) {
+    reconnectWebSocket_shares();
+  };
+}
+
+function reconnectWebSocket_shares() {
+  if (!socket_shares || socket_shares.readyState === WebSocket.CLOSED) {
+    setTimeout(function() {connectWebSocket_shares();}, 3000);
+  }
+}
+
+

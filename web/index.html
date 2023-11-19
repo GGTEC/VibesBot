@@ -10,8 +10,10 @@
   <!-- Favicons -->
   <link href="assets/img/favicon.png" rel="icon">
   
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta2/dist/css/bootstrap-select.min.css">
   <link rel="stylesheet" href="https://unpkg.com/flickity@2/dist/flickity.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
@@ -24,6 +26,9 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/showdown@1.9.0/dist/showdown.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+  <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+  <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta2/dist/js/bootstrap-select.min.js"></script>
   <script src="https://unpkg.com/flickity@2/dist/flickity.pkgd.min.js"></script>
@@ -99,11 +104,11 @@
         <p class="mt-1">Para iniciarmos o aplicativo é necessário efetuar a autenticação da sua conta,
           a autenticação é necessária para termos acessos á alguns dados importantes para o funcionamento
           correto do sistema, fique tranquilo, todos os dados de autenticação são salvos localmente e somente você e o
-          TikTok tem acesso ao token de autenticação.
+          TikTok tem acesso ao sessionID de autenticação.
         </p>
         <p class="mt-1" >
-          Na autenticação será necessário informar o seu SESSIONID e o SIDGUARD, essas informações são para o aplicativo conseguir se conectar totalmente ao tiktok,
-          Caso opte por não inserir estas informações as mensagens de certos usuários não irão aparecer no chat.
+          Na autenticação será necessário informar o seu Nome de usuário e sessionID, essas informações são para o aplicativo conseguir se conectar totalmente ao tiktok,
+          Caso opte por não inserir o sessionID relacionado á sua conta as mensagens de certos usuários não irão aparecer no chat.
         </p>
         <p class="mt-4">Bom, agora que já esclarecemos algumas coisas, clique no botão abaixo para iniciarmos.</p>
         <button class="btn bt-submit mt-1" onclick="auth('next-terms')">Próximo passo</button>
@@ -185,12 +190,8 @@
             <input type="text" class="form-control bg-dark mt-3" id="username" placeholder="Digite o seu nickname do TikTok" required />
           </div>
           <div class="form-group mt-3">
-            <label for="sessionid">SESSIONID Obtido no cookie do tiktok (Veja o tutorial no youtube ou na pagina de download)</label>
+            <label for="sessionid">SESSIONID Obtido no cookie do tiktok (Veja o tutorial na pagina de download)</label>
             <input type="text" class="form-control bg-dark mt-3" id="sessionid" required />
-          </div>
-          <div class="form-group mt-3">
-            <label for="sessionid">SIDGUARD Obtido no cookie do tiktok (Veja o tutorial no youtube ou na pagina de download)</label>
-            <input type="text" class="form-control bg-dark mt-3" id="sidguard" required />
           </div>
           <button type="button" class="btn bt-submit mt-4" onclick="auth('submit-auth')">Salvar</button>
         </div>
@@ -226,6 +227,10 @@
               <button class="nav-link" id="v-pills-queue-tab"  data-bs-placement="right" onclick="queue_js('get','null')" data-bs-toggle="pill" data-bs-target="#v-pills-queue" type="button" role="tab" aria-controls="v-pills-queue" >
                 <i class="fa-solid fa-bars-staggered nav_icon" title="Fila"></i>
                 <span class="nav_name">Fila</span>
+              </button>
+              <button class="nav-link" id="v-pills-rank-tab"  data-bs-placement="right" onclick="rank_js('get')" data-bs-toggle="pill" data-bs-target="#v-pills-rank" type="button" role="tab" aria-controls="v-pills-rank" >
+                <i class="fa-solid fa-bars-staggered nav_icon" title="Ranks"></i>
+                <span class="nav_name">Ranks</span>
               </button>
               <button class="nav-link" id="v-pills-giveaway-tab"  data-bs-placement="right" onclick="giveaway_js('get_config','null')" data-bs-toggle="pill" data-bs-target="#v-pills-giveaway" type="button" role="tab" aria-controls="v-pills-giveaway" >
                 <i class="fa-solid fa-dice nav_icon" title="Sorteio"></i>
@@ -269,9 +274,7 @@
             <div class="events-col" id="events-col">
               <div class="out-redeem">
                 <div class="bg-dark redeem-block" style="height: auto;">
-                  <div class="bg-dark top-toggler d-flex justify-content-between" id="recent-toggler"
-                    data-bs-toggle="collapse" data-bs-target="#colapse-recent" aria-expanded="false"
-                    aria-controls="colapse-recent">
+                  <div class="bg-dark top-toggler d-flex justify-content-between" id="recent-toggler" data-bs-toggle="collapse" data-bs-target="#colapse-recent" aria-expanded="false" aria-controls="colapse-recent">
                     <p class="m-1">Eventos recentes</p>
                     <div>
                       <span class="m-1" id="recent-icon-toggler"><i class="fa-solid fa-square-caret-down"></i></span>
@@ -284,47 +287,87 @@
                   </div>
                 </div>
                 <div class="bg-dark redeem-block" style="height: auto;">
-                  <div class="bg-dark top-toggler d-flex justify-content-between" id="carroucel-toggler" data-bs-toggle="collapse" data-bs-target="#colapse-carroucel" aria-expanded="false" aria-controls="colapse-carroucel">
-                    <p class="m-1">Informações TikTok</p>
+                  <div class="bg-dark top-toggler d-flex justify-content-between" style="box-shadow: none !important;" id="goallikes-toggler" data-bs-toggle="collapse" data-bs-target="#colapse-goallikes" aria-expanded="false" aria-controls="colapse-goallikes">
+                    <p class="m-1">Meta de likes</p>
                     <p class="m-1">
                       <i class="fa-solid fa-square-caret-down"></i>
                     </p>
                   </div>
-                  <div class="collapse show m-3" id="colapse-carroucel">
-                    <div class="carousel main-carousel">
-                      <div class="carousel-cell">
-                        <div class="h-100">
-                          <h5 id="like-user-ttk"></h5>
-                          <h5 id="like-counter-ttk"></h5>
-                          <div class="h-100">
-                            <h5 id="progress-title-likes-user"></h5>
-                            <h6 class="progress-title" style="color: #ffffff"><span id="progress-title-likes">Likes</span>: <span id="progress-value-likes"></span></h6>
-                            <div class="progress mt-4" style="height: 10px;">
-                              <div class="progress-bar progress-bar-striped progress-bar-animated" id="progress-bar-likes" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                        </div>
-                        </div>
-                      </div>  
-                      <div class="carousel-cell">
-                        <div class="h-100">
-                          <span>Principal Espectador</span>
-                          <div id="top-specs" class="container-rank">
-                            <div class="card_rank">
-                              <img id="avatar-rank" src="assets/img/favicon.png" alt="Avatar">
-                              <div class="texto_rank">
-                                  <p id="text-rank-user" class="texto_rank_user"></p>
-                                  <span><i class="fa-solid fa-coins"></i>: <span id="diamonds-rank"></span></span>
-                              </div>
+                  <div class="collapse" id="colapse-goallikes">
+                    <div class="w-100" id="iframe-likes"></div>
+                  </div>
+                </div>
+                <div class="bg-dark redeem-block" style="height: auto;">
+                  <div class="bg-dark top-toggler d-flex justify-content-between" style="box-shadow: none !important;" id="goaldiamonds-toggler" data-bs-toggle="collapse" data-bs-target="#colapse-goaldiamonds" aria-expanded="false" aria-controls="colapse-goaldiamonds">
+                    <p class="m-1">Meta de diamantes</p>
+                    <p class="m-1">
+                      <i class="fa-solid fa-square-caret-down"></i>
+                    </p>
+                  </div>
+                  <div class="collapse" id="colapse-goaldiamonds">
+                    <div class="w-100" id="iframe-diamonds"></div>
+                  </div>
+                </div>
+                <div class="bg-dark redeem-block" style="height: auto;">
+                  <div class="bg-dark top-toggler d-flex justify-content-between" style="box-shadow: none !important;" id="goalfollow-toggler" data-bs-toggle="collapse" data-bs-target="#colapse-goalfollow" aria-expanded="false" aria-controls="colapse-goalfollow">
+                    <p class="m-1">Meta de seguidores</p>
+                    <p class="m-1">
+                      <i class="fa-solid fa-square-caret-down"></i>
+                    </p>
+                  </div>
+                  <div class="collapse" id="colapse-goalfollow">
+                    <div class="w-100" id="iframe-follows"></div>
+                  </div>
+                </div>
+                <div class="bg-dark redeem-block" style="height: auto;">
+                  <div class="bg-dark top-toggler d-flex justify-content-between" style="box-shadow: none !important;" id="goalgifts-toggler" data-bs-toggle="collapse" data-bs-target="#colapse-goalgifts" aria-expanded="false" aria-controls="colapse-goalgifts">
+                    <p class="m-1">Meta de presente</p>
+                    <p class="m-1">
+                      <i class="fa-solid fa-square-caret-down"></i>
+                    </p>
+                  </div>
+                  <div class="collapse" id="colapse-goalgifts">
+                    <div class="w-100" id="iframe-gifts"></div>
+                  </div>
+                </div>
+                <div class="bg-dark redeem-block" style="height: auto;">
+                  <div class="bg-dark top-toggler d-flex justify-content-between" style="box-shadow: none !important;" id="goalshares-toggler" data-bs-toggle="collapse" data-bs-target="#colapse-goalshares" aria-expanded="false" aria-controls="colapse-goalshares">
+                    <p class="m-1">Meta de compartilhamento</p>
+                    <p class="m-1">
+                      <i class="fa-solid fa-square-caret-down"></i>
+                    </p>
+                  </div>
+                  <div class="collapse" id="colapse-goalshares">
+                    <div class="w-100" id="iframe-shares"></div>
+                  </div>
+                </div>
+                <div class="bg-dark redeem-block" style="height: auto;">
+                  <div class="bg-dark top-toggler d-flex justify-content-between" style="box-shadow: none !important;" id="goalspecs-toggler" data-bs-toggle="collapse" data-bs-target="#colapse-goalspecs" aria-expanded="false" aria-controls="colapse-goalspecs">
+                    <p class="m-1">Meta de máximo de espectadores</p>
+                    <p class="m-1">
+                      <i class="fa-solid fa-square-caret-down"></i>
+                    </p>
+                  </div>
+                  <div class="collapse" id="colapse-goalspecs">
+                    <div class="w-100" id="iframe-specs"></div>
+                  </div>
+                </div>
+                <div class="bg-dark redeem-block" style="height: auto;">
+                  <div class="bg-dark top-toggler d-flex justify-content-between" style="box-shadow: none !important; " id="topspecs-toggler" data-bs-toggle="collapse" data-bs-target="#colapse-topspecs" aria-expanded="false" aria-controls="colapse-topspecs">
+                    <p class="m-1">Principal Espectador</p>
+                    <p class="m-1">
+                      <i class="fa-solid fa-square-caret-down"></i>
+                    </p>
+                  </div>
+                  <div class="collapse" id="colapse-topspecs">
+                    <div class="h-100">
+                      <div id="top-specs" class="container-rank">
+                        <div class="card_rank">
+                          <img id="avatar-rank" src="assets/img/favicon.png" alt="Avatar">
+                          <div class="texto_rank">
+                              <p id="text-rank-user" class="texto_rank_user"></p>
+                              <span><i class="fa-solid fa-coins"></i>: <span id="diamonds-rank"></span></span>
                           </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="carousel-cell">
-                        <div class="h-100">
-                            <h5 class="progress-title" style="color: #ffffff"><span id="progress-title-follow">Follows</span>: <span id="progress-value-follow"></span></h5>
-                            <div class="progress mt-4" style="height: 10px;">
-                              <div class="progress-bar progress-bar-striped progress-bar-animated" id="progress-bar-follow" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
                         </div>
                       </div>
                     </div>
@@ -499,20 +542,6 @@
                     </div>
                   </div>
                   <div id="command-costdiv-create" hidden>
-                    <div class="form-group mb-3 mt-4">
-                      <label for="command-cost-type">Tipo de custo</label>
-                      <select class="form-control bg-dark mt-3" id="command-cost-type">
-                        <option value="gifts">
-                          Presentes
-                        </option>
-                        <option value="likes">
-                          Curtidas
-                        </option>
-                        <option value="shares">
-                          Compartilhamentos
-                        </option>
-                      </select>
-                    </div>
                     <div class="form-group mt-2">
                       <label for="command-cost-create">Custo do comando</label>
                       <input type="number" class="form-control bg-dark mt-3" id="command-cost-create"/>
@@ -643,20 +672,6 @@
                     </div>
                   </div>
                   <div id="command-costdiv-edit" hidden>
-                    <div class="form-group mb-3 mt-4">
-                      <label for="command-cost-type">Tipo de custo</label>
-                      <select class="form-control bg-dark mt-3" id="command-cost-type-edit">
-                        <option value="gifts">
-                          Presentes
-                        </option>
-                        <option value="likes">
-                          Curtidas
-                        </option>
-                        <option value="shares">
-                          Compartilhamentos
-                        </option>
-                      </select>
-                    </div>
                     <div class="form-group mt-2">
                       <label for="command-cost-edit">Custo do comando</label>
                       <input type="number" class="form-control bg-dark mt-3" id="command-cost-edit"/>
@@ -837,20 +852,6 @@
                     </div>
                   </div>
                   <div id="command-costdiv-player" hidden>
-                    <div class="form-group  mt-3">
-                      <label for="command-cost-type">Tipo de custo</label>
-                      <select class="form-control bg-dark mt-3" id="command-cost-type-player">
-                        <option value="gifts">
-                          Presentes
-                        </option>
-                        <option value="likes">
-                          Curtidas
-                        </option>
-                        <option value="shares">
-                          Compartilhamentos
-                        </option>
-                      </select>
-                    </div>
                     <div class="form-group mt-3">
                       <label for="command-cost-player">Custo do comando</label>
                       <input type="number" class="form-control bg-dark mt-3" id="command-cost-player"/>
@@ -958,6 +959,19 @@
                       </option>
                     </select>
                   </div>
+                  <div class="form-group mt-3" id="queue-spend" hidden>
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">Remover saldo de usuário com base do custo do comando quando moderador adicionar na fila</p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="command-queue-spend-status" type="checkbox" />
+                          <label for="command-queue-spend-status" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   <div class="form-group mt-4">
                     <div class="row mt-3">
                       <div class="col">
@@ -974,20 +988,6 @@
                     </div>
                   </div>
                   <div id="command-costdiv-queue" hidden>
-                    <div class="form-group mt-3">
-                      <label for="command-cost-type">Tipo de custo</label>
-                      <select class="form-control bg-dark mt-3" id="command-cost-type-queue">
-                        <option value="gifts">
-                          Presentes
-                        </option>
-                        <option value="likes">
-                          Curtidas
-                        </option>
-                        <option value="shares">
-                          Compartilhamentos
-                        </option>
-                      </select>
-                    </div>
                     <div class="form-group mt-3">
                       <label for="command-cost-queue">Custo do comando</label>
                       <input type="number" class="form-control bg-dark mt-3" id="command-cost-queue"/>
@@ -1114,20 +1114,6 @@
                     </div>
                   </div>
                   <div id="command-costdiv-giveaway" hidden>
-                    <div class="form-group mb-3 mt-4">
-                      <label for="command-cost-type">Tipo de custo</label>
-                      <select class="form-control bg-dark mt-3" id="command-cost-type-giveaway">
-                        <option value="gifts">
-                          Presentes
-                        </option>
-                        <option value="likes">
-                          Curtidas
-                        </option>
-                        <option value="shares">
-                          Compartilhamentos
-                        </option>
-                      </select>
-                    </div>
                     <div class="form-group mt-2">
                       <label for="command-cost-giveaway">Custo do comando</label>
                       <input type="number" class="form-control bg-dark mt-3" id="command-cost-giveaway"/>
@@ -1248,20 +1234,6 @@
                   </div>
                   <div id="command-costdiv-tts" hidden>
                     <div class="form-group mt-3">
-                      <label for="command-cost-type-tts">Tipo de custo</label>
-                      <select class="form-control bg-dark mt-3" id="command-cost-type-tts">
-                        <option value="gifts">
-                          Presentes
-                        </option>
-                        <option value="likes">
-                          Curtidas
-                        </option>
-                        <option value="shares">
-                          Compartilhamentos
-                        </option>
-                      </select>
-                    </div>
-                    <div class="form-group mt-3">
                       <label for="command-cost-tts">Custo do comando</label>
                       <input type="number" class="form-control bg-dark mt-3" id="command-cost-tts"/>
                     </div>
@@ -1272,94 +1244,105 @@
                 </div>
                 <div class="bg-dark form-block">
                   <h5>Comando para saldo (Likes, Moedas, Compartilhamentos)</h5>
-                  <div class="form-group mt-3">
-                    <div class="row mt-3">
-                      <div class="col">
-                        <p class="form-check-label">
-                          Status do comando
-                        </p>
-                      </div>
-                      <div class="col-2">
-                        <div class="material-switch bg-white d-flex justify-content-end">
-                          <input id="command-balance-status" type="checkbox" />
-                          <label for="command-balance-status" class="form-check-label"></label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="form-group mt-3">
-                    <label for="balance-command">Comando</label>
-                    <input type="text" class="form-control bg-dark mt-3" id="balance-command" placeholder="Digite o comando" required pattern="[^\s]+" />
-                    <p class="small mt-2">Utilize qualquer prefixo (!,@,#,$), O comando não deve conter espaços</p>
-                  </div>
-                  <div class="form-group mt-3">
-                    <label for="balance-delay">Tempo de recarga</label>
-                    <input type="number" class="form-control bg-dark mt-3" min="5" value="5" id="balance-delay" required />
-                  </div>
-                  <div class="form-group mt-3">
-                    <label for="user-level-balance">Permissão</label>
-                    <select class="form-control bg-dark mt-3" id="user-level-balance" multiple>
-                      <option value="spec">
-                        Todos
-                      </option>
-                      <option value="follow">
-                        Seguidor
-                      </option>
-                      <option value="gifts">
-                        Presenteador
-                      </option>
-                      <option value="Likes">
-                        Curtidor (Likes)
-                      </option>
-                      <option value="shares">
-                        Compartilhador
-                      </option>
-                      <option value="subscriber">
-                        Inscrito
-                      </option>
-                      <option value="moderator">
-                        Moderador
-                      </option>
-                    </select>
-                  </div>
-                  <div class="form-group mt-4">
-                    <div class="row mt-3">
-                      <div class="col">
-                        <p class="form-check-label">
-                          Ativar custo para utilizar comando
-                        </p>
-                      </div>
-                      <div class="col-2">
-                        <div class="material-switch bg-white d-flex justify-content-end">
-                          <input id="command-cost-status-balance" type="checkbox" onchange="command_cost('balance')"/>
-                          <label for="command-cost-status-balance" class="form-check-label"></label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div id="command-costdiv-balance" hidden>
-                    <div class="form-group mt-3">
-                      <label for="command-cost-type-balance">Tipo de custo</label>
-                      <select class="form-control bg-dark mt-3" id="command-cost-type-balance">
-                        <option value="gifts">
-                          Presentes
+
+                  <div class="bg-dark form-block">
+                    <label for="command-balance-select">Selecione o comando para configurar.</label>
+                    <div class="input-group none-flex mt-3">
+                      <select class="form-control bg-dark" id="command-balance-select">
+                        <option value="user_balance">
+                          Usuário verificar saldo
                         </option>
-                        <option value="likes">
-                          Curtidas
+                        <option value="mod_balance">
+                          Moderador verificar saldo de usuário
+                        </option>
+                        <option value="mod_balance_take">
+                          Moderador Remover Saldo de usuário
+                        </option>
+                        <option value="mod_balance_give">
+                          Moderador Adicionar Saldo de usuário
+                        </option>
+                      </select>
+                      <button class="btn bt-submit" type="button" onclick="balance_command('get')">
+                        Editar
+                      </button>
+                    </div>
+                  </div>
+                  <div id="form-div-balance" hidden>
+                    <div class="form-group mt-3">
+                      <div class="row mt-3">
+                        <div class="col">
+                          <p class="form-check-label">
+                            Status do comando
+                          </p>
+                        </div>
+                        <div class="col-2">
+                          <div class="material-switch bg-white d-flex justify-content-end">
+                            <input id="command-balance-status" type="checkbox" />
+                            <label for="command-balance-status" class="form-check-label"></label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group mt-3">
+                      <label for="balance-command">Comando</label>
+                      <input type="text" class="form-control bg-dark mt-3" id="balance-command" placeholder="Digite o comando" required pattern="[^\s]+" />
+                      <p class="small mt-2">Utilize qualquer prefixo (!,@,#,$), O primeiro item do comando não deve conter espaços</p>
+                    </div>
+                    <div class="form-group mt-3">
+                      <label for="balance-delay">Tempo de recarga</label>
+                      <input type="number" class="form-control bg-dark mt-3" min="5" value="5" id="balance-delay" required />
+                    </div>
+                    <div class="form-group mt-3">
+                      <label for="user-level-balance">Permissão</label>
+                      <select class="form-control bg-dark mt-3" id="user-level-balance" multiple>
+                        <option value="spec">
+                          Todos
+                        </option>
+                        <option value="follow">
+                          Seguidor
+                        </option>
+                        <option value="gifts">
+                          Presenteador
+                        </option>
+                        <option value="Likes">
+                          Curtidor (Likes)
                         </option>
                         <option value="shares">
-                          Compartilhamentos
+                          Compartilhador
+                        </option>
+                        <option value="subscriber">
+                          Inscrito
+                        </option>
+                        <option value="moderator">
+                          Moderador
                         </option>
                       </select>
                     </div>
-                    <div class="form-group mt-3">
-                      <label for="command-cost-balance">Custo do comando</label>
-                      <input type="number" class="form-control bg-dark mt-3" id="command-cost-balance"/>
+                    <div class="form-group mt-4">
+                      <div class="row mt-3">
+                        <div class="col">
+                          <p class="form-check-label">
+                            Ativar custo para utilizar comando
+                          </p>
+                        </div>
+                        <div class="col-2">
+                          <div class="material-switch bg-white d-flex justify-content-end">
+                            <input id="command-cost-status-balance" type="checkbox" onchange="command_cost('balance')"/>
+                            <label for="command-cost-status-balance" class="form-check-label"></label>
+                          </div>
+                        </div>
+                      </div>
                     </div>
+                    <div id="command-costdiv-balance" hidden>
+                      <div class="form-group mt-3">
+                        <label for="command-cost-balance">Custo do comando</label>
+                        <input type="number" class="form-control bg-dark mt-3" id="command-cost-balance"/>
+                      </div>
+                    </div>
+                    <button type="button" class="btn bt-submit mt-5" onclick="balance_command('save')">
+                      Salvar
+                    </button>
                   </div>
-                  <button type="button" class="btn bt-submit mt-5" onclick="balance_command('save')">
-                    Salvar
-                  </button>
                 </div>
               </div>
             </div>
@@ -1631,9 +1614,12 @@
                       oninput="rangevalue_ttk_goal.innerText = this.value" />
                     <output id="rangevalue_ttk_goal">50</output>
                   </div>
-                  <button class="btn bt-submit mt-3" type="button" onclick="ttk_goal('save')">
-                    Salvar
-                  </button>
+                  <div class="form-group mt-3">
+                    <button class="btn bt-submit" type="button" onclick="ttk_goal('save')">
+                      Salvar
+                    </button>
+                  </div>
+
                 </div>
               </div>
               <div class="bg-dark form-block">
@@ -1712,8 +1698,15 @@
                       <button type="button" class="btn bt-submit mt-3" id="goal-background-color-button">Selecionar</button>
                     </div>
                   </div>
-                  <iframe class="iframe-bar" id="iframe-bar" src="http://127.0.0.1:7000/src/html/goal/likes/iframe.html" frameborder="0" allowtransparency = "true"></iframe>
-                  <div class="form-group mt">
+                  <div class="form-group mt-3">
+                    <iframe class="iframe-bar" id="iframe-bar" src="http://127.0.0.1:7000/src/html/goal/likes/iframe.html" frameborder="0" allowtransparency = "true"></iframe>
+                  </div>
+                  <div class="form-group mt-3">
+                    <button class="btn bt-submit" type="button" onclick="ttk_goal('save_html')">
+                      Salvar
+                    </button>
+                  </div>
+                  <div class="form-group mt-3">
                     <label for="iframe-link">Link para Vincular o Overlay para metas</label>
                     <div class="input-group none-flex mt-2">
                       <input type="text" class="form-control bg-dark mt-3" id="iframe-link" readonly/>
@@ -1958,6 +1951,115 @@
             </div>
           </div>
         </div>
+        <div class="tab-pane" id="v-pills-rank" role="tabpanel" aria-labelledby="v-pills-rank-tab">
+          <div id="ger-rank-div">
+            <div class="internal-top">
+              <span>Fila de espera</span>
+            </div>
+            <div class="h-scroll flex-wrap flex-wrap justify-content-center">
+              <div class="background">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+             </div>
+              <div class="internal-block">
+                <div class="bg-dark form-block">
+                  <h4>Configurações para Rank de usuários</h4>
+                  <div class="form-group mt-3">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Atualizar os ranks
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="rank-status" type="checkbox" />
+                          <label for="rank-status" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mt-3 mb-3">
+                    <label for="rank-interval">Tempo de intervalo entre atualizações de rank</label>
+                    <input type="number" class="form-control bg-dark mt-3" min="5" value="5" id="rank-interval" />
+                  </div>
+                  <div class="form-group mt-5">
+                    <label for="likes-rank-background">Cor do bloco para rank de likes</label>
+                    <div class="input-group none-flex mt-2">
+                      <span class="color-span mt-3" id="likes-rank-background-span"></span>
+                      <input type="color" id="likes-rank-background-color"/>
+                      <input type="text" class="form-control bg-dark mt-3" id="likes-rank-background-text"/>
+                      <button type="button" class="btn bt-submit mt-3" id="likes-rank-background-button">Selecionar</button>
+                    </div>
+                  </div>
+                  <div class="form-group mt-3 mb-3">
+                    <label for="likes-rank-background-opacity">Tansparência do bloco para rank de likes</label>
+                    <input class="w-100" type="range" min="0" max="1" value="50" id="likes-rank-background-opacity" step="0.1"
+                      oninput="rangevaluelikesrankopacity.innerText = this.value" />
+                    <output id="rangevaluelikesrankopacity">0</output>
+                  </div>
+                  <div class="form-group mt-5">
+                    <label for="gifts-rank-background">Cor do bloco para rank de presentes</label>
+                    <div class="input-group none-flex mt-2">
+                      <span class="color-span mt-3" id="gifts-rank-background-span"></span>
+                      <input type="color" id="gifts-rank-background-color"/>
+                      <input type="text" class="form-control bg-dark mt-3" id="gifts-rank-background-text"/>
+                      <button type="button" class="btn bt-submit mt-3" id="gifts-rank-background-button">Selecionar</button>
+                    </div>
+                  </div>
+                  <div class="form-group mt-3 mb-3">
+                    <label for="gifts-rank-background-opacity">Tansparência do bloco para rank de presentes</label>
+                    <input class="w-100" type="range" min="0" max="1" value="50" id="gifts-rank-background-opacity" step="0.1"
+                      oninput="rangevaluegiftsrankopacity.innerText = this.value" />
+                    <output id="rangevaluegiftsrankopacity">0</output>
+                  </div>
+                  <div class="form-group mt-5">
+                    <label for="shares-rank-background">Cor do bloco para rank de compartilhamentos</label>
+                    <div class="input-group none-flex mt-2">
+                      <span class="color-span mt-3" id="shares-rank-background-span"></span>
+                      <input type="color" id="shares-rank-background-color"/>
+                      <input type="text" class="form-control bg-dark mt-3" id="shares-rank-background-text"/>
+                      <button type="button" class="btn bt-submit mt-3" id="shares-rank-background-button">Selecionar</button>
+                    </div>
+                  </div>
+                  <div class="form-group mt-3 mb-3">
+                    <label for="shares-rank-background-opacity">Tansparência do bloco para rank de compartilhamentos</label>
+                    <input class="w-100" type="range" min="0" max="1" value="50" id="shares-rank-background-opacity" step="0.1"
+                      oninput="rangevaluesharesrankopacity.innerText = this.value" />
+                    <output id="rangevaluesharesrankopacity">0</output>
+                  </div>
+                  <div class="form-group mt-5 ">
+                    <label for="points-rank-background">Cor do bloco para rank de pontos</label>
+                    <div class="input-group none-flex mt-2">
+                      <span class="color-span mt-3" id="points-rank-background-span"></span>
+                      <input type="color" id="points-rank-background-color"/>
+                      <input type="text" class="form-control bg-dark mt-3" id="points-rank-background-text"/>
+                      <button type="button" class="btn bt-submit mt-3" id="points-rank-background-button">Selecionar</button>
+                    </div>
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="likes-rank-background-opacity">Tansparência do bloco para rank de pontos</label>
+                    <input class="w-100" type="range" min="0" max="1" value="50" id="points-rank-background-opacity" step="0.1"
+                      oninput="rangevaluepointsrankopacity.innerText = this.value" />
+                    <output id="rangevaluepointsrankopacity">0</output>
+                  </div>
+                  <button type="button" class="bt-submit btn bg-dark mt-5" onclick="rank_js('save')">
+                    Salvar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="tab-pane" id="v-pills-player" role="tabpanel" aria-labelledby="v-pills-player-tab">
           <div id="ger-player-div">
             <div class="internal-top">
@@ -2115,7 +2217,7 @@
                 <p>Registro de eventos</p>
               </button>
               <button class="btn redeem-block-bt" type="button"
-                onclick="show_userdata_modal()" >
+                onclick="show_config_div('userdata-div')" >
                 <i class="fa-solid fa-users fa-2xl"></i>
                 <p>Registros de usuários</p>
               </button>
@@ -2537,6 +2639,12 @@
                         <option value="event_ttk_disconnected">
                           Aviso: Chat Desconectado
                         </option>
+                        <option value="balance">
+                          Resposta: Comando para saldo de usuário
+                        </option>
+                        <option value="command_cost">
+                          Erro: Pontos insuficientes para executar o comando
+                        </option>
                       </select>
                       <button class="btn bt-submit mt-3" type="button" onclick="config_responses_js(event,'get_response')">
                         Carregar
@@ -2685,21 +2793,41 @@
              </div>
               <div class="internal-block">
                 <div class="form-group bg-dark form-block">
-                  <div class="form-group">
+                  <div class="mt-5">
+                    <h4>Aparência do chat</h4>
+                  </div>
+                  <div class="form-group mt-4">
                     <label for="slider-font">Tamanho da letra no chat</label>
                     <input class="mt-4" type="range" min="0" max="100" value="18" id="slider-font" step="1" oninput="rangevalue_config.innerText = this.value"/>
                     <output id="rangevalue_config">18px</output>
                   </div>
-                  <div class="row">
-                    <div class="col">
-                      <p class="form-check-label">
-                        Aplicar cor aos nomes no chat.
-                      </p>
+                  <div class="form-group mt-2">
+                    <div class="row">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Exibir foto de usuário no chat
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="show-profile-picture" type="checkbox" />
+                          <label for="show-profile-picture" class="form-check-label"></label>
+                        </div>
+                      </div>
                     </div>
-                    <div class="col-2">
-                      <div class="material-switch bg-white d-flex justify-content-end">
-                        <input id="chat-color-name" type="checkbox" />
-                        <label for="chat-color-name" class="form-check-label"></label>
+                  </div>
+                  <div class="form-group mt-2">
+                    <div class="row">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Aplicar cor aos nomes no chat.
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="chat-color-name" type="checkbox" />
+                          <label for="chat-color-name" class="form-check-label"></label>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -2751,21 +2879,23 @@
                       </option>
                     </select>
                   </div>
-                  <div class="row">
-                    <div class="col">
-                      <p class="form-check-label">
-                        Aplicar cor a borda no chat.
-                      </p>
-                    </div>
-                    <div class="col-2">
-                      <div class="material-switch bg-white d-flex justify-content-end">
-                        <input id="chat-color-border" type="checkbox" />
-                        <label for="chat-color-border" class="form-check-label"></label>
+                  <div class="form-group mt-5">
+                    <div class="row">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Aplicar cor a borda no chat.
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="chat-color-border" type="checkbox" />
+                          <label for="chat-color-border" class="form-check-label"></label>
+                        </div>
                       </div>
                     </div>
                   </div>
                   <div class="form-group mt-2">
-                    <label for="select-color-border">Cor dos nomes no chat</label>
+                    <label for="select-color-border">Cor da borda no chat</label>
                     <select class="form-control bg-dark mt-3" id="select-color-border">
                       <option value="Blue" style="color: white;">Azul</option>
                       <option value="Coral" style="color: white;">
@@ -2812,20 +2942,22 @@
                       </option>
                     </select>
                   </div>
-                  <div class="row mt-1">
-                    <div class="col">
-                      <p class="form-check-label">
-                        Exibir as mensagens em uma linha separada do nome
-                      </p>
-                    </div>
-                    <div class="col-2">
-                      <div class="material-switch bg-white d-flex justify-content-end">
-                        <input id="chat-newline" type="checkbox" />
-                        <label for="chat-newline" class="form-check-label"></label>
+                  <div class="form-group mt-5">
+                    <div class="row mt-1">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Exibir as mensagens em uma linha separada do nome
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="chat-newline" type="checkbox" />
+                          <label for="chat-newline" class="form-check-label"></label>
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div class="row mt-5">
+                  <div class="row mt-3">
                     <div class="col">
                       <p class="form-check-label">
                         Exibir horário nas mensagens enviadas no chat.
@@ -2839,7 +2971,7 @@
                     </div>
                   </div>
                   <div class="form-group mb-3 mt-2">
-                    <label for="select-time-mode">Selecione tipo de tempo exibido na mensagem
+                    <label for="select-time-mode">Selecione tipo de horário exibido na mensagem
                       enviada</label>
                     <select class="form-control bg-dark mt-3" id="select-time-mode">
                       <option value="passed" style="color: white;">
@@ -2855,17 +2987,57 @@
                       %H:%M:%S)</label>
                     <input type="text" class="form-control bg-dark" id="time-format" />
                   </div>
-                  <div class="input-group mt-5">
+                  <div class="mt-5">
+                    <h4>Cargos</h4>
+                  </div>
+                  <div class="input-group mt-4">
                     <label for="gift_role" class="mb-3 w-100">Presentes necessários para um usuário ter o cargo 'Presenteador'</label>
                     <input type="text" class="form-control bg-dark" id="gift_role" />
                   </div>
-                  <div class="input-group mt-5">
+                  <div class="input-group mt-2">
                     <label for="share_role" class="mb-3 w-100">Compartilhamentos necessários para um usuário ter o cargo 'Compartilhou'</label>
                     <input type="text" class="form-control bg-dark" id="share_role" />
                   </div>
-                  <div class="input-group mt-5">
+                  <div class="input-group mt-2">
                     <label for="like_role" class="mb-3 w-100">Likes necessários para um usuário ter o cargo 'Likes'</label>
                     <input type="text" class="form-control bg-dark" id="like_role" />
+                  </div>
+
+                  <div class="mt-5">
+                    <h4>Pontos</h4>
+                  </div>
+
+                  <div class="input-group mt-4">
+                    <label for="share_points" class="mb-3 w-100">Pontos por compartilhamento</label>
+                    <input type="text" class="form-control bg-dark" id="share_points" step="any"/>
+                  </div>
+                  <div class="input-group mt-2">
+                    <label for="like_points" class="mb-3 w-100">Pontos por curtida</label>
+                    <input type="text" class="form-control bg-dark" id="like_points" step="any"/>
+                  </div>
+                  <div class="input-group mt-2">
+                    <label for="follow_points" class="mb-3 w-100">Pontos por seguir</label>
+                    <input type="text" class="form-control bg-dark" id="follow_points" step="any"/>
+                  </div>
+
+                  <div class="input-group mt-2">
+                    <label for="gift_points" class="mb-3 w-100">Pontos por presente</label>
+                    <input type="text" class="form-control bg-dark" id="gift_points" step="any"/>
+                  </div>
+                  <input type="text" class="form-control" id="ttk-gift-id-point" hidden/>
+
+                  <div class="mt-5 w-100">
+
+                    <table class="table table-dark table-striped w-100" id="giftlist_points_table" style="height: 20%;">
+                      <thead>
+                          <th>ID</th>
+                          <th>Nome</th>
+                          <th>Pontos</th>
+                          <th>Configurar</th>
+                      </thead>
+                      <tbody></tbody>
+                    </table>
+
                   </div>
                   <button type="button" class="bt-submit btn bg-dark mt-5" onclick="chat_config('save')">
                     Salvar
@@ -3016,6 +3188,19 @@
                     <div class="row mt-1">
                       <div class="col">
                         <p class="form-check-label">
+                          Exibir no Overlay de Alertas
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="show-event-alert" type="checkbox" />
+                          <label for="show-event-alert" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row mt-1">
+                      <div class="col">
+                        <p class="form-check-label">
                           Exibir no chat
                         </p>
                       </div>
@@ -3040,6 +3225,50 @@
               </div>
             </div>
           </div>
+          <div id="userdata-div" hidden>
+            <div class="internal-top">
+              <span>Registro de usuário</span>
+              <button class="btn" onclick="hide_config_div('userdata-div')" data-toggle="tooltip"
+                data-bs-placement="left" title="Voltar">
+                <i class="fa-sharp fa-solid fa-chevron-left fa-xl"></i>
+              </button>
+            </div>
+            <div class="h-scroll flex-wrap justify-content-center">
+              <div class="background">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+             </div>
+              <div class="internal-block w-100">
+                <div id="table_out" class="w-100 p-3"  style="max-height: 100vh;">
+                  <table class="table table-dark" id="userdata_table">
+                    <thead class="w">
+                      <tr>
+                        <th>Usuário</th>
+                        <th>ID ou @</th>
+                        <th>Cargos</th>
+                        <th>Pontos</th>
+                        <th>Likes</th>
+                        <th>Compartilhamentos</th>
+                        <th>Presentes</th>
+                        <th>Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+          </div>
         </div>
         <div class="tab-pane" id="v-pills-sobre" role="tabpanel" aria-labelledby="v-pills-sobre-tab">
           <div class="internal-top">
@@ -3062,27 +3291,33 @@
             <div class="d-flex card bg-dark form-block align-self-center">
               <img src="./src/profile.png" class="rounded mx-auto d-block" width="150px" />
               <div class="card-body text-center">
-                <h4 class="card-title m-3">VibesBot V1.1.1</h4>
+                <h4 class="card-title m-3">VibesBot V1.3.0</h4>
               </div>
               <div class="card-footer">
-                <div class="form-group mt-3 mb-3 ">
-                  <div class="row mt-3">
-                    <div class="col">
-                      <p class="form-check-label">
-                        Ativar debug Visual
-                      </p>
-                    </div>
-                    <div class="col-2">
-                      <div class="material-switch bg-white d-flex justify-content-end">
-                        <input id="debug-status" type="checkbox" onclick="debug_status('debug-save')"/>
-                        <label for="debug-status" class="form-check-label"></label>
+                <div>
+                  <button class="btn bt-submit w-100" onclick="$('#confirm-logout').modal('show')">
+                    Sair da conta
+                  </button>
+                </div>
+                <div>
+                  <div class="form-group mt-2">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Ativar debug Visual
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="debug-status" type="checkbox" onclick="debug_status('debug-save')"/>
+                          <label for="debug-status" class="form-check-label"></label>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div class="card-footer text-center">
-                <button type="button" class="btn bt-submit m-3 mt-0" title="Navegar para a Wiki"
+                <div class="mt-2 text-center">
+                  <button type="button" class="btn bt-submit m-3 mt-0" title="Navegar para a Wiki"
                   onclick="window.pywebview.api.open_py('wiki','null')">
                   <i class="fa-solid fa-circle-question"></i>
                 </button>
@@ -3098,9 +3333,8 @@
                   onclick="window.pywebview.api.open_py('discord','null')">
                   <i class="fa-brands fa-discord"></i>
                 </button>
-                <button type="button" class="btn bt-submit ms-0 m-3 mt-0" title="Registro de usuários" onclick="userdata_js('get')">
-                  <i class="fa-sharp fa-solid fa-users"></i>
-                </button>
+                </div>
+
               </div>
             </div>
           </div>
@@ -3148,10 +3382,15 @@
           <div class="modal-content bg-dark custom-border-modal">
             <div class="modal-header">
               <h4>Configure o Gift</h4>
-              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-              aria-label="Close"></button>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" onclick="ttk_gift('get')"></button>
             </div>
             <div class="modal-body m-1">
+
+              <div class="form-group mt-3">
+                <label for="gift-name">Nome de exibição do Presente</label>
+                <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar" id="gift-name"/>
+              </div>
+
               <div class="row mt-3">
                 <div class="col">
                   <p class="form-check-label">Ativar Notificação</p>
@@ -3182,6 +3421,38 @@
           </div>
         </div>
       </div>
+      <div class="modal fade" id="gift-points-modal" data-bs-backdrop="static"  tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+          <div class="modal-content bg-dark custom-border-modal">
+            <div class="modal-header">
+              <h4>Configure o Gift</h4>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" onclick="ttk_gift('get_points')"></button>
+            </div>
+            <div class="modal-body m-1">
+              
+              <div class="row mt-3">
+                <div class="col">
+                  <p class="form-check-label">Utilizar valor global</p>
+                </div>
+                <div class="col">
+                  <div class="material-switch bg-white d-flex justify-content-end">
+                    <input id="gift-global-point-status" type="checkbox" />
+                    <label for="gift-global-point-status" class="form-check-label"></label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group mt-3">
+                <label for="gift-point">Pontos que o usuário irá ganhar ao receber o gift</label>
+                <input type="number" class="form-control bg-dark mt-3" id="gift-point" />
+              </div>
+
+              <button type="button" class="btn bt-submit mt-2" id="save-gift-points">Salvar</button>
+
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="modal fade" id="confirm-logout" data-bs-backdrop="static" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content bg-dark custom-border-modal">
@@ -3202,41 +3473,6 @@
                     onclick="window.pywebview.api.logout_auth()">
                     Confirmar
                   </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="modal fade" id="userdata-modal" data-bs-backdrop="static" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-fullscreen">
-          <div class="modal-content bg-dark custom-border-modal">
-            <div class="modal-header">
-              <div>
-                <h5>Dados de usuários</h5>
-              </div>
-              <div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                  aria-label="Close"></button>
-              </div>
-            </div>
-            <div class="modal-body p-2">
-              <div class="h-scroll">
-                <div id="table_out" class="w-100">
-                  <table class="table table-dark" id="userdata_table">
-                    <thead class="w">
-                      <tr>
-                        <th>Usuário</th>
-                        <th>ID ou @</th>
-                        <th>Cargos</th>
-                        <th>Likes</th>
-                        <th>Compartilhamentos</th>
-                        <th>Presentes</th>
-                        <th>Ações</th>
-                      </tr>
-                    </thead>
-                    <tbody></tbody>
-                  </table>
                 </div>
               </div>
             </div>
@@ -3300,6 +3536,88 @@
                 <div class="form-group w-100">
                   <textarea class="form-control w-100 h-100 bg-dark" id="errorlog-textarea"
                     readonly></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="userdata-edit-modal" data-bs-backdrop="static" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="modal-content bg-dark custom-border-modal">
+            <div class="modal-header">
+              <div>
+                <h5>Editar usuário</h5>
+              </div>
+              <div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                  aria-label="Close" onclick="userdata_js('get','null')"></button>
+              </div>
+            </div>
+            <div class="modal-body">
+              <div class="row">
+                <div class="col">
+                  <div class="form-group mt-3">
+                    <label for="user-edit-username">Usuário (Não editável)</label>
+                    <input type="text" class="form-control bg-dark mt-3" id="user-edit-username" readonly/>
+                  </div>                  
+                  <div class="form-group mt-3">
+                    <label for="user-edit-userid">@ de usuário (Não editável)</label>
+                    <input type="text" class="form-control bg-dark mt-3" id="user-edit-userid" readonly/>
+                  </div>                  
+                  <div class="form-group mt-3">
+                    <label for="user-edit-likes">Curtidas</label>
+                    <input type="number" class="form-control bg-dark mt-3" id="user-edit-likes" />
+                  </div>      
+                </div>
+                <div class="col">
+                  <div class="form-group mt-3">
+                    <label for="user-edit-gifts">Presentes</label>
+                    <input type="number" class="form-control bg-dark mt-3" id="user-edit-gifts" />
+                  </div>                  
+                  <div class="form-group mt-3">
+                    <label for="user-edit-shares">Compartilhamentos</label>
+                    <input type="number" class="form-control bg-dark mt-3" id="user-edit-shares" />
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="user-edit-roles">Permissões</label>
+                    <select class="form-control bg-dark mt-3" id="user-edit-roles" multiple>
+                      <option value="spec">
+                        Espectador
+                      </option>
+                      <option value="follow">
+                        Seguidor
+                      </option>
+                      <option value="gifts">
+                        Presenteador
+                      </option>
+                      <option value="Likes">
+                        Curtidor (Likes)
+                      </option>
+                      <option value="shares">
+                        Compartilhador
+                      </option>
+                      <option value="subscriber">
+                        Inscrito
+                      </option>
+                      <option value="moderator">
+                        Moderador
+                      </option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col">
+                    <div class="form-group mt-3">
+                      <label for="user-edit-points">Pontos</label>
+                      <input type="number" class="form-control bg-dark mt-3" id="user-edit-points" />
+                    </div>     
+                    <div class="form-group mt-3">
+                      <button class="btn bt-submit" type="button" id="btn-save-useredit">
+                        Salvar
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

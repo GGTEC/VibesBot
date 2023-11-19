@@ -5,6 +5,7 @@ import sys
 import time
 import pytz
 import importlib
+import requests as req
 
 from dotenv import load_dotenv
 from random import randint
@@ -74,6 +75,15 @@ def error_log(ex):
         log_file_r.write(error)
 
 
+class DictDot:
+    def __init__(self, data):
+        self.data = data
+
+    def __getattr__(self, key):
+        if key in self.data:
+            return self.data[key]
+
+
 def manipulate_json(custom_path, type_id, data=None):
 
     try:
@@ -96,11 +106,14 @@ def manipulate_json(custom_path, type_id, data=None):
         error_log(e)
 
 
-def send_message(type_message):
+def send_message(data):
 
     try:
-        with open(f"{local_work('appdata_path')}/rewardevents/web/src/config/commands_config.json") as status_commands_check:
-            status_commands_data = json.load(status_commands_check)
+
+        status_commands_data = manipulate_json(f"{local_work('appdata_path')}/config/commands_config.json", "load")
+
+        type_message = data['type']
+        message = data['message']
 
         status_error_time = status_commands_data['STATUS_ERROR_TIME']
         status_error_user = status_commands_data['STATUS_ERROR_USER']
@@ -242,6 +255,220 @@ def copy_file(source, dest):
     return copy
 
 
+def check_image(image):
+
+    try:
+        respon = req.get(image, stream=True)
+
+        if respon.status_code == 200:
+            return True
+        else:
+            return False
+        
+    except req.exceptions.RequestException as e:
+
+        return False
+
+
+def update_ranks(data):
+
+    ranks_config = manipulate_json(f"{local_work('appdata_path')}/config/rank.json", "load")
+
+    type_id = data["type_id"]
+    info = data["info"]
+
+    if type_id == "likes":
+
+        bg = ranks_config['likes_bg']
+        op = ranks_config['likes_op']
+
+        with open(f"{local_work('appdata_path')}/html/ranks/likes/likes.html", 'r', encoding='utf-8') as file:
+            content_html = file.read()
+
+            soup = bs(content_html, 'html.parser')
+
+            div = soup.find("div", {"class": f"event_block"})
+
+        for user, userdata in info:
+
+            if check_image(userdata['profile_pic']):
+                image = userdata['profile_pic']
+            else:
+                image = "icon.ico"
+
+            new_block = bs(f'''
+                <div class="row user" style="background-color: {bg};opacity: {op};">
+                    <div class="d-flex col-auto">
+                        <img src="{image}" class="rounded-circle" alt="" width="50px">
+                    </div>            
+                    <div class="d-flex col flex-column">
+                        <div class="infos">
+                            <p class="username">{userdata['display_name']}</p>
+                            <p class="value">{userdata['likes']} Curtidas</p>
+                        </div>
+                    </div>
+                </div>
+            ''', 'html.parser')
+
+            div.append(new_block)
+
+        return str(soup)
+        
+    elif type_id == "shares":
+
+        bg = ranks_config['shares_bg']
+        op = ranks_config['shares_op']
+
+        with open(f"{local_work('appdata_path')}/html/ranks/shares/shares.html", 'r', encoding='utf-8') as file:
+            content_html = file.read()
+
+            soup = bs(content_html, 'html.parser')
+
+            div = soup.find("div", {"class": f"event_block"})
+
+        for user, userdata in info:
+
+            if check_image(userdata['profile_pic']):
+                image = userdata['profile_pic']
+            else:
+                image = "icon.ico"
+
+            new_block = bs(f'''
+                <div class="row user" style="background-color: {bg};opacity: {op};">
+                    <div class="d-flex col-auto">
+                        <img src="{image}" class="rounded-circle" alt="" width="50px">
+                    </div>            
+                    <div class="d-flex col flex-column">
+                        <div class="infos">
+                            <p class="username">{userdata['display_name']}</p>
+                            <p class="value">{userdata['shares']} Compartilhamentos</p>
+                        </div>
+                    </div>
+                </div>
+            ''', 'html.parser')
+
+            div.append(new_block)
+
+        return str(soup)
+        
+    elif type_id == "gifts":
+
+        bg = ranks_config['gifts_bg']
+        op = ranks_config['gifts_op']
+
+        with open(f"{local_work('appdata_path')}/html/ranks/gifts/gifts.html", 'r', encoding='utf-8') as file:
+            content_html = file.read()
+
+            soup = bs(content_html, 'html.parser')
+
+            div = soup.find("div", {"class": f"event_block"})
+
+        for user, userdata in info:
+
+            if check_image(userdata['profile_pic']):
+                image = userdata['profile_pic']
+            else:
+                image = "icon.ico"
+
+            new_block = bs(f'''
+                <div class="row user" style="background-color: {bg};opacity: {op};">
+                    <div class="d-flex col-auto">
+                        <img src="{image}" class="rounded-circle" alt="" width="50px">
+                    </div>               
+                    <div class="d-flex col flex-column">
+                        <div class="infos">
+                            <p class="username">{userdata['display_name']}</p>
+                            <p class="value">{userdata['gifts']} Presentes</p>
+                        </div>
+                    </div>
+                </div>
+            ''', 'html.parser')
+
+            div.append(new_block)
+
+        return str(soup)
+        
+    elif type_id == "points":
+
+        bg = ranks_config['points_bg']
+        op = ranks_config['points_op']
+
+        with open(f"{local_work('appdata_path')}/html/ranks/points/points.html", 'r', encoding='utf-8') as file:
+            content_html = file.read()
+
+            soup = bs(content_html, 'html.parser')
+
+            div = soup.find("div", {"class": f"event_block"})
+
+        for user, userdata in info:
+
+            if check_image(userdata['profile_pic']):
+                image = userdata['profile_pic']
+            else:
+                image = "icon.ico"
+
+            new_block = bs(f'''
+                <div class="row user" style="background-color: {bg};opacity: {op};">
+                    <div class="d-flex col-auto">
+                        <img src="{image}" class="rounded-circle" alt="" width="50px">
+                    </div>            
+                    <div class="d-flex col flex-column">
+                        <div class="infos">
+                            <p class="username">{userdata['display_name']}</p>
+                            <p class="value">{userdata['points']} Pontos</p>
+                        </div>
+                    </div>
+                </div>
+            ''', 'html.parser')
+
+            div.append(new_block)
+
+        return str(soup)
+
+
+def update_alert(data):
+
+    notifc_config_Data = manipulate_json(f"{local_work('appdata_path')}/config/notfic.json", "load")
+    alert_config_data = manipulate_json(f"{local_work('appdata_path')}/config/alerts.json", "load")
+
+    duration = notifc_config_Data['HTML_ALERT_TIME']
+
+    message = data['message']
+    img = data['img']
+    
+    image_size = alert_config_data['image_size']
+    font_size = alert_config_data['font_size']
+    background_color = alert_config_data['background_color']
+
+    html_file = f"{local_work('appdata_path')}/html/alerts/alerts.html"
+
+    try:
+
+        with open(html_file, "r") as html:
+            soup = bs(html, 'html.parser')
+
+        main_div = soup.find("div", {"class": f"enter"})
+        main_div['style'] = f'animation-duration: {duration}s'
+
+        event_block = soup.find("div", {"class": f"event_block"})
+        event_block['style'] = f'background-color: {background_color}'
+
+        img_tag = soup.find("img", {"class": "img"})
+        img_tag['src'] = img
+        img_tag['width'] = image_size
+
+        messsage_tag = soup.find("span", {"class": "message"})
+        messsage_tag.string = message
+        messsage_tag['style'] = f"font-size:{font_size};"
+
+        return str(soup)
+
+    except Exception as e:
+
+        error_log(e)
+        return True
+
+
 def update_notif(data):
 
     notifc_config_Data = manipulate_json(f"{local_work('appdata_path')}/config/notfic.json", "load")
@@ -258,7 +485,7 @@ def update_notif(data):
             soup = bs(html, 'html.parser')
 
         main_div = soup.find("div", {"class": f"enter"})
-        main_div['style'] = f'animation-duration: {duration}s'
+        main_div['style'] = f"animation-duration: {duration}s;"
 
         messsage_tag = soup.find("span", {"class": "message"})
 
@@ -459,7 +686,9 @@ def compare_and_insert_keys():
     for root_directory, _, files in os.walk(source_directory):
         
         for file in files:
-            if file.endswith('.json'):
+
+            if file.endswith('.json') and not file.endswith('gifts.json'):
+
                 source_file_path = os.path.join(root_directory, file)
                 destination_file_path = source_file_path.replace(source_directory, destination_directory)
 
@@ -483,11 +712,12 @@ def compare_and_insert_keys():
 
 
     for root_directory, dirs, files in os.walk(destination_directory):
+
         for d in dirs:
+
             destination_path = os.path.join(root_directory, d)
             source_path = destination_path.replace(destination_directory, source_directory)
 
-            
             if not os.path.exists(source_path):
                 if os.path.isdir(destination_path):
                     error_log(f"File or directory in the destination directory that is not in the source directory: {destination_path}")
@@ -515,3 +745,48 @@ def normpath_simple(path):
     
     return path_norm_simple
 
+
+def update_dict_gifts(dict_b):
+
+    dict_a_load = manipulate_json(f"{local_work('appdata_path')}/config/gifts.json","load")
+    dict_a = dict_a_load["gifts"]
+
+
+    if not dict_a:
+        dict_a.update(dict_b)
+    else:
+        for id_, item_a in dict_a.items():
+
+            if id_ in dict_b:
+                item_b = dict_b[id_]
+
+                if item_a['name'] != item_b['name']:
+                    print(f"Atualizado 'name' para {id_}")
+                    dict_a[id_]['name'] = item_b['name']
+
+                if item_a['value'] != item_b['value']:
+                    print(f"Atualizado 'value' para {id_}")
+                    dict_a[id_]['value'] = item_b['value']
+                
+                if item_a['icon'] != item_b['icon']:
+                    print(f"Atualizado 'value' para {id_}")
+                    dict_a[id_]['icon'] = item_b['icon']
+
+            else:
+                print(f"Removendo item para {id_}")
+                del dict_a[id_]
+
+    manipulate_json(f"{local_work('appdata_path')}/config/gifts.json","save",dict_a_load)
+
+
+def check_file(file):
+
+    try:
+
+        with open(file, 'r', encoding='utf-8') as file_r:
+            json.load(file_r)
+
+        return True
+    
+    except Exception as e:
+        return False

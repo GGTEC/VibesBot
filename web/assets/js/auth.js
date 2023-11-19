@@ -20,12 +20,10 @@ async function auth(type_id){
         
         username = document.getElementById('username');
         sessionid = document.getElementById('sessionid');
-        sidguard = document.getElementById('sidguard');
 
         data = {
             username : username.value,
             sessionid :sessionid.value,
-            sidguard :sidguard.value,
         }
 
         authenticated = await window.pywebview.api.tiktok_auth(JSON.stringify(data))
