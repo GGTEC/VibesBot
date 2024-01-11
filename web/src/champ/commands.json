@@ -1,0 +1,36 @@
+{
+    "enter_camp" : {
+        "command" : "!camp",
+        "status": 1,
+        "user_level": [
+              "moderador"
+        ],
+        "delay": "5",
+        "last_use": 0,
+        "cost" : 0,
+        "cost_status" : 0
+    },   
+    "add_camp" : {
+        "command" : "!addcamp",
+        "status": 1,
+        "user_level": [
+              "moderador"
+        ],
+        "delay": "5",
+        "last_use": 0,
+        "cost" : 0,
+        "cost_status" : 0
+    },   
+    "remove_camp" : {
+        "command" : "!removecamp",
+        "status": 1,
+        "user_level": [
+              "moderador"
+        ],
+        "delay": "5",
+        "last_use": 0,
+        "cost" : 0,
+        "cost_status" : 0
+    }
+}
+

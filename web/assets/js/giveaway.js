@@ -1,9 +1,8 @@
-async function giveaway_js(event,type_id) {
+async function giveaway_js(type_id) {
     
     if (type_id == 'get_config') {
-
+        
         var giveaway_name_inp = document.getElementById("giveaway-name");
-        var giveaway_user_level = document.getElementById("user-level-giveaway");
         var giveaway_clear = document.getElementById("giveaway-clear-names-end");
         var giveaway_enable = document.getElementById('giveaway-enable');
         var giveaway_mult = document.getElementById('giveaway-mult');
@@ -11,34 +10,43 @@ async function giveaway_js(event,type_id) {
         var giveaway_info = await window.pywebview.api.giveaway_py(type_id,'null');
     
         if (giveaway_info) {
-            
+
             var giveaway_info_parse = JSON.parse(giveaway_info);
-    
+
             giveaway_clear_receive = giveaway_info_parse.giveaway_clear
             giveaway_enable_receive = giveaway_info_parse.giveaway_enable
             giveaway_mult_receive = giveaway_info_parse.giveaway_mult
             
-    
-            if (giveaway_clear_receive == 1) {
-                giveaway_clear.checked = true
-            } else if (giveaway_clear_receive == 0) {
-                giveaway_clear.checked = false
-            }
-    
-            if (giveaway_enable_receive == 1) {
-                giveaway_enable.checked = true
-            } else if (giveaway_enable_receive == 0) {
-                giveaway_enable.checked = false
-            }
-    
-            if (giveaway_mult_receive == 1) {
-                giveaway_mult.checked = true
-            } else if (giveaway_mult_receive == 0) {
-                giveaway_mult.checked = false
-            }
+            giveaway_clear.checked = giveaway_clear_receive === 1 ? true : false;
+            giveaway_enable.checked = giveaway_enable_receive === 1 ? true : false;
+            giveaway_mult.checked = giveaway_mult_receive === 1 ? true : false;
     
             giveaway_name_inp.value = giveaway_info_parse.giveaway_name;
-            giveaway_user_level.value = giveaway_info_parse.giveaway_level;
+                
+
+        }
+
+    } else if ( type_id == 'get_style' ) {
+
+        var giveaway_color1 = document.getElementById('giveaway-color1-text');
+        var giveaway_color1_span = document.getElementById('giveaway-color1-span');
+        var giveaway_color2 = document.getElementById('giveaway-color2-text');
+        var giveaway_color2_span = document.getElementById('giveaway-color2-span');
+        var giveaway_pointer = document.getElementById('giveaway-pointer-text');
+        var giveaway_pointer_span = document.getElementById('giveaway-pointer-span');
+
+        var giveaway_info = await window.pywebview.api.giveaway_py('get_config','null');
+    
+        if (giveaway_info) {
+
+            var giveaway_info_parse = JSON.parse(giveaway_info);
+
+            giveaway_color1.value = giveaway_info_parse.giveaway_color1;
+            giveaway_color1_span.style.background = giveaway_info_parse.giveaway_color1;
+            giveaway_color2.value = giveaway_info_parse.giveaway_color2;
+            giveaway_color2_span.style.background = giveaway_info_parse.giveaway_color2;
+            giveaway_pointer.value = giveaway_info_parse.giveaway_pointer;
+            giveaway_pointer_span.style.background = giveaway_info_parse.giveaway_pointer;
 
         }
 
@@ -77,11 +85,14 @@ async function giveaway_js(event,type_id) {
 
     } else if (type_id == 'show_names'){
 
+
         var name_list_parse = await window.pywebview.api.giveaway_py(type_id,'null');
 
         if (name_list_parse) {
 
             name_list_parse = JSON.parse(name_list_parse)
+
+
             $("#giveaway-modal").modal("show");
     
             var tbody_give = document.getElementById('giveaway-list-body');
@@ -99,35 +110,18 @@ async function giveaway_js(event,type_id) {
 
     } else if (type_id == 'save_config'){
         
-        event.preventDefault();
-
-        var form = document.querySelector("#giveaway-config-form");
-        giveaway_clear_check_inp = form.querySelector('input[id="giveaway-clear-names-end"]').checked;
-        giveaway_enable_inp = form.querySelector('input[id="giveaway-enable"]').checked;
-        giveaway_mult_inp = form.querySelector('input[id="giveaway-mult"]').checked;
+        var giveaway_clear_check_inp = document.getElementById('giveaway-clear-names-end').checked;
+        var giveaway_enable_inp = document.getElementById('giveaway-enable').checked;
+        var giveaway_mult_inp = document.getElementById('giveaway-mult').checked;
+        var giveaway_name = document.getElementById('giveaway-name').value;
     
-        if (giveaway_clear_check_inp == true) {
-            giveaway_clear_check_value = 1;
-        } else {
-            giveaway_clear_check_value = 0;
-        }
-    
-        if (giveaway_enable_inp == true) {
-            giveaway_enable_value = 1;
-        } else {
-            giveaway_enable_value = 0;
-        }
-    
-        if (giveaway_mult_inp == true) {
-            giveaway_mult_value = 1;
-        } else {
-            giveaway_mult_value = 0;
-        }
+        giveaway_clear_check_value = giveaway_clear_check_inp ? 1 : 0;
+        giveaway_enable_value = giveaway_enable_inp ? 1 : 0;
+        giveaway_mult_value = giveaway_mult_inp ? 1 : 0;
     
         data = {
-            giveaway_name: form.querySelector('input[id="giveaway-name"]').value,
-            giveaway_redeem: form.querySelector('select[id="redeem-select-giveaway"]').value,
-            giveaway_user_level: form.querySelector('select[id="user-level-giveaway"]').value,
+            giveaway_name: giveaway_name,
+            giveaway_user_level: roles,
             giveaway_clear_check: giveaway_clear_check_value,
             giveaway_enable: giveaway_enable_value,
             giveaway_mult: giveaway_mult_value,
@@ -135,8 +129,24 @@ async function giveaway_js(event,type_id) {
     
         var formData = JSON.stringify(data);
     
-        window.pywebview.api.giveaway_py(type_id,formData);
+        window.pywebview.api.giveaway_py(type_id, formData);
 
+
+    } else if (type_id == 'save_style'){
+
+        var giveaway_color1 = document.getElementById('giveaway-color1-text');
+        var giveaway_color2 = document.getElementById('giveaway-color2-text');
+        var giveaway_pointer = document.getElementById('giveaway-pointer-text');
+
+        data = {
+            giveaway_color1: giveaway_color1.value,
+            giveaway_color2: giveaway_color2.value,
+            giveaway_pointer: giveaway_pointer.value,
+        };
+    
+        var formData = JSON.stringify(data);
+    
+        window.pywebview.api.giveaway_py(type_id, formData);
 
     } else if (type_id == 'save_commands'){
 
@@ -163,7 +173,7 @@ async function giveaway_js(event,type_id) {
             status: command_status,
             delay: command_giveaway_delay.value,
             user_level: roles,
-            cost: cost.value,
+            cost: command_giveaway_cost.value,
             cost_status: cost_status
         }
 
@@ -172,23 +182,17 @@ async function giveaway_js(event,type_id) {
 
     } else if (type_id == 'add_user'){
 
-        event.preventDefault();
-
-        var form = document.querySelector("#giveaway-add-user-form");
-        var add_name = form.elements[0].value;
+        var add_name = document.getElementById('giveaway-add-user').value;
         
         data = {
-            new_name: add_name,
-            user_level: 'mod'
+            new_name: add_name
         }
 
         var formData = JSON.stringify(data);
         window.pywebview.api.giveaway_py(type_id,formData);
 
 
-    } else if (type_id == 'execute'){
-        window.pywebview.api.giveaway_py(type_id,'null');
-    } else if (type_id == 'clear_list'){
+    } else if (type_id == 'execute' || type_id == 'execute_overlay' || type_id == 'clear_list' || type_id == 'update_overlay' ){
         window.pywebview.api.giveaway_py(type_id,'null');
     }
 }

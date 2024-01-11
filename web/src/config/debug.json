@@ -1,3 +1,5 @@
 {
-    "debug" : 1
+    "debug" : 0,
+    "version" : "1.6.7",
+    "updated" : "False"
 }

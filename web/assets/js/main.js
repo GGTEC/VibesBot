@@ -65,6 +65,7 @@ window.addEventListener('pywebviewready',async function() {
   
   
       start_scroll()
+      start_scroll_chat_log()
       start_scroll_event_log()
   
       progress_span.innerHTML = 'scroll.'
@@ -111,12 +112,13 @@ window.addEventListener('pywebviewready',async function() {
       }, 1000);
   
   
-      connectWebSocket_likes();
-      connectWebSocket_diamonds();
-      connectWebSocket_folows();
-      connectWebSocket_specs();
-      connectWebSocket_shares();
-      connectWebSocket_gifts();
+      connectWebSocket('likes');
+      connectWebSocket('diamonds');
+      connectWebSocket('follow');
+      connectWebSocket('gift');
+      connectWebSocket('max_viewer');
+      connectWebSocket('share');   
+      connectWebSocketVotes('votes')   
 
       progress_span.innerHTML = 'ConnectWebsockets.'
       functionsExecuted++;
@@ -132,8 +134,9 @@ window.addEventListener('pywebviewready',async function() {
       functionsExecuted++;
       progressBar_start.style.width = `${functionsExecuted * (100 / functionsCount)}%`; //atualize o progresso
   
-      
-  
+      const chatWindow = document.getElementById("chat-block-inner");
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+
     }
     
   }
@@ -236,10 +239,9 @@ function start_color_inputs(){
     $("#goal-text-color").click();
   });
   
-  $("#goal-text-color").change(function(color) {
+  $("#goal-text-color").on('input', function(event) {
     $("#goal-text-color-span").css('background-color',$(this).val());
     $("#goal-text-color-text").val($(this).val())
-    ttk_goal('save_html')
   });
 
 
@@ -247,10 +249,9 @@ function start_color_inputs(){
     $("#goal-bar-color").click();
   });
 
-  $("#goal-bar-color").change(function(event) {
+  $("#goal-bar-color").on('input', function(event) {
     $("#goal-bar-color-span").css('background-color',$(this).val());
     $("#goal-bar-color-text").val($(this).val())
-    ttk_goal('save_html')
   });
 
 
@@ -258,76 +259,207 @@ function start_color_inputs(){
     $("#goal-background-bar-color").click();
   });
 
-  $("#goal-background-bar-color").change(function(event) {
+  $("#goal-background-bar-color").on('input', function(event) {
     $("#goal-background-bar-color-span").css('background-color',$(this).val());
     $("#goal-background-bar-color-text").val($(this).val())
-    ttk_goal('save_html')
   });
-
 
   $("#goal-background-color-button").click(function(event) {
     $("#goal-background-color").click();
   });
 
-  $("#goal-background-color-text").change(function(event) {
+  $("#goal-background-border-color").on('input', function(event) {
+    $("#goal-background-color-border-span").css('background-color',$(this).val());
+    $("#goal-background-color-border-text").val($(this).val())
+  });
+
+  $("#goal-background-color-border-button").click(function(event) {
+    $("#goal-background-border-color").click();
+  });
+
+  $("#goal-background-color").on('input', function(event) {
     $("#goal-background-color-span").css('background-color',$(this).val());
     $("#goal-background-color-text").val($(this).val())
-    ranks_js('save','')
   });
 
 
-  $("#likes-rank-background-button").click(function(event) {
-    $("#likes-rank-background-color").click();
+
+  $("#giveaway-color1-button").click(function(event) {
+    $("#giveaway-color1-color").click();
   });
 
-  $("#likes-rank-background-color").change(function(event) {
-    $("#likes-rank-background-span").css('background-color',$(this).val());
-    $("#likes-rank-background-text").val($(this).val())
+  $("#giveaway-color1-color").on('input', function(event) {
+    $("#giveaway-color1-span").css('background-color',$(this).val());
+    $("#giveaway-color1-text").val($(this).val())
   });
 
-  $("#gifts-rank-background-button").click(function(event) {
-    $("#gifts-rank-background-color").click();
+  $("#giveaway-color2-button").click(function(event) {
+    $("#giveaway-color2-color").click();
   });
 
-  $("#gifts-rank-background-color").change(function(event) {
-    $("#gifts-rank-background-span").css('background-color',$(this).val());
-    $("#gifts-rank-background-text").val($(this).val())
+  $("#giveaway-color2-color").on('input', function(event) {
+    $("#giveaway-color2-span").css('background-color',$(this).val());
+    $("#giveaway-color2-text").val($(this).val())
+  });
+
+  $("#giveaway-pointer-button").click(function(event) {
+    $("#giveaway-pointer-color").click();
+  });
+
+  $("#giveaway-pointer-color").on('input', function(event) {
+    $("#giveaway-pointer-span").css('background-color',$(this).val());
+    $("#giveaway-pointer-text").val($(this).val())
   });
 
 
-  $("#shares-rank-background-button").click(function(event) {
-    $("#shares-rank-background-color").click();
+  $("#subathon-color1-button").click(function(event) {
+    $("#subathon-color1-color").click();
   });
 
-  $("#shares-rank-background-color").change(function(event) {
-    $("#shares-rank-background-span").css('background-color',$(this).val());
-    $("#shares-rank-background-text").val($(this).val())
+  $("#subathon-color1-color").on('input', function(event) {
+    $("#subathon-color1-span").css('background-color',$(this).val());
+    $("#subathon-color1-text").val($(this).val())
+  });
+
+  $("#subathon-color2-button").click(function(event) {
+    $("#subathon-color2-color").click();
+  });
+
+  $("#subathon-color2-color").on('input', function(event) {
+    $("#subathon-color2-span").css('background-color',$(this).val());
+    $("#subathon-color2-text").val($(this).val())
   });
 
 
-  $("#points-rank-background-button").click(function(event) {
-    $("#points-rank-background-color").click();
+
+  $("#vote-text-color-button").click(function(event) {
+    $("#vote-text-color").click();
+  });
+  
+  $("#vote-text-color").on('input', function(event) {
+    $("#vote-text-color-span").css('background-color',$(this).val());
+    $("#vote-text-color-text").val($(this).val())
   });
 
-  $("#points-rank-background-color").change(function(event) {
-    $("#points-rank-background-span").css('background-color',$(this).val());
-    $("#points-rank-background-text").val($(this).val())
+
+  $("#vote-bar-color-button").click(function(event) {
+    $("#vote-bar-color").click();
   });
 
+  $("#vote-bar-color").on('input', function(event) {
+    $("#vote-bar-color-span").css('background-color',$(this).val());
+    $("#vote-bar-color-text").val($(this).val())
+  });
+
+
+  $("#vote-background-bar-color-button").click(function(event) {
+    $("#vote-background-bar-color").click();
+  });
+
+  $("#vote-background-bar-color").on('input', function(event) {
+    $("#vote-background-bar-color-span").css('background-color',$(this).val());
+    $("#vote-background-bar-color-text").val($(this).val())
+  });
+
+  $("#vote-background-color-button").click(function(event) {
+    $("#vote-background-color").click();
+  });
+
+  $("#vote-background-border-color").on('input', function(event) {
+    $("#vote-background-color-border-span").css('background-color',$(this).val());
+    $("#vote-background-color-border-text").val($(this).val())
+  });
+
+  $("#vote-background-color-border-button").click(function(event) {
+    $("#vote-background-border-color").click();
+  });
+
+  $("#vote-background-color").on('input', function(event) {
+    $("#vote-background-color-span").css('background-color',$(this).val());
+    $("#vote-background-color-text").val($(this).val())
+  });
+
+
+
+  $("#rank-font-button").click(function(event) {
+    $("#rank-font-color").click();
+  });
+
+  $("#rank-font-color").on('input', function(event) {
+    $("#rank-font-span").css('background-color',$(this).val());
+    $("#rank-font-text").val($(this).val())
+  });
+
+  
+
+
+  $("#rank-background-button").click(function(event) {
+    $("#rank-background-color").click();
+  });
+
+  $("#rank-background-color").on('input', function(event) {
+    $("#rank-background-span").css('background-color',$(this).val());
+    $("#rank-background-text").val($(this).val())
+  });
+
+  $("#event-background-color-button").click(function(event) {
+    $("#event-background-color-select").click();
+  });
+
+  $("#event-background-color-select").on('input', function(event) {
+    $("#event-background-color-span").css('background-color',$(this).val());
+    $("#event-background-color-text").val($(this).val())/
+    $(".event_block_overlay").css('background-color',$(this).val());
+  });
+
+  $("#event-text-color-button").click(function(event) {
+    $("#event-text-color-select").click();
+  });
+
+  $("#event-text-color-select").on('input', function(event) {
+    $("#event-text-color-span").css('background-color',$(this).val());
+    $("#event-text-color-text").val($(this).val());
+    $(".event_block_overlay span").css('color',$(this).val());
+  });
+
+
+
+  $("#highlighted-background-color-button").click(function(event) {
+    $("#highlighted-background-color-select").click();
+  });
+
+  $("#highlighted-background-color-select").on('input', function(event) {
+    $("#highlighted-background-color-span").css('background-color',$(this).val());
+    $("#highlighted-background-color-text").val($(this).val())
+  });
+
+
+  $("#highlighted-border-color-button").click(function(event) {
+    $("#highlighted-border-color").click();
+  });
+
+  $("#highlighted-border-color").on('input', function(event) {
+    $("#highlighted-color-border-span").css('background-color',$(this).val());
+    $("#highlighted-color-border-text").val($(this).val())
+  });
 
 }
 
 function update_specs_tiktok(specs){
 
   if (specs >= 1){
+
     document.getElementById('tiktok-spec').hidden = false;
     document.getElementById('time-in-live').innerText = 'Online';
     document.getElementById('live-dot').style.color = 'red';
     document.getElementById('text-counter-ttk').innerText = " " + specs;
+
   } else if (specs == 'disconect'){
-    document.getElementById('tiktok-spec').hidden = true;
+
+    document.getElementById('tiktok-spec').hidden = false;
     document.getElementById('time-in-live').innerText = 'Offline';
     document.getElementById('live-dot').style.color = 'white';
+    document.getElementById('text-counter-ttk').innerText = " Desconectado";
   }
 
 }
@@ -343,7 +475,6 @@ function update_carousel_tiktok(type_id,data){
 
   }
 };
-
 
 function toast_notifc(text){
 
@@ -528,9 +659,13 @@ async function updateTimeDiff() {
 }
 
 async function getFolder(id,type_id) {
+
   var dosya_path = await window.pywebview.api.select_file_py(type_id);
+
   if (dosya_path) {
+
       document.getElementById(id).value = dosya_path;
+      
       if (id == 'file-select-notific'){
           chat_config('save')
       }
@@ -562,20 +697,15 @@ async function start_scroll_event_log(){
         const startIndex = paginaAtual * itensPorPagina;
         const endIndex = startIndex + itensPorPagina;
         const items = events_list.slice(startIndex, endIndex);
-  
+        
+        
         for (let i = 0; i < items.length; i++) {
   
-          var part = items[i].split(" | ");
-    
-          var dateString = part[0];
-          var type_message = part[1];
-          var message_rec = part[2];
-          
-          if (part.length > 3){
-            var user_input =  part[3];
-          }else {
-            var user_input =  "";
-          }
+          var dateString = items[i].timestamp;
+          var message_rec = items[i].message;
+          var user_input = items[i].user_input;
+          var type_message = items[i].type;
+
     
           var colorEvents = EventsParse["color-events"];
           var ShowData = EventsParse["data-show-events"];
@@ -590,7 +720,6 @@ async function start_scroll_event_log(){
           var showShare = EventsParse["show-share"];
           var showJoin = EventsParse["show-join"];
   
-  
           var message_span = document.createElement('span');
   
           message_span.id = "message-chat";
@@ -598,7 +727,7 @@ async function start_scroll_event_log(){
           
           var message_user_inp = `${message_rec} <br><span class='small events-sub-color'>Mensagem : ${user_input}</span>`
   
-          message_span.innerHTML = user_input == "" ? message_rec : message_user_inp;
+          message_span.innerHTML = user_input == null || user_input == "" ? message_rec : message_user_inp;
           
           message_div = document.createElement('div');
   
@@ -622,14 +751,14 @@ async function start_scroll_event_log(){
           div_event.id = 'recent-message-block'
           div_event.classList.add('chat-message','event-message');
           div_event.style.fontSize = "16px";
-    
+          
           div_event.appendChild(message_div);
   
           const variableMappings = {
             "command": showCommands,
             "event": showEvents,
             "follow": showFollow,
-            "likes": showLikes,
+            "like": showLikes,
             "gifts": showGifts,
             "chest": showChest,
             "goal": showGoal,
@@ -637,8 +766,8 @@ async function start_scroll_event_log(){
             "join": showJoin,
           };
       
-      
-          if (variableMappings[type_message] === 1) {
+          if (variableMappings[type_message] == 1) {
+
             div_events_scroll.appendChild(div_event);
           }
           
@@ -651,45 +780,242 @@ async function start_scroll_event_log(){
   });
 }
 
+async function start_scroll_chat_log(){
+
+  const div_chat_scroll = document.getElementById("chat-block-inner");
+
+  const itensPorPagina = 1;
+  let paginaAtual = 20;
+
+  let currentListIndex = 0;
+  
+  async function handleScroll(){
+  
+    if (div_chat_scroll.scrollTop === 0) {
+      
+      var messages = await window.pywebview.api.log_chat('get', null);
+  
+      if (messages) {
+  
+        var message_data_parse = JSON.parse(messages);
+
+        const dates = Object.keys(message_data_parse).reverse();
+
+        if (currentListIndex < dates.length) {
+
+          const currentDate = dates[currentListIndex];
+
+          const currentList = message_data_parse[currentDate];
+
+          if (currentList.length > 0) {
+
+            var messages_list = currentList.reverse()
+  
+            const startIndex = paginaAtual * itensPorPagina;
+            const endIndex = startIndex + itensPorPagina;
+            
+            const items = messages_list.slice(startIndex, endIndex);
+            
+            for (let i = 0; i < items.length; i++) {
+
+              var show_user_picture = items[i].show_user_picture;
+              var user_picture_url =  items[i].profile_pic;
+              var chat_color_border =  items[i].chat_color_border;
+              var chat_color_name =  items[i].chat_color_name;
+              var select_color_border =  items[i].chat_border_select;
+              var select_color_name =  items[i].chat_name_select;
+              var animation = items[i].chat_animation;
+              var chat_newline =  items[i].wrapp_message;
+              var text_size =  items[i].font_size;
+              var chat_data =  items[i].data_show;
+              var chat_time =  items[i].chat_time;
+              var type_data =  items[i].type_data;
+              var user_rec =  items[i].display_name;
+              var user_id =  items[i].userid;
+              var username_rec =  items[i].username;
+              var message_rec =  items[i].message;
+              var badges =  items[i].badges;
+              var color_rec = chat_color_name == 1 ? select_color_name : "white";
+              var border_color = chat_color_border == 1 ? select_color_border : '#4f016c';
+
+              if (type_data == 'passed'){
+
+                  let date = new Date(chat_time);
+                  let formattedDate = date.toLocaleDateString() + " " + date.toLocaleTimeString();
+                  var time_chat = document.createElement("span");
+                  time_chat.id = 'time_chat';
+                  time_chat.setAttribute("data-time", chat_time);
+                  time_chat.setAttribute("title", formattedDate);
+                  time_chat.classList.add("message-time");
+                  time_chat.innerHTML = 'Agora';
+
+              } else if (type_data == 'current'){
+
+                  var time_chat = document.createElement("span");
+                  time_chat.id = 'time_chat';
+                  time_chat.classList.add("message-time-current");
+                  time_chat.innerHTML = chat_time;
+
+              }
+
+              var username = document.createElement("span");
+              username.id = 'user-chat';
+              username.innerHTML = user_rec;
+              username.style.color = `${color_rec}`;
+              username.setAttribute('onclick','pywebview.api.open_py("user","'+user_id+'")');
+
+              var separator = document.createElement("span");
+              separator.innerHTML = ' :';
+
+              var span_username = document.createElement("span");
+              span_username.classList.add('span_username');
+              span_username.title = username_rec
+              span_username.setAttribute('data-bs-placement', 'top');
+              span_username.setAttribute('data-toggle', 'tooltip');
+              span_username.appendChild(username);
+
+              badges.forEach(badge => {
+                  const span = createBadgeSpan(badge.name, badge.first_url, text_size);
+                  if (span) {
+                      span_username.appendChild(span);
+                  }
+              });
+
+              span_username.appendChild(separator);
+
+              message_rec = twemoji.parse(message_rec);
+
+              var span_message = document.createElement("span");
+              span_message.id = 'message-chat';
+              span_message.innerHTML = message_rec;
+              
+              var new_line = document.createElement("br");
+              
+              var div_message_block = document.createElement("div");
+
+              var padding_start = show_user_picture == 1 ? "ps-0"  : null;
+
+              div_message_block.id = 'chat-message-block'
+              div_message_block.classList.add('row','chat-message', 'chat-block-color', animation ,padding_start);
+              div_message_block.style.border = "3px solid "+ border_color + "";
+
+              var div_message = document.createElement("div");
+
+              div_message.id = 'message_block';
+              div_message.classList.add('col','ps-0');
+              div_message.style.fontSize = text_size + "px";
+
+
+              var div_profile_pic = document.createElement("div");
+
+              div_profile_pic.id = 'message_pic';
+              div_profile_pic.classList.add('col-2');
+              
+              var img_pic = document.createElement("img"); 
+              img_pic.classList.add('img-responsive','w-100','img-fluid');
+              img_pic.src = user_picture_url
+              img_pic.style.width = '70px'
+
+              div_profile_pic.appendChild(img_pic)
+              
+              chat_data == 1 ? div_message.appendChild(time_chat) : null;
+
+              div_message.appendChild(span_username);
+
+              chat_newline == 1 ? div_message.appendChild(new_line) : null;
+
+              div_message.appendChild(span_message);
+
+              show_user_picture == 1 ? div_message_block.appendChild(div_profile_pic) : null;
+
+              div_message_block.appendChild(div_message)
+              
+              var div_chat = document.querySelector('#chat-block-inner div:first-child');
+
+              div_chat.parentNode.insertBefore(div_message_block, div_chat);
+
+            }
+            $(".span_username").tooltip()
+            paginaAtual++;
+
+            if (endIndex >= currentList.length) {
+              currentListIndex++;
+              paginaAtual = 1;
+            }
+            
+          }
+        }
+      }
+    }
+  }
+
+  div_chat_scroll.addEventListener("wheel", handleScroll);
+
+  div_chat_scroll.addEventListener("scroll", handleScroll);
+  
+}
+
+function copy_username(element){
+
+    var value = element.getAttribute('data-copy-value');
+
+    navigator.clipboard.writeText(value);
+
+}
 async function userdata_modal(type_id,user){
 
-  var usernameElement = document.getElementById("user-edit-username");
   var useridElement = document.getElementById("user-edit-userid");
+  var usernameElement = document.getElementById("user-edit-username");
+  var displaynameElement = document.getElementById("user-edit-display-name");
   var likesElement = document.getElementById("user-edit-likes");
   var giftsElement = document.getElementById("user-edit-gifts");
   var sharesElement = document.getElementById("user-edit-shares");
-  var levelElement = document.getElementById("user-edit-roles");
   var pointsElement = document.getElementById("user-edit-points");
+  var profilePicElement = document.getElementById("user-edit-profile-pic");
   var ButtonElement = document.getElementById("btn-save-useredit");
+
+  var display_name_card = document.getElementById("display-name-card");
+  var username_card = document.getElementById("username-card");
+  var profile_pic_card = document.getElementById("profile-pic-card");
+
+  var button_copy_username = document.getElementById('copy-username')
+  var button_open_profile = document.getElementById('open-profile')
+
 
   if (type_id == 'edit'){
     
-    var userdata_parse = await window.pywebview.api.userdata_py('get','None')
+    var userdata_parse = await window.pywebview.api.userdata_py('load',user)
       
     if (userdata_parse){
-      
-      userdata_parse = JSON.parse(userdata_parse)
 
-      data = userdata_parse[user]
+      data = userdata_parse
 
       $('#userdata-edit-modal').modal("show")
 
       await sleep(1000)
 
+      useridElement.value = data.userid
+      displaynameElement.value = data.username
       usernameElement.value = data.display_name
-      useridElement.value = user
+      profilePicElement.value = data.profile_pic
       likesElement.value = data.likes
       giftsElement.value = data.gifts
       sharesElement.value = data.shares
       pointsElement.value = data.points
-      ButtonElement.setAttribute("onclick", `userdata_modal('save','${user}')`);
+
+      display_name_card.innerHTML = data.display_name
+      username_card.innerHTML = data.username
+      profile_pic_card.src = data.profile_pic
+
+      ButtonElement.setAttribute("onclick", `userdata_modal('save','${data.userid}')`);
+      button_open_profile.setAttribute('onclick', 'pywebview.api.open_py("user","'+data.userid+'")')
+      button_copy_username.setAttribute('data-copy-value',`${data.username}`)
 
       $('#user-edit-roles').selectpicker('val',data.roles);
       $('#user-edit-roles').selectpicker('refresh')
 
-
-
     }
+    
   } else if (type_id == 'save'){
 
       var roles = []; 
@@ -699,12 +1025,14 @@ async function userdata_modal(type_id,user){
       });
 
       data = {
+        display_name : displaynameElement.value,
         username : usernameElement.value,
         userid : useridElement.value,
         likes : likesElement.value,
         gifts : giftsElement.value,
         shares : sharesElement.value,
         points : pointsElement.value,
+        profile_pic : profilePicElement.value,
         roles: roles
       }
 
@@ -733,8 +1061,6 @@ async function userdata_js(type_id,data){
       
       if (userdata_parse){
 
-          userdata_parse = JSON.parse(userdata_parse)
-
           if ($.fn.DataTable.isDataTable("#userdata_table")) {
               $('#userdata_table').DataTable().clear().draw();
               $('#userdata_table').DataTable().destroy();
@@ -743,14 +1069,14 @@ async function userdata_js(type_id,data){
 
           var table = $('#userdata_table').DataTable( {
               pageLength: 8,
-              autoWidth: true,
               destroy: true,
               scrollX: true,
               paging: true,
+              autoWidth: true,
               ordering:  true,
               retrieve : false,
               processing: true,
-              responsive: true,
+              responsive: false,
               lengthMenu: [
                   [10, 25, 50, -1],
                   [10, 25, 50, 'All'],
@@ -769,34 +1095,25 @@ async function userdata_js(type_id,data){
               removeBtn.setAttribute("title", "Remover usuário");
               removeBtn.setAttribute("data-toggle", "tooltip");
               removeBtn.setAttribute("data-bs-placement", "top");
-              removeBtn.setAttribute("onclick", `userdata_modal("remove",'${key}')`);
-
-              var removeIcon = document.createElement("i");
-              removeIcon.classList.add("fa-solid", "fa-user-xmark");
-
-              removeBtn.appendChild(removeIcon);
+              removeBtn.setAttribute("onclick", `userdata_modal("remove",'${userdata_parse[key].userid}')`);
+              removeBtn.innerHTML = 'Excluir'
 
               var EditBtn = document.createElement("button");
               EditBtn.classList.add("btn", "bt-submit", "p-1", "m-1");
               EditBtn.setAttribute("type", "button");
               EditBtn.setAttribute("title", "Editar usuário");
-              EditBtn.setAttribute("onclick", `userdata_modal('edit','${key}')`);
-
-              var EditIcon = document.createElement("i");
-              EditIcon.classList.add("fa-solid", "fa-user-pen");
-
-              EditBtn.appendChild(EditIcon);
+              EditBtn.setAttribute("onclick", `userdata_modal('edit','${userdata_parse[key].userid}')`);
+              EditBtn.innerHTML = 'Editar'
 
 
               var row = table.row.add([
                 userdata_parse[key].display_name,
-                key,
-                userdata_parse[key].roles,
+                userdata_parse[key].username,
                 userdata_parse[key].points,
                 userdata_parse[key].likes,
                 userdata_parse[key].shares,
                 userdata_parse[key].gifts,
-                `${removeBtn.outerHTML}/${EditBtn.outerHTML}`
+                `${removeBtn.outerHTML} | ${EditBtn.outerHTML}`
               ]);
 
               
@@ -807,6 +1124,13 @@ async function userdata_js(type_id,data){
   
   } else if (type_id == 'remove'){
       window.pywebview.api.userdata_py(type_id,data)
+  } else if (type_id == 'destroy'){
+
+    if ($.fn.DataTable.isDataTable("#userdata_table")) {
+      $('#userdata_table').DataTable().clear().draw();
+      $('#userdata_table').DataTable().destroy();
+
+  }
   }
 }
 
@@ -814,516 +1138,144 @@ async function getCheckedValue(element) {
   return element.checked ? 1 : 0;
 }
 
-var socket_likes;
-var socket_gifts;
-var socket_specs;
-var socket_diamonds;
-var socket_follow;
-var socket_shares;
+function connectWebSocket(type) {
+
+  var iframe_div = document.getElementById('iframe-' + type);
+  var iframeConfig = document.getElementById('iframe-' + type + '-config');
 
 
-function connectWebSocket_likes() {
+  var socket;
 
-  var iframe_likes = document.getElementById('iframe-likes');
-
-
-  if (socket_likes && socket_likes.readyState === WebSocket.OPEN) {
+  if (socket && socket.readyState === WebSocket.OPEN) {
     return;
   }
 
-  socket_likes = new WebSocket("ws://localhost:7688");
+  socket = new WebSocket("ws://localhost:7688");
 
-  socket_likes.onopen = function(event) {
+  socket.onopen = function(event) {
 
     message = {
-        type: "likes"
+      type: type
     };
 
-    socket_likes.send(JSON.stringify(message))
-
+    socket.send(JSON.stringify(message))
 
   };
 
-  socket_likes.onmessage = function(event) {
+  socket.onmessage = function(event) {
+    if (event.data === 'ping') {
 
+      message = {
+        type: "pong"
+      };
 
-      if (event.data === 'ping') {
+      socket.send(JSON.stringify(message))
 
-          message = {
-              type: "pong"
-          };
+    } else {
 
-          socket_likes.send(JSON.stringify(message))
+      var data_parse = JSON.parse(event.data);
 
-      } else {
+      if (data_parse.type === 'save_html') {
 
-        var data_parse = JSON.parse(event.data);
+        iframe_div.innerHTML = "";
 
-        if (data_parse.type === 'save_html') {
+        var tempDiv = document.createElement('div');
+        tempDiv.innerHTML = data_parse.html;
 
-          iframe_likes.innerHTML = "";
+        var tempDivOuter = tempDiv.querySelector('.progress-outer');
 
-          var temp_div = document.createElement('div');
-          temp_div.innerHTML = data_parse.html;
+        iframe_div.appendChild(tempDivOuter.cloneNode(true));
 
-          var temp_div_outer = temp_div.querySelector('.progress-outer');
-          iframe_likes.appendChild(temp_div_outer)
-        
+        iframeConfig.contentDocument.documentElement.innerHTML = data_parse.html;
 
-        } else if (data_parse.type === 'update_goal'){
+      } else if (data_parse.type === 'update_goal') {
 
-          if (data_parse.type_goal == 'likes'){
+        if (data_parse.type_goal === type) {
 
-            iframe_likes.innerHTML = "";
+          iframe_div.innerHTML = "";
 
-            var temp_div = document.createElement('div');
-            temp_div.innerHTML = data_parse.html;
+          var tempDiv = document.createElement('div');
+          tempDiv.innerHTML = data_parse.html;
 
-            var temp_div_outer = temp_div.querySelector('.progress-outer');
-            iframe_likes.appendChild(temp_div_outer)
+          var tempDivOuter = tempDiv.querySelector('.progress-outer');
 
-            var bar = iframe_likes.querySelector('#progress-bar');
-            var value = iframe_likes.querySelector("#progress-value");
+          iframe_div.appendChild(tempDivOuter.cloneNode(true));
 
-            var value1 = data_parse.current
-            var value2 = data_parse.goal
-
-            var percent = (value1 / value2) * 100;
-
-            bar.style.width = percent + "%";
-
-            value.textContent = `${value1}/${value2}`
-          }
-
-          }
+          iframeConfig.contentDocument.documentElement.innerHTML = data_parse.html;
+        }
       }
+    }
   };
 
-  socket_likes.onclose = function(error) {
-    reconnectWebSocket_likes();
+  socket.onclose = function(error) {
+    reconnectWebSocket(type);
   };
-}
 
-function reconnectWebSocket_likes() {
-  if (!socket_likes || socket_likes.readyState === WebSocket.CLOSED) {
-    setTimeout(function() {connectWebSocket_likes();}, 3000);
+  function reconnectWebSocket(type) {
+    if (!socket || socket.readyState === WebSocket.CLOSED) {
+      setTimeout(function() {
+        connectWebSocket(type);
+      }, 3000);
+    }
   }
 }
 
 
+function connectWebSocketVotes(type) {
 
-function connectWebSocket_diamonds() {
+  var iframe_div = document.getElementById('iframe-votes-config');
 
-  var iframe_diamonds = document.getElementById('iframe-diamonds');
+  var socket;
 
-  if (socket_diamonds && socket_diamonds.readyState === WebSocket.OPEN) {
+  if (socket && socket.readyState === WebSocket.OPEN) {
     return;
   }
 
-  socket_diamonds = new WebSocket("ws://localhost:7688");
+  socket = new WebSocket("ws://localhost:7688");
 
-  socket_diamonds.onopen = function(event) {
-    
+  socket.onopen = function(event) {
+
     message = {
-        type: "diamonds"
+      type: type
     };
 
-    socket_diamonds.send(JSON.stringify(message))
+    socket.send(JSON.stringify(message))
+
   };
 
-  socket_diamonds.onmessage = function(event) {
+  socket.onmessage = function(event) {
 
-      if (event.data === 'ping') {
+    if (event.data === 'ping') {
 
-          message = {
-              type: "pong"
-          };
+      message = {
+        type: "pong"
+      };
 
-          socket_diamonds.send(JSON.stringify(message))
+      socket.send(JSON.stringify(message))
 
-      } else {
+    } else {
 
-        var data_parse = JSON.parse(event.data);
+      var data_parse = JSON.parse(event.data);
 
-        if (data_parse.type === 'save_html') {
+      if (data_parse.type === 'votes') {
 
-          iframe_diamonds.innerHTML = "";
+        iframe_div.innerHTML = "";
 
-          var temp_div = document.createElement('div');
-          temp_div.innerHTML = data_parse.html;
+        iframe_div.contentDocument.documentElement.innerHTML = data_parse.html;
 
-          var temp_div_outer = temp_div.querySelector('.progress-outer');
-          iframe_diamonds.appendChild(temp_div_outer)
-
-        } else if (data_parse.type === 'update_goal'){
-
-          if (data_parse.type_goal == 'diamonds'){
-
-              iframe_diamonds.innerHTML = "";
-
-              var temp_div = document.createElement('div');
-              temp_div.innerHTML = data_parse.html;
-
-              var temp_div_outer = temp_div.querySelector('.progress-outer');
-              iframe_diamonds.appendChild(temp_div_outer)
-
-              var bar = iframe_diamonds.querySelector('#progress-bar');
-              var value = iframe_diamonds.querySelector("#progress-value");
-
-              var value1 = data_parse.current
-              var value2 = data_parse.goal
-
-              var percent = (value1 / value2) * 100;
-
-              bar.style.width = percent + "%";
-
-              value.textContent = `${value1}/${value2}`
-            }
-
-          }
-      }
+      } 
+    }
   };
 
-  socket_diamonds.onclose = function(error) {
-    reconnectWebSocket_gifts();
+  socket.onclose = function(error) {
+    reconnectWebSocket(type);
   };
-}
 
-function reconnectWebSocket_diamonds() {
-  if (!socket_diamonds || socket_diamonds.readyState === WebSocket.CLOSED) {
-    setTimeout(function() {connectWebSocket_gifts();}, 3000);
+  function reconnectWebSocket(type) {
+    if (!socket || socket.readyState === WebSocket.CLOSED) {
+      setTimeout(function() {
+        connectWebSocket(type);
+      }, 3000);
+    }
   }
 }
-
-
-
-function connectWebSocket_folows() {
-
-  var iframe_follows = document.getElementById('iframe-follows');
-
-  if (socket_follow && socket_follow.readyState === WebSocket.OPEN) {
-    return;
-  }
-
-  socket_follow = new WebSocket("ws://localhost:7688");
-
-  socket_follow.onopen = function(event) {
-    message = {
-        type: "follow"
-    };
-
-    socket_follow.send(JSON.stringify(message))
-  };
-
-  socket_follow.onmessage = function(event) {
-
-      if (event.data === 'ping') {
-
-          message = {
-              type: "pong"
-          };
-
-          socket_follow.send(JSON.stringify(message))
-
-      } else {
-
-        var data_parse = JSON.parse(event.data);
-
-        if (data_parse.type === 'save_html') {
-
-          iframe_follows.innerHTML = "";
-
-          var temp_div = document.createElement('div');
-          temp_div.innerHTML = data_parse.html;
-
-          var temp_div_outer = temp_div.querySelector('.progress-outer');
-          iframe_follows.appendChild(temp_div_outer)
-
-        } else if (data_parse.type === 'update_goal'){
-
-          if (data_parse.type_goal == 'follow'){
-
-              iframe_follows.innerHTML = "";
-
-              var temp_div = document.createElement('div');
-              temp_div.innerHTML = data_parse.html;
-
-              var temp_div_outer = temp_div.querySelector('.progress-outer');
-              iframe_follows.appendChild(temp_div_outer)
-
-              var bar = iframe_follows.querySelector('#progress-bar');
-              var value = iframe_follows.querySelector("#progress-value");
-
-              var value1 = data_parse.current
-              var value2 = data_parse.goal
-
-              var percent = (value1 / value2) * 100;
-
-              bar.style.width = percent + "%";
-
-              value.textContent = `${value1}/${value2}`
-            }
-
-          }
-      }
-  };
-
-  socket_follow.onclose = function(error) {
-    reconnectWebSocket_folows();
-  };
-}
-
-function reconnectWebSocket_folows() {
-  if (!socket_follow || socket_follow.readyState === WebSocket.CLOSED) {
-    setTimeout(function() {connectWebSocket_folows();}, 3000);
-  }
-}
-
-
-function connectWebSocket_gifts() {
-
-  var iframe_gifts = document.getElementById('iframe-gifts');
-
-  if (socket_gifts && socket_gifts.readyState === WebSocket.OPEN) {
-    return;
-  }
-
-  socket_gifts = new WebSocket("ws://localhost:7688");
-
-  socket_gifts.onopen = function(event) {
-    message = {
-        type: "gift"
-    };
-
-    socket_gifts.send(JSON.stringify(message))
-  };
-
-  socket_gifts.onmessage = function(event) {
-
-      if (event.data === 'ping') {
-
-          message = {
-              type: "pong"
-          };
-
-          socket_gifts.send(JSON.stringify(message))
-
-      } else {
-
-        var data_parse = JSON.parse(event.data);
-
-        if (data_parse.type === 'save_html') {
-
-          iframe_gifts.innerHTML = "";
-
-          var temp_div = document.createElement('div');
-          temp_div.innerHTML = data_parse.html;
-
-          var temp_div_outer = temp_div.querySelector('.progress-outer');
-          iframe_gifts.appendChild(temp_div_outer)
-
-        } else if (data_parse.type === 'update_goal'){
-
-          if (data_parse.type_goal == 'gift'){
-
-            iframe_gifts.innerHTML = "";
-
-              var temp_div = document.createElement('div');
-              temp_div.innerHTML = data_parse.html;
-
-              var temp_div_outer = temp_div.querySelector('.progress-outer');
-              iframe_gifts.appendChild(temp_div_outer)
-
-              var bar = iframe_gifts.querySelector('#progress-bar');
-              var value = iframe_gifts.querySelector("#progress-value");
-
-              var value1 = data_parse.current
-              var value2 = data_parse.goal
-
-              var percent = (value1 / value2) * 100;
-
-              bar.style.width = percent + "%";
-
-              value.textContent = `${value1}/${value2}`
-            }
-
-          }
-      }
-  };
-
-  socket_gifts.onclose = function(error) {
-    reconnectWebSocket_gifts();
-  };
-}
-
-function reconnectWebSocket_gifts() {
-  if (!socket_gifts || socket_gifts.readyState === WebSocket.CLOSED) {
-    setTimeout(function() {connectWebSocket_gifts();}, 3000);
-  }
-}
-
-function connectWebSocket_specs() {
-
-  var iframe_specs = document.getElementById('iframe-specs');
-
-  if (socket_specs && socket_specs.readyState === WebSocket.OPEN) {
-    return;
-  }
-
-  socket_specs = new WebSocket("ws://localhost:7688");
-
-  socket_specs.onopen = function(event) {
-    message = {
-        type: "max_viewer"
-    };
-
-    socket_specs.send(JSON.stringify(message))
-  };
-
-  socket_specs.onmessage = function(event) {
-
-      if (event.data === 'ping') {
-
-          message = {
-              type: "pong"
-          };
-
-          socket_specs.send(JSON.stringify(message))
-
-      } else {
-
-        var data_parse = JSON.parse(event.data);
-
-        if (data_parse.type === 'save_html') {
-
-          iframe_specs.innerHTML = "";
-
-          var temp_div = document.createElement('div');
-          temp_div.innerHTML = data_parse.html;
-
-          var temp_div_outer = temp_div.querySelector('.progress-outer');
-          iframe_specs.appendChild(temp_div_outer)
-
-        } else if (data_parse.type === 'update_goal'){
-
-          if (data_parse.type_goal == 'max_viewer'){
-
-              iframe_specs.innerHTML = "";
-
-              var temp_div = document.createElement('div');
-              temp_div.innerHTML = data_parse.html;
-
-              var temp_div_outer = temp_div.querySelector('.progress-outer');
-              iframe_specs.appendChild(temp_div_outer)
-
-              var bar = iframe_specs.querySelector('#progress-bar');
-              var value = iframe_specs.querySelector("#progress-value");
-
-              var value1 = data_parse.current
-              var value2 = data_parse.goal
-
-              var percent = (value1 / value2) * 100;
-
-              bar.style.width = percent + "%";
-
-              value.textContent = `${value1}/${value2}`
-            }
-
-          }
-      }
-  };
-
-  socket_specs.onclose = function(error) {
-    reconnectWebSocket_specs();
-  };
-}
-
-function reconnectWebSocket_specs() {
-  if (!socket_specs || socket_specs.readyState === WebSocket.CLOSED) {
-    setTimeout(function() {connectWebSocket_specs();}, 3000);
-  }
-}
-
-function connectWebSocket_shares() {
-
-  var iframe_shares = document.getElementById('iframe-shares');
-
-  if (socket_shares && socket_shares.readyState === WebSocket.OPEN) {
-    return;
-  }
-
-  socket_shares = new WebSocket("ws://localhost:7688");
-
-  socket_shares.onopen = function(event) {
-    message = {
-        type: "share"
-    };
-
-    socket_shares.send(JSON.stringify(message))
-  };
-
-  socket_shares.onmessage = function(event) {
-
-      if (event.data === 'ping') {
-
-          message = {
-              type: "pong"
-          };
-
-          socket_specs.send(JSON.stringify(message))
-
-      } else {
-
-        var data_parse = JSON.parse(event.data);
-
-        if (data_parse.type === 'save_html') {
-
-          iframe_shares.innerHTML = "";
-
-          var temp_div = document.createElement('div');
-          temp_div.innerHTML = data_parse.html;
-
-          var temp_div_outer = temp_div.querySelector('.progress-outer');
-          iframe_shares.appendChild(temp_div_outer)
-
-        } else if (data_parse.type === 'update_goal'){
-
-          if (data_parse.type_goal == 'share'){
-
-              iframe_shares.innerHTML = "";
-
-              var temp_div = document.createElement('div');
-              temp_div.innerHTML = data_parse.html;
-
-              var temp_div_outer = temp_div.querySelector('.progress-outer');
-              iframe_shares.appendChild(temp_div_outer)
-
-              var bar = iframe_shares.querySelector('#progress-bar');
-              var value = iframe_shares.querySelector("#progress-value");
-
-              var value1 = data_parse.current
-              var value2 = data_parse.goal
-
-              var percent = (value1 / value2) * 100;
-
-              bar.style.width = percent + "%";
-
-              value.textContent = `${value1}/${value2}`
-            }
-
-          }
-      }
-  };
-
-  socket_shares.onclose = function(error) {
-    reconnectWebSocket_shares();
-  };
-}
-
-function reconnectWebSocket_shares() {
-  if (!socket_shares || socket_shares.readyState === WebSocket.CLOSED) {
-    setTimeout(function() {connectWebSocket_shares();}, 3000);
-  }
-}
-
-

@@ -84,12 +84,6 @@ async function discord_js(event,type_id) {
 
         var chat_alert_form = document.getElementById('chat-alert-form')
 
-        var ignore_list = [
-            'clips_create',
-            'clips_edit',
-            'live_start_ttk'
-        ]
-
         input_type_edit.value = select.value
 
         var webhook_url= document.getElementById('url-webhook');
@@ -127,38 +121,12 @@ async function discord_js(event,type_id) {
 
         const responses_aliases = {
             live_start: '{url}',
-            live_start_ttk: '{url}',
-            live_cat : '',
             live_end : '',
             follow: '{username}',
-            ban : '{reason}, {moderator}, {username}, {time}',
-            unban : '{moderator},{username}',
-            sub: '{username}, {type}, {plan}, {months}, {cumulative}',
-            resub: ' {username}, {tier}, {total_months}, {streak_months}, {months}, {user_message}',
-            subend: '{username}',
-            giftsub: ' {username}, {months}, {rec_username}, {plan}',
-            mysterygift: '{username}, {count}, {plan}',
-            're-mysterygift': ' {username}',
-            raid: ' {username}, {specs}',
-            bits: ' {username}, {amount}',
-            shoutout_start: '{broadcaster_user_name}, {moderator_user_name}, {to_broadcaster_user_name}, {viewer_count}',
-            shoutout_receive: '{broadcaster_user_name} ,{to_broadcaster_user_name}',
-            poll_start: '{title}, {choices}, {current_id}, {bits_voting_status}, {bits_voting_amount}, {channel_points_voting_status}, {channel_points_voting_amount}, {start_at}, {ends_at}',
-            poll_status: '{title}, {choices}, {bits_voting_status}, {bits_voting_amount}, {channel_points_voting_status}, {channel_points_voting_amount}',
-            poll_end: '{title}, {choices}, {current_id}, {poll_status}, {bits_voting_status}, {bits_voting_amount}, {channel_points_voting_status}, {channel_points_voting_amount}',
-            prediction_start: '{title}',
-            prediction_progress: '{title}',
-            prediction_end: '{title}',
             goal_start: '{target}, {current}, {description}, {type}',
             goal_progress: '{target}, {current}, {description}, {type}',
             goal_end: '{target}, {current}, {description}, {type}',
-            shield_start: '{broadcaster},{moderator}',
-            shield_end: '{broadcaster},{moderator}',
-            charity_campaign_donate: '{username}, {charity_name}, {charity_logo}, {value}, {decimal_places}, {currency}',
-            charity_campaign_progress: '{charity_name}, {charity_logo}, {current_amount_value}, {current_amount_currency}, {target_amount_value}, {target_amount_currency}',
-            charity_campaign_start: '{charity_name}, {charity_logo}, {current_amount_value}, {current_amount_currency}, {target_amount_value}, {target_amount_currency}',
-            charity_campaign_stop: '{charity_name}, {charity_logo}, {current_amount_value}, {current_amount_currency}, {target_amount_value}, {target_amount_currency}'
-        };
+            };
         
         
         response_aliases.value = responses_aliases[select.value];

@@ -1,0 +1,17 @@
+{
+      "chat-color-name": 1,
+      "chat-color-border": 1,
+      "chat-name-select": "Green",
+      "chat-border-select": "Green",
+      "chat-animation": "animation-1",
+      "show-user-picture" : 0,
+      "font-size": "18",
+      "wrapp-message": 1,
+      "data-show": 1,
+      "type-data": "current",
+      "time-format": "%H:%M",
+      "chat-log-status" : 1,
+      "chat-log-days" : 2,
+      "slow-mode" : 0,
+      "slow-mode-time" : 2
+}

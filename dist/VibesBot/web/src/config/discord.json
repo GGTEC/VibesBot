@@ -1,0 +1,101 @@
+{
+    "profile_status": 1,
+    "profile_image": "None",
+    "profile_name": "None",
+    "live_start": {
+        "url": "https://discord.com/api/webhooks/1075869807204896778/anDQRGu-jwdgIumluiQqBcV-xgcRob9FuhoeY-fhGbaczgCFc6BFTrTKFnEUoJQUbxHF",
+        "status": 0,
+        "color": "03b2f8",
+        "content": "",
+        "title": "O streamer iniciou uma live no TikTok",
+        "description": "{url}"
+    },
+    "live_end": {
+        "url": "https://discord.com/api/webhooks/1144648304290959360/hZOyj1LNgWqAwA38ihCucG4v7h7HNAwbZq8ptRlnFjPn10QFMM4UTqwexC2WdrmR36Ly",
+        "status": 1,
+        "color": "03b2f8",
+        "content": "",
+        "title": "O streamer finalizou a live no TikTok",
+        "description": "{url}"
+    },
+    "share": {
+        "url": "",
+        "status": 1,
+        "color": "03b2f8",
+        "content": "",
+        "title": "O usuário {user} compartilhou a live",
+        "description": "{url}"
+    },
+    "gift": {
+        "url": "",
+        "status": 0,
+        "color": "03b2f8",
+        "content": "",
+        "title": "O usuário {user} enviou {amount}{gift} / {diamond} Diamantes",
+        "description": "{url}"
+    },
+    "like": {
+        "url": "",
+        "status": 1,
+        "color": "03b2f8",
+        "content": "",
+        "title": "O usuário {user} enviou {amount} Likes",
+        "description": "{url}"
+    },
+    "follow": {
+        "url": "",
+        "status": 0,
+        "color": "03b2f8",
+        "content": "",
+        "title": "O usuário {user} Seguiu o canal",
+        "description": "{url}"
+    },
+    "envelope": {
+        "url": "",
+        "status": 1,
+        "color": "03b2f8",
+        "content": "",
+        "title": "O usuário {user} Enviou um baú para live do tiktok",
+        "description": "{url}"
+    },
+    "subscriber": {
+        "url": "",
+        "status": 1,
+        "color": "03b2f8",
+        "content": "",
+        "title": "O usuário {user} se inscreveu no canal",
+        "description": "{url}"
+    },
+    "goal_start": {
+        "url": "",
+        "status": 1,
+        "color": "03b2f8",
+        "content": "",
+        "title": "Uma meta para {current}/{target} {type} foi iniciada. ",
+        "description": ""
+    },
+    "goal_end": {
+        "url": "",
+        "status": 1,
+        "color": "03b2f8",
+        "content": "",
+        "title": "A meta para {current}/{target }{type} foi finalizada.",
+        "description": ""
+    },
+    "live_start_ttk": {
+        "url": "",
+        "status": 1,
+        "color": "03b2f8",
+        "content": "",
+        "title": "O streamer iniciou uma live no TikTok",
+        "description": "{url}"
+    },
+    "goal_progress": {
+        "url": "",
+        "status": 1,
+        "color": "03b2f8",
+        "content": "",
+        "title": "Uma meta para {current}/{target} {type} foi atualizada. ",
+        "description": ""
+    }
+}

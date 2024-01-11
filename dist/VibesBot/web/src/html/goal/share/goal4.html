@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="IE=edge" http-equiv="X-UA-Compatible" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Kanit" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"></script>
+    <title>Event</title>
+</head>
+<style>
+    html {
+        height: fit-content;
+    }
+
+    body {
+        background-color: transparent;
+        overflow: hidden;
+        font-family: 'Kanit';
+        height: fit-content;
+    }
+
+    .progress-outer {
+        background: #000000;
+        padding: 0px 10px 10px 10px;
+        border: 3px solid #3f0365;
+        position: relative;
+    }
+
+    .progress-title {
+        margin-top: 5px;
+        font-size: 25px;
+        font-weight: 500;
+        color: rgb(250, 250, 250);
+    }
+
+
+    .progress {
+        height: 10px;
+        background: #e9e9ea;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        overflow: visible;
+        position: relative;
+    }
+
+    .progress:before,
+    .progress:after {
+        content: "";
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #fff;
+        position: absolute;
+        top: -5px;
+        left: 0;
+        z-index: 1;
+    }
+
+    .progress:after {
+        border: 7px solid #e9e9ea;
+        left: auto;
+        right: 0;
+    }
+
+    .progress .progress-bar {
+        box-shadow: none;
+        border: none;
+        border-radius: 15px;
+        position: relative;
+        -webkit-animation: animate-positive 1s;
+        animation: animate-positive 1s;
+    }
+
+    .progress .progress-value {
+        width: 70px;
+        height: 35px;
+        line-height: 27px;
+        border-radius: 20px;
+        background: #fff;
+        font-size: 17px;
+        font-weight: 600;
+        position: absolute;
+        top: -12px;
+        right: 0;
+        z-index: 2;
+    }
+
+    .progress:before {
+        border: 7px solid #66406f;
+    }
+
+
+    .progress .progress-value {
+        border: 5px solid #66406f;
+        color: #66406f;
+    }
+
+    @-webkit-keyframes animate-positive {
+        0% {
+            width: 0;
+        }
+    }
+
+    @keyframes animate-positive {
+        0% {
+            width: 0;
+        }
+    }
+</style>
+
+<body>
+    <div class="progress-outer" style="background-color: #000000">
+        <h3 class="progress-title" style="color: #ffffff"></h3>
+        
+
+        <div class="progress" style="background-color: #ffffff">
+            <div class="progress-bar" id="progress-bar" style="background-color: #3f0365;width:82%;">
+
+                <div class="progress-value">90%</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

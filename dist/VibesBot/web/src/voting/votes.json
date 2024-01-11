@@ -1,0 +1,15 @@
+{
+    "options": {
+        "option1": {
+            "name": "S",
+            "votes": 0
+        },
+        "option2": {
+            "name": "N",
+            "votes": 0
+        }
+    },
+    "voted": [],
+    "status": "Voting",
+    "name": "Personalizada Hoje"
+}

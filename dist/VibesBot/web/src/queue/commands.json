@@ -1,0 +1,58 @@
+{
+    "check_queue": {
+        "command": "!verfila",
+        "status": 1,
+        "delay": "0",
+        "last_use": 1704596414,
+        "user_level": [
+            "follow"
+        ],
+        "cost": "",
+        "cost_status": 0
+    },
+    "rem_queue": {
+        "command": "!rfila",
+        "status": 1,
+        "delay": "10",
+        "last_use": 1703989581,
+        "user_level": [
+            "moderator"
+        ],
+        "cost": "0",
+        "cost_status": 0
+    },
+    "add_queue": {
+        "command": "!addfila",
+        "status": 1,
+        "delay": "1",
+        "last_use": 1704143870,
+        "user_level": [
+            "moderator"
+        ],
+        "cost": "0",
+        "cost_status": 1
+    },
+    "self_add_queue": {
+        "command": "!fila",
+        "status": 0,
+        "delay": "1",
+        "last_use": 1704834232,
+        "user_level": [
+            "follow",
+            "subscriber_custom"
+        ],
+        "cost": "500",
+        "cost_status": 1
+    },
+    "check_queue_p": {
+        "command": "!verfilasub",
+        "status": 1,
+        "delay": "10",
+        "last_use": 0,
+        "user_level": [
+            "subscriber_custom"
+        ],
+        "cost": "0",
+        "cost_status": 0
+    }
+}

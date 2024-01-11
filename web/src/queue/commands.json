@@ -1,42 +1,57 @@
 {
     "check_queue": {
-        "command": "!queue",
+        "command": "!verfila",
         "status": 1,
         "delay": "10",
         "last_use": 0,
-        "user_level": "mod",
+        "user_level": [
+            "follow"
+        ],
         "cost" : 0,
-        "cost_status" : 0,
-        "cost_type" : "None"
+        "cost_status" : 0
+    },
+    "check_queue_p": {
+        "command": "!verfilasub",
+        "status": 1,
+        "delay": "10",
+        "last_use": 0,
+        "user_level": [
+            "follow"
+        ],
+        "cost" : 0,
+        "cost_status" : 0
     },
     "rem_queue": {
-        "command": "!remqueue ",
-        "status": 1,
+        "command": "!rfila",
+        "status": 0,
         "delay": "10",
         "last_use": 0,
-        "user_level": "mod",
+        "user_level": [
+            "moderator"
+        ],
         "cost" : 0,
-        "cost_status" : 0,
-        "cost_type" : "None"
+        "cost_status" : 0
     },
     "add_queue": {
-        "command": "!addqueue",
-        "status": 1,
+        "command": "!afila",
+        "status": 0,
         "delay": "10",
         "last_use": 0,
-        "user_level": "mod",
+        "user_level": [
+            "moderator"
+        ],
         "cost" : 0,
-        "cost_status" : 0,
-        "cost_type" : "None"
+        "cost_status" : 0
     },
     "self_add_queue": {
-        "command": "!proximo",
+        "command": "!fila",
         "status": 1,
         "delay": "10",
         "last_use": 0,
-        "user_level": "mod",
+        "user_level": [
+            "follow"
+        ],
         "cost" : 0,
-        "cost_status" : 0,
-        "cost_type" : "None"
+        "cost_status" : 0
     }
 }

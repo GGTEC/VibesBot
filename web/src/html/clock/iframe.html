@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Kanit" rel="stylesheet" />
+    <title>Subathon Clock</title>
+    <style>
+        * {
+            font-family: 'Kanit';
+            text-align: center
+        }
+
+        body {
+            background: transparent
+        }
+
+        .clock {
+            background-color: black;
+            font-size: 56px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #85C1E9;
+        }
+
+        h2 {
+            padding: 2px;
+            margin: 0%;
+        }
+
+        .bg {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2em;
+            height: 2em;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="clock" id="clock">
+        <div class="bg">
+            <h2 id="h">00</h2>
+        </div>
+        <h2>:</h2>
+        <div class="bg">
+            <h2 id="m">00</h2>
+        </div>
+        <h2>:</h2>
+        <div class="bg">
+            <h2 id="s">00</h2>
+        </div>
+    </div>
+
+</body>
+<script>
+
+
+    let socket;
+
+    $(document).ready(function () {
+
+        let ConectionClosed = false
+
+        function connectWebSocket() {
+
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                return;
+            }
+
+            socket = new WebSocket("ws://localhost:7688");
+
+            socket.onopen = function (event) {
+                socket.send(JSON.stringify(message = { type: "clock" }))
+            };
+
+            socket.onmessage = function (event) {
+
+                if (event.data === 'ping') {
+
+                    socket.send(JSON.stringify(message = { type: "pong" }))
+
+                } else {
+
+                    var data_parse = JSON.parse(event.data);
+
+                    if (data_parse.type === 'clock') {
+
+                        if (data_parse.action === "add") {
+
+                            addTime(data_parse.time);
+                        }
+                        if (data_parse.action === "remove") {
+
+                            removeTime(data_parse.time);
+                        }
+                        if (data_parse.action === "reset") {
+
+                            resetTime();
+                        }
+                        if (data_parse.action === "style") {
+
+                            var clock = document.getElementById('clock');
+
+                            clock.style.backgroundColor = data_parse.color2
+                            clock.style.color = data_parse.color1
+                        }
+
+
+                    } else if (data_parse.type == 'close') {
+
+                        ConectionClosed = true
+
+                    }
+                }
+            };
+
+            socket.onclose = function (error) {
+                if (ConectionClosed == false) { reconnectWebSocket(); }
+            };
+
+        }
+
+        function reconnectWebSocket() {
+            if (!socket || socket.readyState === WebSocket.CLOSED) {
+                setTimeout(function () { connectWebSocket(); }, 3000);
+            }
+        }
+
+        connectWebSocket();
+
+
+    });
+
+    let totalTime = 0;
+
+    function updateClock() {
+
+        if (totalTime >= 0) {
+
+            let hours = Math.floor(totalTime / 3600);
+            let minutes = Math.floor((totalTime % 3600) / 60);
+            let seconds = totalTime % 60;
+
+            document.getElementById("h").innerText = update(hours);
+            document.getElementById("m").innerText = update(minutes);
+            document.getElementById("s").innerText = update(seconds);
+
+            totalTime--;
+
+            setTimeout(updateClock, 1000);
+
+        }
+    }
+
+    function update(k) {
+        return (k < 10) ? "0" + k : k;
+    }
+
+    function addTime(timeToAdd) {
+        // Parse o tempo no formato "00:00:00"
+        const [hours, minutes, seconds] = timeToAdd.split(':').map(Number);
+
+        // Converta o tempo para segundos e adicione ao totalTime
+        totalTime += hours * 3600 + minutes * 60 + seconds;
+
+        if (totalTime == (hours * 3600 + minutes * 60 + seconds)) {
+            updateClock();
+        }
+    }
+
+    function removeTime(timeToRemove) {
+        // Parse o tempo no formato "00:00:00"
+        const [hours, minutes, seconds] = timeToRemove.split(':').map(Number);
+
+        // Converta o tempo para segundos e remova do totalTime
+        totalTime -= hours * 3600 + minutes * 60 + seconds;
+
+        if (totalTime <= 0) {
+            totalTime = 0;
+        }
+    }
+
+
+    function resetTime() {
+
+        totalTime = 0;
+
+    }
+
+</script>
+
+</html>

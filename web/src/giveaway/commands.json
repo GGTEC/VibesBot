@@ -6,8 +6,7 @@
             "last_use": 0,
             "user_level": "mod",
             "cost" : 0,
-            "cost_status" : 0,
-            "cost_type" : "None"
+            "cost_status" : 0
       },
       "clear_giveaway": {
             "command": "!limpar_sorteio",
@@ -16,8 +15,7 @@
             "last_use": 0,
             "user_level": "mod",
             "cost" : 0,
-            "cost_status" : 0,
-            "cost_type" : "None"
+            "cost_status" : 0
       },
       "check_name": {
             "command": "!check_user",
@@ -26,8 +24,7 @@
             "last_use": 0,
             "user_level": "mod",
             "cost" : 0,
-            "cost_status" : 0,
-            "cost_type" : "None"
+            "cost_status" : 0
       },
       "check_self_name": {
             "command": "!selfcheck",
@@ -36,8 +33,7 @@
             "last_use": 0,
             "user_level": "mod",
             "cost" : 0,
-            "cost_status" : 0,
-            "cost_type" : "None"
+            "cost_status" : 0
       },
       "add_user": {
             "command": "!useradd",
@@ -46,7 +42,15 @@
             "last_use": 0,
             "user_level": "mod",
             "cost" : 0,
-            "cost_status" : 0,
-            "cost_type" : "None"
+            "cost_status" : 0
+      },
+      "enter": {
+            "command": "!sorteio",
+            "status": 1,
+            "delay": 10,
+            "last_use": 0,
+            "user_level": "mod",
+            "cost" : 0,
+            "cost_status" : 0
       }
 }

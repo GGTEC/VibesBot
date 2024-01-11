@@ -1,0 +1,604 @@
+{
+    "event-list": [
+        {
+            "timestamp": "2023-12-30 20:26:35.487943",
+            "type": "command",
+            "message": "fakeydymond --> Você tem 10323 Pontos, 5423 likes, 0 Presentes e 0 Compartilhamentos. Na posição 52 ",
+            "user_input": null
+        },
+        {
+            "timestamp": "2023-12-30 20:26:39.717907",
+            "type": "join",
+            "message": "kaiqui Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:26:47.151887",
+            "type": "like",
+            "message": "GB🥷⚡ deu Like",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:26:55.991468",
+            "type": "join",
+            "message": "masaotsuchiya5 Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:27:02.831929",
+            "type": "join",
+            "message": "BRICKS Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:27:06.453380",
+            "type": "join",
+            "message": "Heloá Silva Santos Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:27:07.873817",
+            "type": "command",
+            "message": "Usuário nicolasnakamura3 utilizou !saldo",
+            "user_input": null
+        },
+        {
+            "timestamp": "2023-12-30 20:27:07.899438",
+            "type": "command",
+            "message": "nicolasnakamura3 --> Você tem 519 Pontos, 1819 likes, 0 Presentes e 0 Compartilhamentos. Na posição 755 ",
+            "user_input": null
+        },
+        {
+            "timestamp": "2023-12-30 20:27:10.468145",
+            "type": "join",
+            "message": "edits_neymar11_jr Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:27:26.532969",
+            "type": "join",
+            "message": "Pedrao Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:27:28.761004",
+            "type": "command",
+            "message": "Usuário GG_Wesley utilizou !balgive",
+            "user_input": "kawaaazaki 10000"
+        },
+        {
+            "timestamp": "2023-12-30 20:27:28.786059",
+            "type": "command",
+            "message": "GG_Wesley --> Saldo adicionado ao usuário.",
+            "user_input": "kawaaazaki 10000"
+        },
+        {
+            "timestamp": "2023-12-30 20:27:54.847568",
+            "type": "command",
+            "message": "Usuário Master utilizou !saldo",
+            "user_input": null
+        },
+        {
+            "timestamp": "2023-12-30 20:27:54.881652",
+            "type": "command",
+            "message": "Master --> Você tem 622 Pontos, 2172 likes, 0 Presentes e 1 Compartilhamentos. Na posição 646 ",
+            "user_input": null
+        },
+        {
+            "timestamp": "2023-12-30 20:27:56.238018",
+            "type": "command",
+            "message": "Usuário GG_Wesley utilizou !balgive",
+            "user_input": ".isyst 5000"
+        },
+        {
+            "timestamp": "2023-12-30 20:27:56.264584",
+            "type": "command",
+            "message": "GG_Wesley --> Saldo adicionado ao usuário.",
+            "user_input": ".isyst 5000"
+        },
+        {
+            "timestamp": "2023-12-30 20:28:01.107889",
+            "type": "join",
+            "message": "souzaffff5 Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:28:08.346298",
+            "type": "join",
+            "message": "TheuzHenriquez Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:28:19.599877",
+            "type": "like",
+            "message": "GB🥷⚡ deu Like",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:28:23.810892",
+            "type": "like",
+            "message": "henriquemelo997 deu Like",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:28:42.150725",
+            "type": "command",
+            "message": "Usuário ✞ utilizou !saldo",
+            "user_input": null
+        },
+        {
+            "timestamp": "2023-12-30 20:28:42.263476",
+            "type": "command",
+            "message": "✞ --> Você tem 28769 Pontos, 12570 likes, 3 Presentes e 0 Compartilhamentos. Na posição 10 ",
+            "user_input": null
+        },
+        {
+            "timestamp": "2023-12-30 20:28:51.935434",
+            "type": "join",
+            "message": "Bernardo Vieira Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:28:58.052455",
+            "type": "command",
+            "message": "Usuário GG_Wesley utilizou !balgive",
+            "user_input": "nicolasnakamura3 2000"
+        },
+        {
+            "timestamp": "2023-12-30 20:28:58.071490",
+            "type": "command",
+            "message": "GG_Wesley --> Saldo adicionado ao usuário.",
+            "user_input": "nicolasnakamura3 2000"
+        },
+        {
+            "timestamp": "2023-12-30 20:29:20.038341",
+            "type": "like",
+            "message": "GB🥷⚡ deu Like",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:29:27.254692",
+            "type": "join",
+            "message": "Tz goza em sua mãe Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:29:37.499684",
+            "type": "command",
+            "message": "Usuário GB🥷⚡ utilizou !saldo",
+            "user_input": null
+        },
+        {
+            "timestamp": "2023-12-30 20:29:37.587381",
+            "type": "command",
+            "message": "GB🥷⚡ --> Você tem 6061 Pontos, 7261 likes, 0 Presentes e 0 Compartilhamentos. Na posição 90 ",
+            "user_input": null
+        },
+        {
+            "timestamp": "2023-12-30 20:29:39.230250",
+            "type": "command",
+            "message": "Usuário nicolasnakamura3 utilizou !saldo",
+            "user_input": null
+        },
+        {
+            "timestamp": "2023-12-30 20:29:39.259821",
+            "type": "command",
+            "message": "nicolasnakamura3 --> Você tem 2519 Pontos, 1819 likes, 0 Presentes e 0 Compartilhamentos. Na posição 215 ",
+            "user_input": null
+        },
+        {
+            "timestamp": "2023-12-30 20:29:56.395781",
+            "type": "join",
+            "message": "arthur Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:30:07.714998",
+            "type": "join",
+            "message": "fadesleo Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:30:20.653222",
+            "type": "like",
+            "message": "GB🥷⚡ deu Like",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:30:32.747526",
+            "type": "join",
+            "message": "um garoto aleatório Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:30:37.590135",
+            "type": "like",
+            "message": "guilhermecarrete deu Like",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:30:39.944045",
+            "type": "like",
+            "message": "Ⓜ️atheus deu Like",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:30:42.446444",
+            "type": "join",
+            "message": "GG_NOOB Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:30:46.594009",
+            "type": "like",
+            "message": "edits_neymar11_jr deu Like",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:30:50.640882",
+            "type": "join",
+            "message": "gabrie.olivr Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:31:02.685933",
+            "type": "like",
+            "message": "GG_NOOB deu Like",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:31:09.938352",
+            "type": "join",
+            "message": "zozo Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:31:26.872817",
+            "type": "like",
+            "message": "GB🥷⚡ deu Like",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:31:44.707096",
+            "type": "like",
+            "message": "Ⓜ️atheus deu Like",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:32:20.991064",
+            "type": "join",
+            "message": "silva né pae🤷🏻 Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:32:36.560408",
+            "type": "join",
+            "message": "Deco Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:32:45.400261",
+            "type": "like",
+            "message": "Ⓜ️atheus deu Like",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:32:47.434377",
+            "type": "join",
+            "message": "Davi🕶️🌚🌜🌛 Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:33:09.595507",
+            "type": "join",
+            "message": "RyanS2 Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:33:33.646194",
+            "type": "join",
+            "message": "★ Silvaxzy ★ Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:33:36.075967",
+            "type": "join",
+            "message": "Cauã Duarte905 Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:34:13.303754",
+            "type": "join",
+            "message": "Gbl Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:34:14.107213",
+            "type": "join",
+            "message": "kaiquemuller708 Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:35:54.707003",
+            "type": "join",
+            "message": "rfshzims Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:36:02.728715",
+            "type": "like",
+            "message": "davi deu Like",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:36:22.039536",
+            "type": "like",
+            "message": "𝙍𝙉𝙕|𝙣𝙚𝙮_𝙚𝙙𝙞𝙩𝙨.12 deu Like",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:36:23.637622",
+            "type": "like",
+            "message": "Excureto editis deu Like",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:36:23.677707",
+            "type": "like",
+            "message": "guilhermecarrete deu Like",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:37:15.484056",
+            "type": "join",
+            "message": "Its me Nick Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:37:49.246304",
+            "type": "join",
+            "message": "Sally Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:38:12.522323",
+            "type": "join",
+            "message": "sem dinheiro todo fudido Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:38:14.939692",
+            "type": "like",
+            "message": "sem dinheiro todo fudido deu Like",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:38:16.425883",
+            "type": "command",
+            "message": "Usuário GG_NOOB utilizou !sr",
+            "user_input": "akuma no mi 7mz"
+        },
+        {
+            "timestamp": "2023-12-30 20:38:20.706602",
+            "type": "music",
+            "message": "GG_NOOB --> Musica 'Lucas A.R.T. - AKUMA NO MI' adicionada na fila.",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:38:22.962917",
+            "type": "join",
+            "message": "rian felipe💍❓ Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:38:28.128475",
+            "type": "event",
+            "message": "Reproduzindo = Lucas A.R.T. - AKUMA NO MI | Pedido por = GG_NOOB",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:38:43.800350",
+            "type": "command",
+            "message": "Usuário GG_NOOB utilizou !volume",
+            "user_input": "15"
+        },
+        {
+            "timestamp": "2023-12-30 20:38:43.835486",
+            "type": "command",
+            "message": "GG_NOOB --> O volume foi alterado para 15",
+            "user_input": "15"
+        },
+        {
+            "timestamp": "2023-12-30 20:39:36.451445",
+            "type": "like",
+            "message": "Pedro Costa deu Like",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:39:38.073235",
+            "type": "join",
+            "message": "Wendell jr 10 Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:39:46.877559",
+            "type": "like",
+            "message": "Wendell jr 10 deu Like",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:39:55.152019",
+            "type": "join",
+            "message": "cripesmonteg Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:40:17.694158",
+            "type": "join",
+            "message": "Pietro Ortiz Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:40:21.677161",
+            "type": "join",
+            "message": "lorenzo Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:40:29.702524",
+            "type": "join",
+            "message": "Gobbo.xxz_ Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:40:36.926689",
+            "type": "join",
+            "message": "gameplay_clips_20 Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:40:40.146828",
+            "type": "join",
+            "message": "Cauã Matheus Bastos Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:41:06.093673",
+            "type": "join",
+            "message": "peuus🌪️ Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:41:26.384994",
+            "type": "join",
+            "message": "Luiz Gustavo Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:42:17.646995",
+            "type": "command",
+            "message": "Usuário GG_NOOB utilizou !sr",
+            "user_input": "sol e lua"
+        },
+        {
+            "timestamp": "2023-12-30 20:42:17.787812",
+            "type": "join",
+            "message": "SrGodness Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:42:20.705275",
+            "type": "music",
+            "message": "GG_NOOB --> Musica 'Pequeno Cidadão - O Sol e a Lua' adicionada na fila.",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:42:26.102683",
+            "type": "event",
+            "message": "Reproduzindo = Pequeno Cidadão - O Sol e a Lua | Pedido por = GG_NOOB",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:43:37.429945",
+            "type": "like",
+            "message": "GB🥷⚡ deu Like",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:44:20.955447",
+            "type": "join",
+            "message": "nah Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:44:44.263054",
+            "type": "join",
+            "message": "camiss <3 Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:45:01.292805",
+            "type": "join",
+            "message": "adilsonmarcelino9 Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:45:05.327172",
+            "type": "join",
+            "message": "Ana Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:45:06.838131",
+            "type": "join",
+            "message": "joao Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:45:14.953031",
+            "type": "join",
+            "message": "Denis Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:45:15.755106",
+            "type": "join",
+            "message": "https: Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:45:50.348292",
+            "type": "join",
+            "message": "Felps SPFC Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:46:00.873523",
+            "type": "join",
+            "message": "Andr3 Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:46:14.511375",
+            "type": "join",
+            "message": "Mariana Mattos Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:46:34.544212",
+            "type": "like",
+            "message": "Mariana Mattos deu Like",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:47:01.052817",
+            "type": "join",
+            "message": "🤠❤️‍🩹BOPE.VR❤️‍🩹😎 Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:47:09.117765",
+            "type": "join",
+            "message": "Ysmael Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:47:09.130798",
+            "type": "join",
+            "message": "Lisboa Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:47:17.948359",
+            "type": "join",
+            "message": "ENFIAESSAPORRADEESTWIRANOSEUCU Entrou!",
+            "user_input": ""
+        },
+        {
+            "timestamp": "2023-12-30 20:47:20.398186",
+            "type": "gift",
+            "message": "✞ enviou 2 2024 | 1 Diamante(s)",
+            "user_input": ""
+        }
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "status": 0,
+    "command": "!votar",
+    "user_level": [
+        "follow"
+    ],
+    "delay": "2",
+    "last_use": 1702669753,
+    "cost": "100",
+    "cost_status": 1
+}

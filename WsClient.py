@@ -17,17 +17,13 @@ class WebSocketClient():
         while not self.close_requested:
 
             try:
+
                 self.websocket = websocket.WebSocketApp(self.server_url, on_message=self.on_message)
                 self.websocket.run_forever()
             
-            except ConnectionRefusedError as e:
-                time.sleep(10)
-            
             except Exception as e:
                 utils.error_log(e)
-                time.sleep(10)
-
-            time.sleep(10)
+                pass
 
     def on_message(self, ws, message):
 
@@ -36,16 +32,23 @@ class WebSocketClient():
             if not message == None:
 
                 if message == "ping":
+
                     self.websocket.send("pong")
+
                 else:
 
                     json_data = json.loads(message)
+
                     if json_data is not None and 'type' in json_data:
+
                         message_type = json_data['type']
+
                         if message_type in self.callback:
                             callback_function = self.callback[message_type]
                             callback_function(json_data)
+
                     else:
+
                         utils.error_log(f"Mensagem inválida ou ausente de tipo / {json_data}")
 
         except Exception as e:
@@ -64,7 +67,7 @@ class WebSocketClient():
 
         try:
             if self.websocket:
-                self.close_requested = True  # Define a flag para indicar que o fechamento foi solicitado
+                self.close_requested = True
                 self.websocket.close()
 
         except Exception as e:

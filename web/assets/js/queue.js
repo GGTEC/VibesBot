@@ -1,62 +1,151 @@
+async function queue_js_normal(queue_list){
+
+    var dataTableData = [];
+
+    $.each(queue_list, function(index, value) {
+
+        var pos = index + 1;
+        var button_config = document.createElement("button");
+
+        button_config.innerText = "Remover";
+        button_config.classList.add('bnt','bt-submit')
+        button_config.setAttribute('onclick', `queue_js('queue_rem','${value.replace("'", "\\'")}')`)
+
+        dataTableData.push([
+            pos,
+            value,
+            button_config.outerHTML
+        ]);
+
+    });
+
+
+    if ($.fn.DataTable.isDataTable("#queuelist_table")) {
+
+        $('#queuelist_table').DataTable().clear().draw();
+        $('#queuelist_table').DataTable().destroy();
+    }
+    
+
+    var table = $('#queuelist_table').DataTable( {
+        destroy: true,
+        scrollX: true,
+        paging: false,
+        ordering:  false,
+        retrieve : false,
+        processing: true,
+        responsive: false,
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/pt-BR.json'
+        },
+        columns: [
+            { title: 'Pos' },
+            { title: 'Usuário' },
+            { title: 'Remover' },
+        ]
+    } );
+
+
+    for (var i = 0; i < dataTableData.length; i++) {
+        table.row.add(dataTableData[i]).draw();
+    }
+
+}
+
+async function queue_js_pri(queue_list){
+
+    var dataTableData = [];
+
+    $.each(queue_list, function(index, value) {
+
+        var pos = index + 1;
+        var button_config = document.createElement("button");
+
+        button_config.innerText = "Remover";
+        button_config.classList.add('bnt','bt-submit')
+        button_config.setAttribute('onclick', `queue_js('queue_rem_pri','${value.replace("'", "\\'")}')`)
+
+        dataTableData.push([
+            pos,
+            value,
+            button_config.outerHTML
+        ]);
+
+    });
+
+
+    if ($.fn.DataTable.isDataTable("#queuelist_table_pri")) {
+
+        $('#queuelist_table_pri').DataTable().clear().draw();
+        $('#queuelist_table_pri').DataTable().destroy();
+    }
+    
+
+    var table = $('#queuelist_table_pri').DataTable( {
+        destroy: true,
+        scrollX: true,
+        paging: false,
+        autoWidth: true,
+        ordering:  false,
+        retrieve : false,
+        processing: true,
+        responsive: true,
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/pt-BR.json'
+        },
+        columns: [
+            { title: 'Pos' },
+            { title: 'Usuário' },
+            { title: 'Remover' },
+        ]
+    } );
+
+
+    for (var i = 0; i < dataTableData.length; i++) {
+        table.row.add(dataTableData[i]).draw();
+    }
+
+}
+
+async function queue_js_get(){
+
+    var queue_data = await window.pywebview.api.queue('get','none');
+
+        if (queue_data) {
+
+            queue_parse = queue_data
+
+            var role_status = document.getElementById('queue-role-status');
+            var queue_pri_status = document.getElementById('queue-pri-status'); 
+
+            role_status.checked = queue_parse.config.roles_status == 1 ? true : false;
+            queue_pri_status.checked = queue_parse.config.roles_pri == 1 ? true : false;
+
+            var roles = queue_parse.config.roles_queue
+
+            $('#queue-role').selectpicker('val', roles);
+            $('#queue-role').selectpicker('refresh');
+
+            var queue_list = queue_parse.queue
+            var queue_list_pri = queue_parse.queue_pri
+
+            queue_js_normal(queue_list)
+
+            if (queue_parse.config.roles_pri){
+                document.getElementById('queue-pri-div').hidden = false
+                queue_js_pri(queue_list_pri)
+            } else {
+                document.getElementById('queue-pri-div').hidden = true
+            }
+
+        }
+}
+
 async function queue_js(type_id,item){
     
     if (type_id == "get"){
 
-        var queue_data = await window.pywebview.api.queue(type_id,'none');
-
-        if (queue_data) {
-
-            queue_parse = JSON.parse(queue_data)
-
-            var queue_list = queue_parse.queue
-
-            var dataTableData = [];
-
-            $.each(queue_list, function(index, value) {
-
-                var button_config = document.createElement("button");
-
-                button_config.innerText = "Remover";
-                button_config.classList.add('bnt','bt-submit')
-                button_config.setAttribute('onclick', `queue_js('queue_rem','${value}')`)
-
-                dataTableData.push([
-                    value,
-                    button_config.outerHTML
-                ]);
-
-            });
-
-
-            if ($.fn.DataTable.isDataTable("#queuelist_table")) {
-
-                $('#queuelist_table').DataTable().clear().draw();
-                $('#queuelist_table').DataTable().destroy();
-            }
-            
-
-            var table = $('#queuelist_table').DataTable( {
-                destroy: true,
-                scrollX: true,
-                paging: false,
-                ordering:  false,
-                retrieve : false,
-                processing: true,
-                responsive: false,
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/pt-BR.json'
-                },
-                columns: [
-                    { title: 'Usuário' },
-                    { title: 'Remover' },
-                ]
-            } );
-
-            for (var i = 0; i < dataTableData.length; i++) {
-                table.row.add(dataTableData[i]).draw();
-            }
-
-        }
+        queue_js_get()
 
     } else if (type_id == "queue_add"){
 
@@ -65,57 +154,11 @@ async function queue_js(type_id,item){
         var queue_data = await window.pywebview.api.queue(type_id,add_queue);
 
         if (queue_data) {
-            
-            queue_list = JSON.parse(queue_data)
 
-            var dataTableData = [];
-
-            $.each(queue_list, function(index, value) {
-
-                var button_config = document.createElement("button");
-
-                button_config.innerText = "Remover";
-                button_config.classList.add('bnt','bt-submit')
-                button_config.setAttribute('onclick', `queue_js('queue_rem','${value}')`)
-
-                dataTableData.push([
-                    value,
-                    button_config.outerHTML
-                ]);
-
-            });
-
-
-            if ($.fn.DataTable.isDataTable("#queuelist_table")) {
-
-                $('#queuelist_table').DataTable().clear().draw();
-                $('#queuelist_table').DataTable().destroy();
-            }
-            
-
-            var table = $('#queuelist_table').DataTable( {
-                destroy: true,
-                scrollX: true,
-                paging: false,
-                ordering:  false,
-                retrieve : false,
-                processing: true,
-                responsive: false,
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/pt-BR.json'
-                },
-                columns: [
-                    { title: 'Usuário' },
-                    { title: 'Remover' },
-                ]
-            } );
-
-            for (var i = 0; i < dataTableData.length; i++) {
-                table.row.add(dataTableData[i]).draw();
-            }
+            queue_js_get()
             
             add_queue = ''
-    }
+        }
 
     } else if (type_id == "queue_rem"){
 
@@ -123,55 +166,82 @@ async function queue_js(type_id,item){
 
         if (queue_data) {
 
-            queue_list = JSON.parse(queue_data)
+            queue_js_get()
+        }
 
-            var dataTableData = [];
+    } else if (type_id == "clear_queue"){
 
-            $.each(queue_list, function(index, value) {
+        var queue_data = await window.pywebview.api.queue(type_id, "None");
 
-                var button_config = document.createElement("button");
+        if (queue_data) {
 
-                button_config.innerText = "Remover";
-                button_config.classList.add('bnt','bt-submit')
-                button_config.setAttribute('onclick', `queue_js('queue_rem','${value}')`)
+            queue_js_get()
+        }
 
-                dataTableData.push([
-                    value,
-                    button_config.outerHTML
-                ]);
+    } else if (type_id == "clear_queue_pri"){
 
-            });
+        var queue_data = await window.pywebview.api.queue(type_id, "None");
 
+        if (queue_data) {
 
-            if ($.fn.DataTable.isDataTable("#queuelist_table")) {
+            queue_js_get()
+        }
 
-                $('#queuelist_table').DataTable().clear().draw();
-                $('#queuelist_table').DataTable().destroy();
-            }
+    } else if (type_id == "queue_add_pri"){
+
+        var add_queue = document.getElementById('add_queue_pri').value;
+
+        var queue_data = await window.pywebview.api.queue(type_id,add_queue);
+
+        if (queue_data) {
+
+            queue_js_get()
             
+            add_queue = ''
+        }
 
-            var table = $('#queuelist_table').DataTable( {
-                destroy: true,
-                scrollX: true,
-                paging: false,
-                ordering:  false,
-                retrieve : false,
-                processing: true,
-                responsive: false,
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/pt-BR.json'
-                },
-                columns: [
-                    { title: 'Usuário' },
-                    { title: 'Remover' },
-                ]
-            } );
+    } else if (type_id == "queue_rem_pri"){
 
-            for (var i = 0; i < dataTableData.length; i++) {
-                table.row.add(dataTableData[i]).draw();
-            }
+        var queue_data = await window.pywebview.api.queue(type_id,item);
 
+        if (queue_data) {
+
+            queue_js_get()
     }
+
+    } else if (type_id == "save_config"){
+
+        var role_status = document.getElementById('queue-role-status');
+        var queue_pri_status = document.getElementById('queue-pri-status'); 
+
+        queue_pri_status = queue_pri_status.checked == 1 ? true : false;
+        role_status = role_status.checked == 1 ? true : false;
+
+        var roles = []; 
+
+        $('#queue-role :selected').each(function(i, selected){ 
+            roles[i] = $(selected).val(); 
+        });
+
+        data = {
+            role_status : role_status,
+            roles_queue : roles,
+            roles_pri : queue_pri_status
+        }
+
+        window.pywebview.api.queue(type_id,data);
+
+    } else if (type_id == "get_config"){
+
+        var queue_data = await window.pywebview.api.queue(type_id,item);
+
+        if (queue_data) {
+
+            queue_parse = JSON.parse(queue_data)
+
+
+
+        }
 
     } else if (type_id == 'get_commands') {
 
@@ -230,6 +300,7 @@ async function queue_js(type_id,item){
         var command_queue_cost = document.getElementById('command-cost-queue');
         
         var command_queue_spend_status = document.getElementById('command-queue-spend-status');
+        
         var command_status = command_queue_status.checked ? 1 : 0;
         var command_cost_status = command_queue_cost_status.checked ? 1 : 0;
         
@@ -253,7 +324,23 @@ async function queue_js(type_id,item){
         }
 
         var formData = JSON.stringify(data);
+
         window.pywebview.api.queue(type_id,formData)
 
+        document.getElementById("command_queue_form").hidden = true
+
+    } else if (type_id == 'queue-pri'){
+
+        var queue_pri_status = document.getElementById('queue-pri-status'); 
+
+        if (queue_pri_status.checked){
+            document.getElementById('queue-pri-div').hidden = false
+        } else {
+            document.getElementById('queue-pri-div').hidden = true
+        }
+
+        queue_js('save_config', null)
+    } else if (type_id == 'hideconfig'){
+        document.getElementById("command_queue_form").hidden = true
     }
 }

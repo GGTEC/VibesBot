@@ -1,0 +1,29 @@
+{
+    "add_minutes": {
+        "command": "!madd",
+        "status": 1,
+        "delay": 10,
+        "last_use": 0,
+        "user_level": "mod",
+        "cost" : 0,
+        "cost_status" : 0
+    },    
+    "remove_minutes": {
+        "command": "!mremover",
+        "status": 1,
+        "delay": 10,
+        "last_use": 0,
+        "user_level": "mod",
+        "cost" : 0,
+        "cost_status" : 0
+    },    
+    "clear_minutes": {
+        "command": "!mlimpar",
+        "status": 1,
+        "delay": 10,
+        "last_use": 0,
+        "user_level": "mod",
+        "cost" : 0,
+        "cost_status" : 0
+    }
+}

@@ -1,0 +1,14 @@
+{
+    "response": 1,
+    "spend_user_balance": 1,
+    "queue_role_status": true,
+    "queue_roles": [
+        "subscriber"
+    ],
+    "queue_prioriry_role_status": false,
+    "queue_prioriry_roles": [
+        "follow",
+        "subscriber_custom"
+    ],
+    "queue_prioriry": true
+}

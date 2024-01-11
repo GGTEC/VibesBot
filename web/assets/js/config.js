@@ -4,140 +4,222 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function config_responses_js(event,fun_id_responses) {
-
-    event.preventDefault();
-
-    var button_el = document.getElementById('submit-responses-config');
-    var select_id_el = document.getElementById('response-select-edit').value;
-    var in_reponse_el = document.getElementById('response-message-new');
-    var aliases_responses = document.getElementById('aliases-responses');
-
-    if (fun_id_responses == 'get_response'){
-
-        var messages = await window.pywebview.api.responses_config('get_response',select_id_el,'none');
+function toggle_div(type_id, div_id){
     
-        if (messages) {
+    if (type_id == 'show'){
 
-            button_el.removeAttribute("disabled");
-            in_reponse_el.value = messages;
+        if (div_id == "config-chat-messages-div") {
+
+            messages_config_js('get');
+
+        } else if (div_id == "config-discord-div") {
+
+            discord_js('event','get-profile');
+
+        } else if (div_id == "config-music-div"){
+
+            sr_config_js('event','get')
+
+        } else if (div_id == "config-chat-div"){
+
+            chat_config('get')
+
+        } else if (div_id == "config-points-div"){
+
+            points_config('get')
+            ttk_gift('get_points')
+
+        } else if (div_id == "config-events-div"){
+
+            event_log_config('get')
+
+        } else if (div_id == "userdata-div"){
+
+            userdata_js('get')
+
+        } else if (div_id == "config-roles-div"){
+            roles_config('get')
+        }
+
+        document.getElementById("config-div").hidden = true;
+        document.getElementById(div_id).hidden = false;
+
+    } else if (type_id == 'hide'){
+
+        if (div_id == "userdata-div"){ 
+            userdata_js('destroy','')
+        }
+        
+        document.getElementById("config-div").hidden = false;
+        document.getElementById(div_id).hidden = true;
+
+    }
+}
+
+function toggle_div_int(toShow,ToHide){
+
+    if (toShow == 'global-gifts-div'){
+        ttk_gift('get_global')
+    } else if (toShow == 'individual-gifts-div'){
+        ttk_gift('get_table')
+    } else if (toShow == "config-queue-div" || toShow == "commom-queue" || toShow == "priority-queue"){
+        queue_js('get','null')
+    } else if (toShow == 'giveaway-config'){
+        giveaway_js('get_config')
+    } else if (toShow == 'giveaway-style'){
+        giveaway_js('get_style')
+    } else if (toShow == "subathon-config-div"){
+
+        subathon_js('get')
+
+    } else if (toShow == "subathon-style-div"){
+
+        subathon_js('get_style')
+
+    } else if (toShow == "highlighted-painel"|| toShow == "highlighted-style"){
+
+        highlighted('get')
+
+    }
+
+    document.getElementById(ToHide).hidden = true;
+    document.getElementById(toShow).hidden = false;
+
+}
+
+
+async function config_responses_js(type_id) {
+
+    var select_message = document.getElementById('response-select-edit').value;
+    var response_input = document.getElementById('response-message-new');
+    var status = document.getElementById('response-status');
+    var status_s = document.getElementById('response-status-s');
+    var aliases_responses = document.getElementById('aliases-responses');
+    var edit_div = document.getElementById('response-edit-div');
+
+    if (type_id == 'get_response'){
+
+        data = {
+            type_id: type_id,
+            key:select_message
+        }
+
+        var message = await window.pywebview.api.responses_config(type_id, data);
+    
+        if (message) {
+
+            response_input.value = message.response;
+
+            status.checked = message.status == 1 ? true : false
+            status_s.checked = message.status_s == 1 ? true : false
+
+            edit_div.hidden = false
     
         }
 
         const responses_aliases_respo = {
-            error_tts_disabled: "{username}",
-            error_tts_no_text: "{username}",
-            error_user_level: "{username},{user_level},{command}",
-            giveaway_response_win: "{username}",
-            giveaway_response_user_add: "{username}",
+
+            error_tts_no_text: "{username}, {nickname}",
+            error_user_level: "{username}, {nickname}, {user_level}, {command}",
+            giveaway_response_win: "{username}, {nickname}",
+            giveaway_response_user_add: "{username}, {nickname}",
             giveaway_status_enable: "{giveaway_name}",
             giveaway_status_disable: "{giveaway_name}",
-            giveaway_response_mult_add: "{username}",
+            giveaway_response_mult_add: "{username}, {nickname}",
             giveaway_clear: "",
             giveaway_response_perm: "{perm}",
             giveaway_status_disabled: "",
-            response_user_giveaway: "{username}",
-            response_no_user_giveaway: "{username}",
+            response_user_giveaway: "{username}, {nickname}",
+            response_no_user_giveaway: "{username}, {nickname}",
             response_giveaway_disabled: "",
-            response_user_error_giveaway: "{username}",
-            response_check_error_giveaway: "{username}",
+            response_user_error_giveaway: "{username}, {nickname}",
+            response_check_error_giveaway: "{username}, {nickname}",
             response_delay_error: "{seconds}",
             commands_disabled: "",
-            command_disabled: "{username}",
-            music_disabled: "{username}",
-            music_added_to_queue: "{username},{music}",
-            music_add_error: "{username}",
+            command_disabled: "{username}, {nickname}",
+            music_disabled: "{username}, {nickname}",
+            music_added_to_queue: "{username}, {nickname}, {music}",
+            music_add_error: "{username}, {nickname}",
             music_process_error: "",
             music_process_cache_error: "",
             music_leght_error: "{max_duration}",
-            music_playing: "{music_name},{music_artist},{username}",
+            music_playing: "{music_name}, {music_artist}, {username}, {nickname}",
             music_link_error: "",
             music_error_name: "",
             music_stream_error: "",
             music_link_youtube: "",
-            command_sr_error_link: "{username}",
-            command_volume_confirm: "{username},{volume}",
-            command_volume_error: "{username}",
-            command_skip_confirm: "{username}",
-            command_current_confirm: "{username},{music}",
-            command_next_no_music: "{username}",
-            command_next_confirm: "{username},{music}",
-            command_volume_number: "",
-            command_volume_response: "{username},{volume}",
-            command_value: "{username}",
-            command_string: "{username}",
+            skip_votes: "{username}, {nickname}, {votes}, {minimum}",
+            command_skip_inlist: "{username}, {nickname}",
+            command_skip_noplaying: "{username}, {nickname}",
+            command_sr_error_link: "{username}, {nickname}",
+            command_volume_confirm: "{username}, {nickname}, {volume}",
+            command_volume_error: "{username}, {nickname}",
+            command_skip_confirm: "{username}, {nickname}",
+            command_current_confirm: "{username}, {nickname}, {music}",
+            command_next_no_music: "{username}, {nickname}",
+            command_next_confirm: "{username}, {nickname}, {music}, {request_by}",
+            command_volume_number: "{username}, {nickname}",
+            command_volume_response: "{username}, {nickname}, {volume}",
+            command_value: "{username}, {nickname}",
+            command_string: "{username}, {nickname}",
             music_blacklist: "{music}",
-            cmd_created: "",
-            cmd_edited: "",
-            cmd_removed: "",
-            cmd_use: "{command}",
-            cmd_exists: "",
-            cmd_not_exists: "",
-            command_sufix: "{username}",
-            response_queue: "{username}",
-            response_add_queue: "{value}",
-            response_namein_queue: "{value}",
-            response_rem_queue: "{value}",
-            response_noname_queue: "{value}",
-            response_get_queue: "{username},{queue-3}",
-            skip_votes: "{username},{votes},{minimum}",
-            command_skip_inlist: "{username}",
-            goal_start: "{current},{target},{type}",
-            goal_end: "{current},{target},{type}",
-            goal_progress: "{current},{target},{type}",
-            command_skip_noplaying: "{username}",
-            event_ttk_connect: "",
-            event_ttk_envelope: "{username}",
-            event_ttk_gift: "{username},{amount},{giftname},{diamonds}",
-            event_ttk_join: "{username}",
-            event_ttk_like: "{username}",
-            event_ttk_share: "{username}",
-            event_ttk_follow: "{username}",
+            command_sufix: "{username}, {nickname}",
+            response_queue: "{username}, {nickname}",
+            response_add_queue: "{username}, {nickname}, {value}, {pos}",
+            response_namein_queue: "{username}, {nickname}, {value}, {pos}",
+            response_rem_queue: "{username}, {nickname}, {value}",
+            response_noname_queue: "{username}, {nickname}, {value}",
+            response_get_queue: "{username}, {nickname}, {queue-3}/{queue-4}/{queue-5}...",
+            goal_start: "{current}, {target}, {type}",
+            goal_end: "{current}, {target}, {type}",
+            goal_progress: "{current}, {target}, {type}",
+            event_ttk_envelope: "{username}, {nickname}, {coins}",
+            event_ttk_gift: "{username}, {nickname}, {amount}, {giftname}, {diamonds}",
+            event_ttk_join: "{username}, {nickname}",
+            event_ttk_like: "{username}, {nickname}, {likes}",
+            event_ttk_share: "{username}, {nickname}",
+            event_ttk_follow: "{username}, {nickname}",
             event_ttk_disconected: "",
+            event_ttk_connect: "",
+            command_vote_ended : "{votes}, {winner}, {name]",
+            balance_top_error_response : "{username}, {nickname}",
+            balance_top_points : "{username}, {nickname} , {top-1}, {top-2}, {top-3}... ",
+            balance_top_share : "{username}, {nickname} , {top-1}, {top-2}, {top-3}... ",
+            balance_top_likes : "{username}, {nickname} , {top-1}, {top-2}, {top-3}... ",
+            balance_top_gifts: "{username}, {nickname} , {top-1}, {top-2}, {top-3}... ",
+
         }
 
             
-        aliases_responses.value = responses_aliases_respo[select_id_el];
+        aliases_responses.value = responses_aliases_respo[select_message];
 
-        if (select_id_el in responses_aliases_respo) {
-            aliases_responses.value = responses_aliases_respo[select_id_el];
-          } else {
+        if (select_message in responses_aliases_respo) {
+            aliases_responses.value = responses_aliases_respo[select_message];
+        } else {
             aliases_responses.value = "{username}";
-          }
+        }
 
-    } else if (fun_id_responses == "save-response"){
+        
 
-        window.pywebview.api.responses_config('save_response',select_id_el,in_reponse_el.value)
-        in_reponse_el = '';
+    } else if (type_id == "save-response"){
+
+        data = {
+            type_id: type_id,
+            key: select_message,
+            response: response_input.value,
+            status : status.checked ? 1 : 0,
+            status_s : status_s.checked ? 1 : 0,
+        }
+
+        window.pywebview.api.responses_config(type_id,data)
+
+        response_input.value = '';
+        aliases_responses.value = '';
+        edit_div.hidden = true
+
+    } else if (type_id == "change"){
+        edit_div.hidden = true
     }
-}
-
-function show_config_div(div_id) {
-
-    if (div_id == "config-chat-messages-div") {
-        messages_config_js('get');
-    } else if (div_id == "config-discord-div") {
-        discord_js('event','get-profile');
-    } else if (div_id == "config-music-div"){
-        sr_config_js('event','get')
-    } else if (div_id == "chat-config-div"){
-        chat_config('get')
-        ttk_gift('get_points')
-    } else if (div_id == "events-config-div"){
-        event_log_config('get')
-    } else if (div_id == "userdata-div"){
-        userdata_js('get')
-    }
-
-
-    document.getElementById("config-div").hidden = true;
-    document.getElementById(div_id).hidden = false;
-}
-
-function hide_config_div(div_id, modal) {
-    $("#" + modal).modal("hide");
-    document.getElementById("config-div").hidden = false;
-    document.getElementById(div_id).hidden = true;
 }
 
 async function black_list_remove(music){
@@ -289,6 +371,8 @@ async function sr_config_js(event,type_id){
         var formData = JSON.stringify(data);
         window.pywebview.api.sr_config_py(type_id,formData);
 
+        document.getElementById("command_player_form").hidden = true
+
     } else if (type_id == 'save'){
 
         var check_seletor = document.getElementById('music-enable');
@@ -310,6 +394,7 @@ async function sr_config_js(event,type_id){
     
         var formData = JSON.stringify(data);
         window.pywebview.api.sr_config_py(type_id,formData);
+        
         
     } else if (type_id == 'list_get'){
 
@@ -382,7 +467,9 @@ async function sr_config_js(event,type_id){
 
         blocked_music.value = '';
         
-    } 
+    } else if (type_id == 'hideconfig'){
+        document.getElementById("command_player_form").hidden = true
+    }
 }
 
 async function setElementState(elementId, value) {
@@ -403,15 +490,21 @@ async function setElementState(elementId, value) {
 
         element.value = value;
 
+      } else if (element.tagName === "INPUT" && element.type === "number") {
+
+        element.value = value;
+
       }
     }
 }
 
-async function get_event_state(element){
+async function get_event_state(){
+
+    var select = document.getElementById('select-event-type')
 
     data ={
         "type_id" : 'get_state',
-        "type" : element.value
+        "type" : select.value
     };
 
     var event_data = await window.pywebview.api.event_log(JSON.stringify(data))
@@ -433,16 +526,28 @@ async function get_event_state(element){
 async function event_log_config(type_id){
 
     var sliderFontEvents = document.getElementById("slider-font-events");
+    var sliderFontEventsOverlay = document.getElementById("font-events-overlay");
     var colorEvents = document.getElementById("color-events");
     var dataShowEvents = document.getElementById("data-show-events");
+    var backgroundColorEvent = document.getElementById("event-background-color-text");
+    var backgroundColorEventText = document.getElementById("event-text-color-text");
+    var backgroundColorEventspan = document.getElementById("event-background-color-span");
+    var backgroundColorEventTextspan = document.getElementById("event-text-color-span");
+    var eventDelay = document.getElementById('event-delay');
 
     if (type_id == 'save'){
 
+        dataShowEvents = dataShowEvents.checked ? 1 : 0
+
         data = {}
         data["type_id"] = type_id;
+        data['font-events-overlay'] = sliderFontEventsOverlay.value
         data["slider-font-events"] = sliderFontEvents.value;
         data["color-events"] = colorEvents.value;
-        data["data-show-events"] = dataShowEvents.value;
+        data["data-show-events"] = dataShowEvents;
+        data["background-color"] = backgroundColorEvent.value;
+        data["text-color"] = backgroundColorEventText.value;
+        data["event-delay"] = eventDelay.value;
 
         window.pywebview.api.event_log(JSON.stringify(data));
 
@@ -462,6 +567,13 @@ async function event_log_config(type_id){
                 var value = event_data_parse[elementId];
                 setElementState(elementId, value);
             });
+
+            backgroundColorEvent.value = event_data_parse.background_color
+            backgroundColorEventText.value = event_data_parse.text_color
+
+            backgroundColorEventspan.style.backgroundColor = event_data_parse.background_color;
+            backgroundColorEventTextspan.style.backgroundColor = event_data_parse.text_color;
+
         }
 
     } else if (type_id == 'save_state'){
@@ -477,6 +589,8 @@ async function event_log_config(type_id){
 
         window.pywebview.api.event_log(JSON.stringify(data));
 
+        document.getElementById('select-show').hidden = true
+
     }
 
 
@@ -488,17 +602,24 @@ async function show_error_log(type_id){
 
         $("#errorlog-modal").modal("show");
 
-        $('#errorlog-textarea').val('');
+        $('#errorlog-textarea').val('Aguarde, carregando...');
+        
+        var textarea = document.getElementById('errorlog-textarea');
 
         var errors_data = await window.pywebview.api.open_py('errolog','null')
-    
+        
+        text_to_textarea = ''
+
         if (errors_data){
-    
-            var textarea = document.getElementById('errorlog-textarea');
-    
-            $('#errorlog-textarea').val(errors_data);
             
-            textarea.scrollTop = textarea.scrollHeight;
+            errors_data.forEach(error_item => {
+
+                text_to_textarea += `${error_item.message} \n`
+                text_to_textarea += "\n"
+                
+            });
+
+            $('#errorlog-textarea').val(text_to_textarea);
         }
 
     } else if (type_id == 'clear-errorlog'){
@@ -510,6 +631,7 @@ async function show_error_log(type_id){
 
     }
 
+    debug_status('rel-get')
 }
 
 async function debug_status(type_id){
@@ -531,6 +653,26 @@ async function debug_status(type_id){
             status_debug.checked = get_debug == 1 ? true : false;
 
         }
+    } else if (type_id == "rel-get"){
+
+        var status_rel = document.getElementById('rel-status') 
+        
+        var get_rel = await window.pywebview.api.open_py(type_id,'null');
+
+        if (get_rel){
+
+            status_rel.checked = get_rel == 1 ? true : false;
+
+        }
+
+    } else if (type_id == "rel-save"){
+
+        var status_rel = document.getElementById('rel-status') 
+        
+        status_rel = status_rel.checked ? 1 : 0;
+
+        window.pywebview.api.open_py(type_id,status_rel)
+
     }
 
 }
@@ -568,19 +710,34 @@ async function ttk_alerts(type){
 
             rec_data = JSON.parse(data_re)
 
-            follow_status_sound.checked = rec_data.follow_sound_status == 1 ? true : false;
-            follow_volume_sound.value = rec_data.follow_sound_volume;
-            follow_input_sound.value = rec_data.follow_sound_loc;
+            select_alert = document.getElementById('alert-select').value;
 
-            like_delay.value = rec_data.like_delay;
-            like_status_sound.checked = rec_data.like_sound_status == 1 ? true : false;
-            like_volume_sound.value = rec_data.like_sound_volume;
-            like_input_sound.value = rec_data.like_sound_loc;
+            if (select_alert == 'likes'){
 
-            share_delay.value = rec_data.share_delay;
-            share_status_sound.checked = rec_data.share_sound_status == 1 ? true : false;
-            share_volume_sound.value = rec_data.share_sound_volume;
-            share_input_sound.value = rec_data.share_sound_loc;
+                like_delay.value = rec_data.like_delay;
+                like_status_sound.checked = rec_data.like_sound_status == 1 ? true : false;
+                like_volume_sound.value = rec_data.like_sound_volume;
+                like_input_sound.value = rec_data.like_sound_loc;
+
+                document.getElementById('alert-like').hidden = false;
+
+            } else if (select_alert == 'follow'){
+
+                follow_status_sound.checked = rec_data.follow_sound_status == 1 ? true : false;
+                follow_volume_sound.value = rec_data.follow_sound_volume;
+                follow_input_sound.value = rec_data.follow_sound_loc;
+
+                document.getElementById('alert-follow').hidden = false;
+    
+            } else if (select_alert == 'share'){
+
+                share_delay.value = rec_data.share_delay;
+                share_status_sound.checked = rec_data.share_sound_status == 1 ? true : false;
+                share_volume_sound.value = rec_data.share_sound_volume;
+                share_input_sound.value = rec_data.share_sound_loc;
+
+                document.getElementById('alert-share').hidden = false;
+            }
     
         }
 
@@ -599,6 +756,8 @@ async function ttk_alerts(type){
 
         window.pywebview.api.tiktok_alerts(data)
         
+        document.getElementById('alert-follow').hidden = true;
+        
     } else if (type == "save_sound_like"){
         
         var status_sound = like_status_sound.checked ? 1 : 0;
@@ -614,6 +773,8 @@ async function ttk_alerts(type){
         var data = JSON.stringify(data);
 
         window.pywebview.api.tiktok_alerts(data)
+
+        document.getElementById('alert-like').hidden = true;
         
     } else if (type == "save_sound_share"){
         
@@ -630,6 +791,13 @@ async function ttk_alerts(type){
         var data = JSON.stringify(data);
 
         window.pywebview.api.tiktok_alerts(data)
+
+        document.getElementById('alert-share').hidden = true;
+
+    } else if (type == "change"){
+        document.getElementById('alert-follow').hidden = true;
+        document.getElementById('alert-like').hidden = true;
+        document.getElementById('alert-share').hidden = true;
     }
 }
 
@@ -653,7 +821,7 @@ async function ttk_modal_points(button){
 
 async function ttk_gift(type_id){
 
-    if (type_id == "get"){
+    if (type_id == "get_table"){
 
         data = {
             type_id : "get",
@@ -731,6 +899,22 @@ async function ttk_gift(type_id){
                 table.row.add(dataTableData[i]).draw();
             }
 
+        }
+
+    } else if (type_id == "get_global"){
+
+        data = {
+            type_id : "get",
+        }
+
+        var data = JSON.stringify(data);
+
+        var rec = await window.pywebview.api.tiktok_gift(data);
+    
+        if (rec) {
+
+            rec_data = JSON.parse(rec)
+
             var global_gift_status = document.getElementById('global-gift-status');
             var global_gift_volume = document.getElementById('global-gift-volume');
             var global_gift_sound = document.getElementById('global-gift-sound');
@@ -739,7 +923,7 @@ async function ttk_gift(type_id){
             global_gift_sound.value = rec_data.sound;
             global_gift_volume.value = rec_data.volume;
         }
-        
+
     } else if (type_id == "get_points"){
 
         data = {
@@ -826,6 +1010,12 @@ async function ttk_gift(type_id){
         var gift_status = document.getElementById('gift-sound-status');
         var gift_volume_sound = document.getElementById('audio-volume-ttk-gift');
         var gift_id_inp = document.getElementById('ttk-gift-id');
+        var gift_key_status = document.getElementById('gift-key-status');
+        var gift_key1 = document.getElementById('gift-key-1');
+        var gift_key2 = document.getElementById('gift-key-2');
+        var gift_key3 = document.getElementById('gift-key-3');
+        var gift_key4 = document.getElementById('gift-key-4');
+        var gift_key_time = document.getElementById('time-key-gift');
 
         data = {
             type_id : "get_gift_info",
@@ -847,10 +1037,25 @@ async function ttk_gift(type_id){
             gift_status.checked = gift_rec_data.status == 1 ? true : false;
             gift_volume_sound.value = gift_rec_data.volume;
 
-            document.getElementById('save-gift-notification').setAttribute('onclick',`ttk_gift('save_sound_gift')`)
-        }
+            gift_key_status.checked = gift_rec_data.key_status == 1 ? true : false;
 
-        
+            $("#gift-key-1").selectpicker('val', gift_rec_data.keys[0]);
+            $("#gift-key-1").selectpicker("refresh");
+
+            $("#gift-key-2").selectpicker('val', gift_rec_data.keys[1]);
+            $("#gift-key-2").selectpicker("refresh");
+
+            $("#gift-key-3").selectpicker('val', gift_rec_data.keys[2]);
+            $("#gift-key-3").selectpicker("refresh");
+
+            $("#gift-key-4").selectpicker('val', gift_rec_data.keys[3]);
+            $("#gift-key-4").selectpicker("refresh");
+
+            gift_key_time.value = gift_rec_data.key_time
+
+            document.getElementById('save-gift-notification').setAttribute('onclick',`ttk_gift('save_sound_gift')`)
+
+        }
         
     } else if (type_id == "modal-points"){
 
@@ -906,8 +1111,17 @@ async function ttk_gift(type_id){
         var gift_sound = document.getElementById('file-select-sound-gift')
         var gift_status = document.getElementById('gift-sound-status')
         var gift_volume_sound = document.getElementById('audio-volume-ttk-gift')
+        var gift_key_status = document.getElementById('gift-key-status');
+        var gift_key1 = document.getElementById('gift-key-1');
+        var gift_key2 = document.getElementById('gift-key-2');
+        var gift_key3 = document.getElementById('gift-key-3');
+        var gift_key4 = document.getElementById('gift-key-4');
+        var gift_key_time = document.getElementById('time-key-gift');
 
         var gift_status = gift_status.checked ? 1 : 0;
+        var gift_key_status = gift_key_status.checked ? 1 : 0;
+        
+        var gift_key_list = [gift_key1.value, gift_key2.value, gift_key3.value, gift_key4.value]
 
         var gift_id_inp = document.getElementById('ttk-gift-id');
 
@@ -917,7 +1131,10 @@ async function ttk_gift(type_id){
             name: gift_name.value,
             status: gift_status,
             sound_loc : gift_sound.value,
-            sound_volume : gift_volume_sound.value 
+            sound_volume : gift_volume_sound.value,
+            keys: gift_key_list,
+            key_status : gift_key_status,
+            key_time : gift_key_time.value
         }
 
         var data = JSON.stringify(data);
@@ -999,6 +1216,7 @@ async function ttk_goal(type_id){
                     $("#goal-gift").selectpicker("refresh");
 
                 });
+
             } else {
                 
                 document.getElementById("goal-gift-select").hidden = true;
@@ -1063,52 +1281,82 @@ async function ttk_goal(type_id){
 
     } else if (type_id == 'save_html'){
 
-        var iframe = document.getElementById('iframe-bar');
 
         var goalText = document.getElementById("goal-text");
+
+        var goal_style = document.getElementById('goal-style');
+        var goal_text_above = document.getElementById('goal-text-above');
+        var goal_text_type = document.getElementById('goal-text-type');
+        var goal_text_size = document.getElementById('slider-font-bar');
         var goalTextColorInput = document.getElementById("goal-text-color-text");
         var goalBarColorInput = document.getElementById("goal-bar-color-text");
         var goalBackgroundBarColorInput = document.getElementById("goal-background-bar-color-text");
+        var goalBackgroundBarColorOpacity = document.getElementById("goal-background-opacity");
         var goalBackgroundColorInput = document.getElementById("goal-background-color-text");
+        var goalBackgroundBarBorderColorInput = document.getElementById("goal-background-color-border-text");
 
         var goalTextColorspan = document.getElementById("goal-text-color-span");
         var goalBarColorspan = document.getElementById("goal-bar-color-span");
         var goalBackgroundBarColorspan = document.getElementById("goal-background-bar-color-span");
         var goalBackgroundColorspan = document.getElementById("goal-background-color-span");
+        var goalBackgroundBorderColorspan = document.getElementById("goal-background-color-border-span");
 
-        
+        var goal_text_above = goal_text_above.checked ? 1 : 0;
+
         data = {
             type_id : type_id,
             type_goal : goal_html_type.value,
+            goal_above : goal_text_above,
+            goal_style : goal_style.value,
+            goal_type : goal_text_type.value,
             text_value : goalText.value,
             text_color : goalTextColorInput.value,
+            text_size : goal_text_size.value,
             bar_color: goalBarColorInput.value,
             background_bar_color: goalBackgroundBarColorInput.value,
-            outer_color : goalBackgroundColorInput.value
+            background_bar_color_opacity: goalBackgroundBarColorOpacity.value,
+            background_border: goalBackgroundBarBorderColorInput.value,
+            background_color : goalBackgroundColorInput.value
         }
 
         var data_parse = JSON.stringify(data);
 
-        res_html = await window.pywebview.api.tiktok_goal(data_parse);
+        window.pywebview.api.tiktok_goal(data_parse);
 
-        iframe.src = `${res_html}ts=${new Date().getTime()}`
+        for (var key in DataIframeLinks) {
+
+            if (key === goal_html_type.value) {
+                document.getElementById(`iframe-${key}-config`).hidden = false
+            } else {
+                document.getElementById(`iframe-${key}-config`).hidden = true
+            }
+        }
 
 
     } else if (type_id == 'get_html'){
 
-        var iframe = document.getElementById('iframe-bar');
         
         var goalText = document.getElementById("goal-text");
+
+
+        var goal_text_above = document.getElementById('goal-text-above');
+        var goal_text_type = document.getElementById('goal-text-type');
+
+        var goal_text_size = document.getElementById('slider-font-bar');
 
         var goalTextColorInput = document.getElementById("goal-text-color-text");
         var goalBarColorInput = document.getElementById("goal-bar-color-text");
         var goalBackgroundBarColorInput = document.getElementById("goal-background-bar-color-text");
+        var goalBackgroundBarBorderColorInput = document.getElementById("goal-background-color-border-text");
+        
+        var goalBackgroundBarColorOpacity = document.getElementById("goal-background-opacity");
         var goalBackgroundColorInput = document.getElementById("goal-background-color-text");
 
         var goalTextColorspan = document.getElementById("goal-text-color-span");
         var goalBarColorspan = document.getElementById("goal-bar-color-span");
         var goalBackgroundBarColorspan = document.getElementById("goal-background-bar-color-span");
         var goalBackgroundColorspan = document.getElementById("goal-background-color-span");
+        var goalBackgroundBorderColorspan = document.getElementById("goal-background-color-border-span");
 
         var GoalLinkInput = document.getElementById("iframe-link");
         
@@ -1129,15 +1377,26 @@ async function ttk_goal(type_id){
 
             goalText.value = html_data_parse.title_text_value;
 
+            $("#goal-style").selectpicker('val',html_data_parse.goal_style)
+            $("#goal-text-type").selectpicker('val',html_data_parse.goal_type)
+
+            goal_text_above.checked = html_data_parse.goal_above == 1 ? true : false
+
+            goal_text_size.value = html_data_parse.text_size;
+
             goalTextColorInput.value = html_data_parse.title_text;
             goalBarColorInput.value = html_data_parse.progress_bar;
             goalBackgroundBarColorInput.value = html_data_parse.progress_bar_background;
-            goalBackgroundColorInput.value = html_data_parse.outer_bar;
+            goalBackgroundColorInput.value = html_data_parse.background_color;
+            goalBackgroundBarBorderColorInput.value = html_data_parse.background_border;
 
             goalTextColorspan.style.backgroundColor = html_data_parse.title_text;
             goalBarColorspan.style.backgroundColor = html_data_parse.progress_bar;
             goalBackgroundBarColorspan.style.backgroundColor = html_data_parse.progress_bar_background;
-            goalBackgroundColorspan.style.backgroundColor = html_data_parse.outer_bar;
+            goalBackgroundBarColorOpacity.value = html_data_parse.progress_bar_background_opacity;
+            goalBackgroundColorspan.style.backgroundColor = html_data_parse.background_color;
+            goalBackgroundBorderColorspan.style.backgroundColor = html_data_parse.background_border;
+
 
             DataIframeLinks = {
                 "likes" : "http://127.0.0.1:7000/src/html/goal/likes/iframe.html",
@@ -1146,11 +1405,21 @@ async function ttk_goal(type_id){
                 "share" : "http://127.0.0.1:7000/src/html/goal/share/iframe.html",
                 "diamonds": "http://127.0.0.1:7000/src/html/goal/diamonds/iframe.html",
                 "max_viewer" : "http://127.0.0.1:7000/src/html/goal/max_viewer/iframe.html"
-            } 
-
-            iframe.src = `${DataIframeLinks[goal_html_type.value]}?ts=${new Date().getTime()}`
+            }
 
             GoalLinkInput.value = DataIframeLinks[goal_html_type.value]
+
+
+            for (var key in DataIframeLinks) {
+
+                if (key === goal_html_type.value) {
+                    document.getElementById(`iframe-${key}-config`).hidden = false
+                } else {
+                    document.getElementById(`iframe-${key}-config`).hidden = true
+                }
+            }
+            
+
         }
 
 
@@ -1163,9 +1432,10 @@ async function ttk_goal(type_id){
         } else {
             goal_add_div.hidden = true
         }
+    } else if (type_id == 'change'){
+        document.getElementById('edit-goal-div').hidden = true
+        document.getElementById('html_editor').hidden = true
     }
-    
-
 }
 
 async function ttk_logs(type_id){
@@ -1218,148 +1488,96 @@ async function ttk_logs(type_id){
     }
 }
 
-async function tts_command(type_id){
+async function points_config(type_id){
 
-    var command = document.getElementById('tts-command');
-    var delay = document.getElementById('tts-delay');
-    var status = document.getElementById('command-tts-status');
-    var prefix = document.getElementById('command-tts-prefix');
-    var cost_status = document.getElementById('command-cost-status-tts'); 
-    var cost = document.getElementById('command-cost-tts'); 
- 
-    if (type_id == 'get'){
+    var gift_points = document.getElementById('gift_points');
+    var like_points = document.getElementById('like_points');
+    var share_points = document.getElementById('share_points');
+    var follow_points = document.getElementById('follow_points');
+
+    if(type_id == 'get'){
 
         data = {
-            type_id : 'get',
+            type_id : type_id
         }
 
-        var data = JSON.stringify(data);
+        var data_parse = await window.pywebview.api.points_config(JSON.stringify(data))
 
-        var rec = await window.pywebview.api.tts_command(data);
-    
-        if (rec) {
+        if (data_parse){
 
-            rec_parse = JSON.parse(rec)
+            var data_parse = JSON.parse(data_parse);
 
-            command_cost_get('tts',rec_parse.cost_status)
+            gift_points.value = data_parse.gift_points;
+            like_points.value = data_parse.like_points;
+            share_points.value = data_parse.share_points;
+            follow_points.value = data_parse.follow_points;
 
-            command.value = rec_parse.command;
-            delay.value = rec_parse.delay;
-            status.checked = rec_parse.status == 1 ? true : false;
-            prefix.checked = rec_parse.prefix == 1 ? true : false;
-
-            cost_status.checked = rec_parse.cost_status == 1 ? true : false;
-
-            cost.value = rec_parse.cost;
-
-            $("#user-level-tts").selectpicker('val', rec_parse.user_level);
-            $("#user-level-tts").selectpicker("refresh");
-    
         }
 
-    } else if (type_id == "save"){
-        
-        var status = status.checked ? 1 : 0;
-        var cost_status = cost_status.checked ? 1 : 0;
-        var prefix = prefix.checked ? 1 : 0;
-        
-        var roles = []; 
-
-        $('#user-level-tts :selected').each(function(i, selected){ 
-            roles[i] = $(selected).val(); 
-        });
+    } else if (type_id == 'save'){
 
         data = {
-            type_id : 'save',
-            status : status,
-            prefix : prefix,
-            command : command.value,
-            delay: delay.value,
-            user_level: roles,
-            cost: cost.value,
-            cost_status: cost_status
+            type_id : type_id,
+            gift_points: gift_points.value,
+            like_points: like_points.value,
+            share_points: share_points.value,
+            follow_points: follow_points.value
         }
 
-        var data = JSON.stringify(data);
+        var formData = JSON.stringify(data);
 
-        window.pywebview.api.tts_command(data)
+        window.pywebview.api.points_config(formData)
+
+    } else if (type_id == 'clear-points'){
+
+        data = {
+            type_id : type_id
+        }
+
+        window.pywebview.api.points_config(JSON.stringify(data))
 
     }
 }
 
-async function balance_command(type_id){
+async function roles_config(type_id){
 
-    var command_type = document.getElementById('command-balance-select');
+    var gift_role = document.getElementById('gift_role');
+    var like_role = document.getElementById('like_role');
+    var share_role = document.getElementById('share_role');
 
-    var command = document.getElementById('balance-command');
-    var delay = document.getElementById('balance-delay');
-    var status = document.getElementById('command-balance-status');
-    var cost_status = document.getElementById('command-cost-status-balance'); 
-    var cost = document.getElementById('command-cost-balance');
-
-
-    if (type_id == 'get'){
-
-        document.getElementById("form-div-balance").hidden = false
+    if(type_id == 'get'){
 
         data = {
-            type_id : 'get',
-            command : command_type.value
+            type_id : type_id
         }
 
-        var data = JSON.stringify(data);
+        var data_parse = await window.pywebview.api.roles_config(JSON.stringify(data))
 
-        var rec = await window.pywebview.api.balance_command(data);
-    
-        if (rec) {
+        if (data_parse){
 
-            rec_parse = JSON.parse(rec)
+            var data_parse = JSON.parse(data_parse);
 
-            command_cost_get('balance',rec_parse.cost_status)
+            gift_role.value = data_parse.gift_role;
+            like_role.value = data_parse.like_role;
+            share_role.value = data_parse.share_role;
 
-            command.value = rec_parse.command;
-            delay.value = rec_parse.delay;
-            status.checked = rec_parse.status == 1 ? true : false;
-            cost_status.checked = rec_parse.cost_status == 1 ? true : false;
-            cost.value = rec_parse.cost;
-
-            $("#user-level-balance").selectpicker('val', rec_parse.user_level);
-            $("#user-level-balance").selectpicker("refresh");
-    
         }
 
-    } else if (type_id == "save"){
-        
-        var status = status.checked ? 1 : 0;
-        var cost_status = cost_status.checked ? 1 : 0;
-        var roles = []; 
-
-        $('#user-level-balance :selected').each(function(i, selected){ 
-            roles[i] = $(selected).val(); 
-        });
+    } else if (type_id == 'save'){
 
         data = {
-            type_id : 'save',
-            command_type : command_type.value,
-            status : status,
-            command : command.value,
-            delay: delay.value,
-            user_level: roles,
-            cost: cost.value,
-            cost_status: cost_status
+            type_id : type_id,
+            gift_role : gift_role.value,
+            like_role : like_role.value,
+            share_role: share_role.value,
         }
 
-
-        var data = JSON.stringify(data);
-
-        window.pywebview.api.balance_command(data)
-        
-        document.getElementById("form-div-balance").hidden = true
+        window.pywebview.api.roles_config(JSON.stringify(data));
 
     }
 }
 
-function command_cost(type){
+async function command_cost(type){
     
     var checkbox = document.getElementById(`command-cost-status-${type}`);
 
@@ -1371,7 +1589,7 @@ function command_cost(type){
 
 }
 
-function command_cost_get(type,value){
+async function command_cost_get(type,value){
     
     if (value == 1){
         document.getElementById(`command-costdiv-${type}`).hidden = false
@@ -1386,26 +1604,33 @@ async function rank_js(type_id){
     var rankStatusCheckbox = document.getElementById('rank-status');
     var rankIntervalInput = document.getElementById('rank-interval');
     
-    var likesRankBackgroundTextInput = document.getElementById('likes-rank-background-text');
-    var likesRankBackgroundOpacityRange = document.getElementById('likes-rank-background-opacity');
-    var giftsRankBackgroundTextInput = document.getElementById('gifts-rank-background-text');
-    var giftsRankBackgroundOpacityRange = document.getElementById('gifts-rank-background-opacity');
-    var sharesRankBackgroundTextInput = document.getElementById('shares-rank-background-text');
-    var sharesRankBackgroundOpacityRange = document.getElementById('shares-rank-background-opacity');
-    var pointsRankBackgroundTextInput = document.getElementById('points-rank-background-text');
-    var pointsRankBackgroundOpacityRange = document.getElementById('points-rank-background-opacity');
+    var RankBackgroundTextInput = document.getElementById('rank-background-text');
+    
+    var RankTextTextInput = document.getElementById("rank-font-text");
+    var RankTextSpan = document.getElementById("rank-font-span");
 
-    var likesRankBackgroundOpacitySpan = document.getElementById('likes-rank-background-span');
-    var giftsRankBackgroundOpacitySpan = document.getElementById('gifts-rank-background-span');
-    var sharesRankBackgroundOpacitySpan = document.getElementById('shares-rank-background-span');
-    var pointsRankBackgroundOpacitySpan = document.getElementById('points-rank-background-span');
+    var RankTextSize = document.getElementById("rank-text-size");
+    var RankProfilepicSize = document.getElementById("rank-profilepic-size");
 
-    var LikesrangeOp = document.getElementById('rangevaluelikesrankopacity');
-    var giftsrangeOp = document.getElementById('rangevaluegiftsrankopacity'); 
-    var sharesrangeOp = document.getElementById('rangevaluesharesrankopacity');
-    var pointsrangeOp = document.getElementById('rangevaluepointsrankopacity');
+    var RankBackgroundOpacitySpan = document.getElementById('rank-background-span');
+    var RankBackgroundOpacityRange = document.getElementById('rank-background-opacity');
+
+    var rangeOpinner = document.getElementById('rangevaluesrankopacity');
+    var rangePicinner = document.getElementById('rangevaluesrankpicsize');
+    var rangeTxinner = document.getElementById('rangevaluesranktextsize');
+    var rangeCardinner = document.getElementById('rangevaluesrankcardsize');
+    
+    var rangeRankMaxinner = document.getElementById('rangevaluesrankmax');
 
     var rankstatus = rankStatusCheckbox.checked;
+
+    var rank_type = document.getElementById('rank-select');
+    var rank_status_side = document.getElementById("rank-status-side");
+    var rank_card_size = document.getElementById('rank-card-size');
+
+    var rank_max_users = document.getElementById("rank-users-max");
+
+
 
     if (type_id == 'get'){
 
@@ -1421,32 +1646,36 @@ async function rank_js(type_id){
 
             rec_parse = JSON.parse(rec)
 
-            rankStatusCheckbox.checked = rec_parse.status ? true : false
-
+            rankStatusCheckbox.checked = rec_parse.status == 1  ? true : false;
             rankIntervalInput.value = rec_parse.interval;
+            rank_max_users.value = rec_parse.max_users;
+            rangeRankMaxinner.innerHTML = rec_parse.max_users;
 
-            likesRankBackgroundTextInput.value = rec_parse.likes_bg;
-            likesRankBackgroundOpacityRange.value = rec_parse.likes_op;
+            RankTextTextInput.value = rec_parse.font_color;
+            RankTextSpan.style.backgroundColor = rec_parse.font_color;
 
-            giftsRankBackgroundTextInput.value = rec_parse.gifts_bg;
-            giftsRankBackgroundOpacityRange.value = rec_parse.gifts_op;
+            RankTextSize.value = rec_parse.font_size;
+            RankProfilepicSize.value = rec_parse.image_size;
+            rank_card_size.value = rec_parse.card_size;
+
+            rank_status_side.checked = rec_parse.rank_side == 1 ? true : false;
+
+            RankBackgroundTextInput.value = rec_parse.bg
+            RankBackgroundOpacityRange.value = rec_parse.op;
+            RankBackgroundOpacitySpan.style.backgroundColor = rec_parse.bg;
+
+            rangeOpinner.innerHTML = rec_parse.op;
+            rangePicinner.innerHTML = rec_parse.image_size;
+            rangeTxinner.innerHTML = rec_parse.font_size;
+            rangeCardinner.innerHTML = rec_parse.font_size;
             
-            sharesRankBackgroundTextInput.value = rec_parse.shares_bg;
-            sharesRankBackgroundOpacityRange.value = rec_parse.shares_op;
+            $("#rank-select").val(rec_parse.type_rank);
 
-            pointsRankBackgroundTextInput.value = rec_parse.points_bg;
-            pointsRankBackgroundOpacityRange.value = rec_parse.points_op;
-
-            likesRankBackgroundOpacitySpan.style.backgroundColor = rec_parse.likes_bg;
-            giftsRankBackgroundOpacitySpan.style.backgroundColor = rec_parse.gifts_bg;
-            sharesRankBackgroundOpacitySpan.style.backgroundColor = rec_parse.shares_bg;
-            pointsRankBackgroundOpacitySpan.style.backgroundColor = rec_parse.points_bg;
-
-            LikesrangeOp.innerHTML = rec_parse.likes_bg;
-            giftsrangeOp.innerHTML = rec_parse.gifts_op;
-            sharesrangeOp.innerHTML = rec_parse.shares_bg;
-            pointsrangeOp.innerHTML = rec_parse.points_bg;
-        
+            if (rec_parse.type_rank == "card"){
+                document.getElementById('rank-config-div').hidden = false
+            } else {
+                document.getElementById('rank-config-div').hidden = true
+            }
         }
 
     } else if (type_id == 'save'){
@@ -1455,18 +1684,651 @@ async function rank_js(type_id){
             type_id : 'save',
             status : rankstatus,
             interval : rankIntervalInput.value,
-            likes_bg : likesRankBackgroundTextInput.value,
-            likes_op : likesRankBackgroundOpacityRange.value,
-            gifts_bg : giftsRankBackgroundTextInput.value,
-            gifts_op : giftsRankBackgroundOpacityRange.value,
-            shares_bg: sharesRankBackgroundTextInput.value,
-            shares_op: sharesRankBackgroundOpacityRange.value,
-            points_bg: pointsRankBackgroundTextInput.value,
-            points_op: pointsRankBackgroundOpacityRange.value
+            max_users : rank_max_users.value,
         }
 
         var data = JSON.stringify(data);
 
         window.pywebview.api.ranks_config(data)
+
+    } else if (type_id == 'save_rank'){
+        
+        var opacity = RankBackgroundOpacityRange.value;
+        var background = RankBackgroundTextInput.value;
+        var text = RankTextTextInput.value;
+        var size = RankTextSize.value;
+        var profilepic = RankProfilepicSize.value;
+        var card_size = rank_card_size.value;
+        var rank_side = rank_status_side.checked ? 1 : 0;
+        var type_rank = rank_type.value;
+
+        data = {
+            type_id : 'save_rank',
+            op: opacity,
+            bg: background,
+            font_color: text,
+            font_size: size,
+            image_size: profilepic,
+            card_size: card_size,
+            rank_side: rank_side,
+            rank_type: type_rank,
+        }
+
+        var data = JSON.stringify(data);
+
+        window.pywebview.api.ranks_config(data)
+
+    } else if (type_id == 'change'){
+
+        var type_config = document.getElementById('rank-select').value; 
+
+        if (type_config == "card"){
+            document.getElementById('rank-config-div').hidden = false
+        
+        } else {
+            document.getElementById('rank-config-div').hidden = true
+        }
+    }
+}
+
+async function test_js(type_id){
+
+    if (type_id == "edit_command"){
+
+        var command = document.getElementById('command-select-edit');
+
+        data ={
+            type_id : 'comment',
+            comment : command.value
+        }
+
+        var formData = JSON.stringify(data);
+        window.pywebview.api.test_fun(formData);
+        
+    } else if (type_id == "tts_command"){
+
+        var command_input = document.getElementById('command-tts-command');
+        command = `${command_input.value} Esta é uma mensagem de teste, siga o canal GG TEC`
+
+        data ={
+            type_id : 'comment',
+            comment : command
+        }
+
+        var formData = JSON.stringify(data);
+        window.pywebview.api.test_fun(formData);
+
+    } else if (type_id == "balance_command"){
+
+        var command_input = document.getElementById('balance-command');
+        var command_type = document.getElementById('command-balance-select');
+
+        if (command_type.value == "mod_balance"){
+            command = `${command_input.value} usuarioexemplo`
+        } else if (command_type.value == "mod_balance_take"){
+            command = `${command_input.value} usuarioexemplo 1000`
+        }else if (command_type.value == "mod_balance_give"){
+            command = `${command_input.value} usuarioexemplo 1000`
+        } else {
+            command = `${command_input.value}`
+        }
+
+        data ={
+            type_id : 'comment',
+            comment : command
+        }
+
+        var formData = JSON.stringify(data);
+        window.pywebview.api.test_fun(formData);
+
+    } else if (type_id == "champ_command"){
+
+        var command_input = document.getElementById('command-champ-command');
+        var command_select = document.getElementById('command-camp-select');
+        
+        if (command_select.value == "add_camp" || command_select.value == "remove_camp"){
+            command = `${command_input.value} usuarioexemplo`
+        } else {
+            command = `${command_input.value}`
+        }
+
+        data ={
+            type_id : 'comment',
+            comment : command
+        }
+
+        var formData = JSON.stringify(data);
+        window.pywebview.api.test_fun(formData);
+
+    } else if (type_id == "votes_command"){
+
+        var command = document.getElementById('vote-command-test');
+
+        data ={
+            type_id : 'comment',
+            comment : command.value
+        }
+
+        var formData = JSON.stringify(data);
+        window.pywebview.api.test_fun(formData);
+
+    } else if (type_id == "giveaway_command"){
+
+        var command_input = document.getElementById('command-giveaway-command');
+        var command_type = document.getElementById('command-giveaway-select');
+
+        if (command_type.value == "add_user" || command_type.value == "check_name"){
+            command = `${command_input.value} usuarioexemplo`
+        } else {
+            command = command_input.value
+        }
+
+        data ={
+            type_id : 'comment',
+            comment : command
+        }
+
+        var formData = JSON.stringify(data);
+        window.pywebview.api.test_fun(formData);
+
+    } else if (type_id == "queue_command"){
+        
+        var command_input = document.getElementById('command-queue-command');
+        var command_type = document.getElementById('command-queue-select');
+
+        if (command_type.value == "add_queue" || command_type.value == "rem_queue"){
+            command = `${command_input.value} usuarioexemplo`
+        } else {
+            command = command_input.value
+        }
+
+        data ={
+            type_id : 'comment',
+            comment : command
+        }
+
+        var formData = JSON.stringify(data);
+        window.pywebview.api.test_fun(formData);
+
+    } else if (type_id == "music_command"){
+
+        var command_input = document.getElementById('command-player-command');
+        var command_type = document.getElementById('command-player-edit');
+
+        if (command_type.value == "request"){
+            command = `${command_input.value} https://www.youtube.com/watch?v=Vz56ApeiaQ4`
+        } else if (command_type.value == "volume") {
+            command = `${command_input.value} 50`
+        } else {
+            command = `${command_input.value}`
+        }
+        
+        data ={
+            type_id : 'comment',
+            comment : command
+        }
+
+        var formData = JSON.stringify(data);
+        window.pywebview.api.test_fun(formData);
+
+    } else if (type_id == "subathon_command"){
+
+        var command_input = document.getElementById('command-subathon-command');
+        var command_type = document.getElementById('command-subathon-select');
+
+        if (command_type.value == "add_minutes" || command_type.value == "remove_minutes"){
+            command = `${command_input.value} 10`
+        } else {
+            command = command_input.value
+        }
+
+        data ={
+            type_id : 'comment',
+            comment : command
+        }
+
+        var formData = JSON.stringify(data);
+        window.pywebview.api.test_fun(formData);
+
+    }  else if (type_id == "goal"){
+
+        var select_goal = document.getElementById('goal-select');
+        var select_gift = document.getElementById('goal-gift');
+
+        data ={
+            type_id : 'goal',
+            type_goal : select_goal.value,
+            gift_id : select_gift.value
+        }
+
+        var formData = JSON.stringify(data);
+        window.pywebview.api.test_fun(formData);
+    
+    }
+}
+
+async function subathon_modal(button){
+
+    var id = button.getAttribute('data-id');
+    var gift_id_inp = document.getElementById('subathon-gift-id');
+    gift_id_inp.value = id
+    subathon_js('modal')
+
+}
+
+async function subathon_js(type_id){
+
+    if (type_id == "get"){
+
+        data = {
+            type_id : "get",
+        }
+
+        var data = JSON.stringify(data);
+
+        var rec = await window.pywebview.api.subathon(data);
+    
+        if (rec) {
+
+            rec_data = JSON.parse(rec)
+            
+            var status = rec_data.status
+            var time_global = rec_data.time_global
+            var time_type = rec_data.time_type
+
+            $("#subathon-time-type").selectpicker('val', time_type);
+            $("#subathon-time-type").selectpicker("refresh");
+
+            document.getElementById('time-global').value = time_global;
+            
+            var status_checkbox = document.getElementById('status-subathon');
+
+            status_checkbox.checked = status ? true : false;
+
+            var dataTableData = [];
+
+            var gift_data = rec_data.gifts
+
+            for (const key in gift_data) {
+
+                if (gift_data.hasOwnProperty(key)) {
+
+                    const item = gift_data[key];
+                    
+                    
+                    var gift_id = key
+                    var gift_name = item.name_br != "" ? item.name_br : item.name
+                    var time = item.time
+
+                    
+                    var button_config = document.createElement("button");
+
+                    button_config.innerText = "Configurar";
+                    button_config.classList.add('bnt','bt-submit')
+                    button_config.setAttribute('data-id', `${gift_id}`)
+                    button_config.setAttribute('onclick', `subathon_modal(this)`)
+
+                    dataTableData.push([
+                        gift_name,
+                        time,
+                        button_config.outerHTML
+                    ]);
+
+                }
+            }
+
+
+            if ($.fn.DataTable.isDataTable("#giftlist_subathon_table")) {
+
+                $('#giftlist_subathon_table').DataTable().clear().draw();
+                $('#giftlist_subathon_table').DataTable().destroy();
+            }
+
+            var table = $('#giftlist_subathon_table').DataTable( {
+                destroy: true,
+                scrollX: true,
+                scrollY: '300px',
+                paging: false,
+                ordering:  true,
+                retrieve : false,
+                processing: true,
+                responsive: false,
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/pt-BR.json'
+                },
+                columns: [
+                    { title: 'Nome' ,"searchable": true },
+                    { title: 'Tempo' },
+                    { title: 'Ação' }
+                ]
+            } );
+
+            for (var i = 0; i < dataTableData.length; i++) {
+                table.row.add(dataTableData[i]).draw();
+            }
+        }
+
+    } else if (type_id == "modal"){
+
+        var gift_name = document.getElementById('subathon-gift-name');
+        var gift_time = document.getElementById('subathon-gift-time');
+        var gift_status = document.getElementById('subathon-status');
+        var gift_id_inp = document.getElementById('subathon-gift-id');
+
+        data = {
+            type_id : "get_gift_info",
+            id : gift_id_inp.value
+        }
+
+        var data = JSON.stringify(data);
+
+        var gift_data = await window.pywebview.api.subathon(data);
+
+        if (gift_data){
+
+            gift_rec_data = JSON.parse(gift_data)
+
+            $("#gift-modal-subathon").modal("show");
+
+            gift_name.innerHTML = gift_rec_data.name
+            gift_time.value = gift_rec_data.time
+            gift_status.checked = gift_rec_data.status_subathon ? true : false;
+
+            document.getElementById('save-gift-subathon').setAttribute('onclick',`subathon_js('save_gift_info')`)
+        }
+    } else if (type_id == "save"){
+
+        var globa0l = document.getElementById('time-global');
+        var status_checkbox = document.getElementById('status-subathon');
+        var time_type = document.getElementById('ssubathon-time-type');
+
+        status = status_checkbox.checked ? 1 : 0;
+
+        data = {
+            type_id : "save",
+            status : status,
+            tume_type: time_type,
+            time_global : globa0l.value
+        }
+
+        var data = JSON.stringify(data);
+        window.pywebview.api.subathon(data);
+
+    } else if (type_id == "save_commands"){
+
+        var command_subathon_select = document.getElementById('command-subathon-select');
+        var command_subathon_status = document.getElementById('command-subathon-status');
+        var command_subathon_command = document.getElementById('command-subathon-command');
+        var command_subathon_delay = document.getElementById('command-subathon-delay');
+        var command_subathon_cost_status = document.getElementById('command-cost-status-subathon'); 
+        var command_subathon_cost = document.getElementById('command-cost-subathon');
+
+        var command_status = command_subathon_status.checked ? 1 : 0;
+        var command_cost_status = command_subathon_cost_status.checked ? 1 : 0;
+
+        var roles = []; 
+
+        $('#command-subathon-perm :selected').each(function(i, selected){ 
+            roles[i] = $(selected).val(); 
+        });
+
+        data  = {
+            type_id : type_id,
+            type_command: command_subathon_select.value,
+            command: command_subathon_command.value,
+            status: command_status,
+            delay: command_subathon_delay.value,
+            user_level: roles,
+            cost: command_subathon_cost.value,
+            cost_status: command_cost_status
+        }
+
+        var formData = JSON.stringify(data);
+
+        window.pywebview.api.subathon(formData)
+
+        document.getElementById("command_subathon_form").hidden = true
+
+    } else if (type_id == "get_commands"){
+
+        var command_subathon_select = document.getElementById('command-subathon-select');
+        var command_subathon_status = document.getElementById('command-subathon-status');
+        var command_subathon_command = document.getElementById('command-subathon-command');
+        var command_subathon_delay = document.getElementById('command-subathon-delay');
+        var command_subathon_cost_status = document.getElementById('command-cost-status-subathon'); 
+        var command_subathon_cost = document.getElementById('command-cost-subathon');
+
+        var subathon_command_edit = document.getElementById('command_subathon_form');
+
+        data = {
+            type_id : type_id,
+            type_command : command_subathon_select.value,
+        }
+
+        var subathon_parse = await window.pywebview.api.subathon(JSON.stringify(data));
+
+        if (subathon_parse){
+
+            subathon_parse = JSON.parse(subathon_parse)
+            
+            subathon_command_edit.hidden = false       
+
+            command_cost_get('subathon',subathon_parse.cost_status)
+
+            command_subathon_cost_status.checked = subathon_parse.cost_status == 1 ? true : false;
+            command_subathon_status.checked = subathon_parse.status == 1 ? true : false;
+            command_subathon_command.value = subathon_parse.command
+            command_subathon_delay.value = subathon_parse.delay
+            command_subathon_cost.value = subathon_parse.cost
+
+            $("#command-subathon-perm").selectpicker('val',subathon_parse.user_level)
+            $("#command-subathon-perm").selectpicker("refresh");
+
+        }
+
+    } else if (type_id == "save_gift_info"){
+
+        var gift_name = document.getElementById('subathon-gift-name');
+        var gift_time = document.getElementById('subathon-gift-time');
+        var gift_status = document.getElementById('subathon-status');
+        var gift_id_inp = document.getElementById('subathon-gift-id');
+
+        data = {
+            type_id : "save_gift_info",
+            id : gift_id_inp.value,
+            time : gift_time.value,
+            status : gift_status.checked ? 1 : 0,
+        }
+
+        var data = JSON.stringify(data);
+
+        window.pywebview.api.subathon(data);
+
+        gift_status.checked = false
+        gift_time.value = "00:00:00"
+        gift_name.innerHTML = ""
+        gift_id_inp.value = ""
+        $("#gift-modal-subathon").modal("hide");
+
+        data = {
+            type_id : "get",
+        }
+
+        var data = JSON.stringify(data);
+
+        var rec = await window.pywebview.api.subathon(data);
+    
+        if (rec) {
+
+            rec_data = JSON.parse(rec)
+            
+            var status = rec_data.status
+            var minutes_global = rec_data.global_minutes
+
+            var time_type = rec_data.time_type
+
+            $("#subathon-time-type").selectpicker('val', time_type);
+            $("#subathon-time-type").selectpicker("refresh");
+
+            document.getElementById('global-minutes').value = minutes_global;
+            
+            var status_checkbox = document.getElementById('status-subathon');
+
+            status_checkbox.checked = status ? true : false;
+
+            var dataTableData = [];
+
+            var gift_data = rec_data.gifts
+
+            for (const key in gift_data) {
+
+                if (gift_data.hasOwnProperty(key)) {
+
+                    const item = gift_data[key];
+                    
+                    var gift_id = key
+                    var gift_name = item.name_br != "" ? item.name_br : item.name
+                    var time = item.time
+
+                    
+                    var button_config = document.createElement("button");
+
+                    button_config.innerText = "Configurar";
+                    button_config.classList.add('bnt','bt-submit')
+                    button_config.setAttribute('data-id', `${gift_id}`)
+                    button_config.setAttribute('onclick', `subathon_modal(this)`)
+
+                    dataTableData.push([
+                        gift_name,
+                        time,
+                        button_config.outerHTML
+                    ]);
+
+                }
+            }
+
+
+            if ($.fn.DataTable.isDataTable("#giftlist_subathon_table")) {
+
+                $('#giftlist_subathon_table').DataTable().clear().draw();
+                $('#giftlist_subathon_table').DataTable().destroy();
+            }
+
+            var table = $('#giftlist_subathon_table').DataTable( {
+                destroy: true,
+                scrollX: true,
+                scrollY: '300px',
+                paging: false,
+                ordering:  true,
+                retrieve : false,
+                processing: true,
+                responsive: false,
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/pt-BR.json'
+                },
+                columns: [
+                    { title: 'Nome', "searchable": true },
+                    { title: 'Tempo' },
+                    { title: 'Ação' }
+                ]
+            } );
+
+            for (var i = 0; i < dataTableData.length; i++) {
+                table.row.add(dataTableData[i]).draw();
+            }
+        }
+        
+    } else if (type_id == "add"){
+
+        var value = document.getElementById('subathon-time').value;
+
+        data = {
+            type_id : "add",
+            value : value,
+        }
+
+        var data = JSON.stringify(data);
+
+        window.pywebview.api.subathon(data);
+
+    } else if (type_id == "remove"){
+
+        var value = document.getElementById('subathon-time').value;
+
+        data = {
+            type_id : "remove",
+            value : value,
+        }
+        var data = JSON.stringify(data);
+
+        window.pywebview.api.subathon(data);
+
+    } else if (type_id == "reset"){
+
+        var value = document.getElementById('subathon-time').value;
+
+        data = {
+            type_id : "reset",
+            value : value,
+        }
+        var data = JSON.stringify(data);
+
+        window.pywebview.api.subathon(data);
+
+    } else if (type_id == "get_style"){
+
+        var subathon_color1 = document.getElementById('subathon-color1-text');
+        var subathon_color1_span = document.getElementById('subathon-color1-span');
+
+        var subathon_color2 = document.getElementById('subathon-color2-text');
+        var subathon_color2_span = document.getElementById('subathon-color2-span');
+
+        var subathon_opacity = document.getElementById("subathon-background-opacity");
+
+        data = {
+            type_id : "get_style",
+        }
+
+        var data = JSON.stringify(data);
+
+        var rec = await window.pywebview.api.subathon(data);
+    
+        if (rec) {
+
+            rec_data = JSON.parse(rec)
+            
+            var color1 = rec_data.color1
+            var color2 = rec_data.color2
+            var opacity = rec_data.opacity
+
+            subathon_color1_span.style.backgroundColor = color1;
+            subathon_color2_span.style.backgroundColor = color2;
+
+            subathon_color1.value = color1;
+            subathon_color2.value = color2;
+            subathon_opacity.value = opacity;
+
+        }
+    } else if (type_id == "save_style"){
+
+        var subathon_color1 = document.getElementById('subathon-color1-text');
+        var subathon_color1_span = document.getElementById('subathon-color1-span');
+
+        var subathon_color2 = document.getElementById('subathon-color2-text');
+        var subathon_color2_span = document.getElementById('subathon-color2-span');
+
+        var subathon_opacity = document.getElementById("subathon-background-opacity");
+
+        data = {
+            type_id : "save_style",
+            color1 : subathon_color1.value,
+            color2 : subathon_color2.value,
+            opacity : subathon_opacity.value,
+
+        }
+
+        var data = JSON.stringify(data);
+
+        var rec = await window.pywebview.api.subathon(data);
     }
 }

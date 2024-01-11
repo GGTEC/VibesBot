@@ -6,8 +6,7 @@
             "last_use": 1681444927,
             "user_level": "subs",
             "cost" : 0,
-            "cost_status" : 0,
-            "cost_type" : "None"
+            "cost_status" : 0
       },
       "atual": {
             "command": "!atual",
@@ -16,8 +15,7 @@
             "last_use": 0,
             "user_level": "subs",
             "cost" : 0,
-            "cost_status" : 0,
-            "cost_type" : "None"
+            "cost_status" : 0
       },
       "next": {
             "command": "!next",
@@ -26,8 +24,7 @@
             "last_use": 0,
             "user_level": "subs",
             "cost" : 0,
-            "cost_status" : 0,
-            "cost_type" : "None"
+            "cost_status" : 0
       },
       "skip": {
             "command": "!skip",
@@ -36,8 +33,7 @@
             "last_use": 1681407249,
             "user_level": "subs",
             "cost" : 0,
-            "cost_status" : 0,
-            "cost_type" : "None"
+            "cost_status" : 0
       },
       "volume": {
             "command": "!volume",
@@ -46,7 +42,6 @@
             "last_use": 1681348784,
             "user_level": "mod",
             "cost" : 0,
-            "cost_status" : 0,
-            "cost_type" : "None"
+            "cost_status" : 0
       }
 }

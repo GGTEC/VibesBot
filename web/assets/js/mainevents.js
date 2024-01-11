@@ -97,7 +97,7 @@ function AddEventsOut(event){
         
         var message_user_inp = `${message_rec} <br><span class='small events-sub-color'>Mensagem : ${user_input}</span>`
 
-        message_span.innerHTML = user_input == "" ? message_rec : message_user_inp;
+        message_span.innerHTML = user_input == null || user_input == "" ? message_rec : message_user_inp;
         
         message_div = document.createElement('div');
 
@@ -219,7 +219,7 @@ function append_notice_out(data){
 
     message_user_inp = `${message_rec} <br><span class='small events-sub-color'>Mensagem : ${user_input}</span>`
 
-    message_span.innerHTML = user_input == "" ? message_rec : message_user_inp;
+    message_span.innerHTML = user_input == null || user_input == "" ? message_rec : message_user_inp;
 
     
     message_div = document.createElement('div');

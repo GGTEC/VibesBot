@@ -7,14 +7,26 @@ import pytz
 import importlib
 import requests as req
 
+import tkinter.messagebox as messagebox
 from dotenv import load_dotenv
 from random import randint
 from bs4 import BeautifulSoup as bs
 from datetime import datetime
+from discord_webhook import DiscordWebhook, DiscordEmbed
+from logerror import LogManager
+
 
 if getattr(sys, 'frozen', False):
     if '_PYIBoot_SPLASH' in os.environ and importlib.util.find_spec("pyi_splash"):
         import pyi_splash
+
+
+def check_local_work():
+
+    if getattr(sys, 'frozen', False):
+        return True
+    else:
+        return False
 
 
 def local_work(type_id):
@@ -46,6 +58,10 @@ load_dotenv(dotenv_path=os.path.join(local_work('datadir'), '.env'))
 
 def error_log(ex):
 
+    curr_version = "1.6.7"
+
+    logdatabase = LogManager()
+
     now = datetime.now()
     time_error = now.strftime("%d/%m/%Y %H:%M:%S")
 
@@ -53,7 +69,8 @@ def error_log(ex):
     error_type = "Unknown"
     error_message = ""
 
-    if isinstance(ex, BaseException):  # Verifica se ex é uma exceção
+    if isinstance(ex, BaseException):
+
         tb = ex.__traceback__
 
         while tb is not None:
@@ -65,14 +82,46 @@ def error_log(ex):
             tb = tb.tb_next
 
         error_type = type(ex).__name__
+
         error_message = str(ex)
+
     else:
+
         error_message = ex
 
-    error = str(f'Erro = type: {error_type} | message: {error_message} | trace: {trace} | time: {time_error} \n\n')
+    error = str(f'Erro = type: {error_type} | message: {error_message} | trace: {trace} | time: {time_error} | Version : {curr_version}')
 
-    with open(f"{local_work('appdata_path')}/error_log.txt", "a+", encoding='utf-8') as log_file_r:
-        log_file_r.write(error)
+    logdatabase.save_log(error)
+
+    data = manipulate_json(f"{local_work('appdata_path')}/auth/auth.json", "load")
+
+    if data["error_status"] == True:
+
+        username = data["USERNAME"]
+        
+        if username == None or username == "":
+            username = "Não autenticado"
+        
+
+        WEBHOOKURL = os.getenv('WEBHOOKURLERROR')
+
+        webhook_login = DiscordWebhook(url=WEBHOOKURL)
+
+        embed_login = DiscordEmbed(
+            title='Relátorio de erro',
+            description= F'https://www.tiktok.com/@{username}' ,
+            color= '03b2f8'
+        )
+
+        embed_login.add_embed_field(
+            name='Erro',
+            value=error,
+        )
+
+        embed_login.set_author(name=username, url=f'https://www.tiktok.com/@{username}')
+        
+        webhook_login.add_embed(embed_login)
+        webhook_login.execute() 
 
 
 class DictDot:
@@ -106,11 +155,36 @@ def manipulate_json(custom_path, type_id, data=None):
         error_log(e)
 
 
+def manipulate_json_user(custom_path, type_id, line, data=None):
+
+    try:
+
+        if type_id == 'load':
+
+            with open(custom_path, 'r',encoding='utf-8') as file:
+                loaded_data = json.load(file)
+
+            return loaded_data
+        
+        elif type_id == 'save':
+
+            with open(custom_path, 'w',encoding='utf-8') as file:
+                json.dump(data, file, indent=4, ensure_ascii=False)
+
+    except FileNotFoundError:
+        print(f'The file {custom_path} was not found.')
+
+    except Exception as e:
+        if not isinstance(e, json.JSONDecodeError):
+            error_log(f"{custom_path} - {line} ")
+            error_log(e)
+
+
 def send_message(data):
 
     try:
 
-        status_commands_data = manipulate_json(f"{local_work('appdata_path')}/config/commands_config.json", "load")
+        status_commands_data = manipulate_json(f"{local_work('appdata_path')}/commands/commands_config.json", "load")
 
         type_message = data['type']
         message = data['message']
@@ -210,10 +284,7 @@ def calculate_time(started):
 
 def check_delay(delay_command, last_use):
 
-    with open(f"{local_work('appdata_path')}/messages/messages_file.json", "r", encoding='utf-8') as messages_file:
-        messages_data = json.load(messages_file)
-
-    message_error = messages_data['response_delay_error']
+    message_error = messages_file_load("response_delay_error")
 
     last_command_time = last_use
     delay_compare = int(delay_command)
@@ -231,14 +302,18 @@ def check_delay(delay_command, last_use):
 
         remaining_time = last_command_time + delay_compare - current_time
 
-        message = message_error.replace('{seconds}', str(remaining_time))
+        message = replace_all(message_error['response'],{'{seconds}' : str(remaining_time)})
+
+        message_error['response'] = message
+
         value = False
         current_time = ''
 
-        return message, value, current_time
+        return message_error, value, current_time
 
 
 def copy_file(source, dest):
+
     copy = 0
 
     try:
@@ -248,17 +323,20 @@ def copy_file(source, dest):
     except Exception as e:
 
         error_log(e)
+        
         copy = 1
+
         return copy
 
     copy = 1
+
     return copy
 
 
 def check_image(image):
 
     try:
-        respon = req.get(image, stream=True)
+        respon = req.get(url=image, stream=True)
 
         if respon.status_code == 200:
             return True
@@ -268,28 +346,79 @@ def check_image(image):
     except req.exceptions.RequestException as e:
 
         return False
+    
+    except Exception as e:
+        print(e)
+        print(image)
+
+        return False
+    
+
+def convert_opacity_to_hex(opacity):
+
+    if opacity < 0 or opacity > 1:
+        raise ValueError("Opacity must be between 0 and 1")
+
+    hex_list = [
+        "FF", "FC", "FA", "F7", "F5", "F2", "F0", "ED", "EB", "E8",
+        "E6", "E3", "E0", "DE", "DB", "D9", "D6", "D4", "D1", "CF",
+        "CC", "C9", "C7", "C4", "C2", "BF", "BD", "BA", "B8", "B5",
+        "B3", "B0", "AD", "AB", "A8", "A6", "A3", "A1", "9E", "9C",
+        "99", "96", "94", "91", "8F", "8C", "8A", "87", "85", "82",
+        "80", "7D", "7A", "78", "75", "73", "70", "6E", "6B", "69",
+        "66", "63", "61", "5E", "5C", "59", "57", "54", "52", "4F",
+        "4D", "4A", "47", "45", "42", "40", "3D", "3B", "38", "36",
+        "33", "30", "2E", "2B", "29", "26", "24", "21", "1F", "1C",
+        "1A", "17", "14", "12", "0F", "0D", "0A", "08", "05", "03", "00"
+    ]
+
+    index = round(opacity * (len(hex_list) - 1))
+    hex_opacity = hex_list[index]
+
+    return hex_opacity
 
 
 def update_ranks(data):
 
-    ranks_config = manipulate_json(f"{local_work('appdata_path')}/config/rank.json", "load")
+    ranks_config_data = manipulate_json(f"{local_work('appdata_path')}/config/rank.json", "load")
 
     type_id = data["type_id"]
     info = data["info"]
+    rank_type = ranks_config_data["rank_type"]
+    rank_side = ranks_config_data["rank_side"]
+    font_size = ranks_config_data["font_size"]
+    font_color = ranks_config_data["font_color"]
+    card_size = ranks_config_data["card_size"]
+    image_size = ranks_config_data["image_size"]
 
-    if type_id == "likes":
+    bg = ranks_config_data['bg']
+    op = convert_opacity_to_hex(float(ranks_config_data['op'])) 
 
-        bg = ranks_config['likes_bg']
-        op = ranks_config['likes_op']
+    with open(f"{local_work('appdata_path')}/html/ranks/{type_id}/{type_id}.html", 'r', encoding='utf-8') as file:
+        content_html = file.read()
 
-        with open(f"{local_work('appdata_path')}/html/ranks/likes/likes.html", 'r', encoding='utf-8') as file:
-            content_html = file.read()
+        soup = bs(content_html, 'html.parser')
 
-            soup = bs(content_html, 'html.parser')
+        div = soup.find("div", {"class": f"event_block"})
 
-            div = soup.find("div", {"class": f"event_block"})
 
-        for user, userdata in info:
+    if rank_type == "card":
+        
+        if rank_side == 1:
+
+            if "flex-column" in div['class']:
+                div['class'].remove("flex-column")
+            
+            div['class'] = ["event_block", "d-flex", "flex-row"]
+
+        user_number = 0
+
+
+        for userdata in info:
+
+            user_number += 1
+
+            value_user = userdata[type_id]
 
             if check_image(userdata['profile_pic']):
                 image = userdata['profile_pic']
@@ -297,14 +426,44 @@ def update_ranks(data):
                 image = "icon.ico"
 
             new_block = bs(f'''
-                <div class="row user" style="background-color: {bg};opacity: {op};">
+                <div class="card ms-2 text-center" style="width: {card_size}rem; background-color: {bg}{op} !important;">
+                    <img src="{image}" class="rounded" width="{image_size}px" alt="...">
+                    <div style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">
+                        <p style="font-size: {font_size} !important;color:{font_color} !important; text-align: center; margin:0px;">Posição {user_number}</p>
+                        <p style="font-size: {font_size} !important;color:{font_color} !important; text-align: center; margin:0px;">{userdata['display_name']}</p>
+                        <p style="font-size: {font_size} !important;color:{font_color} !important; text-align: center; margin:0px;">{value_user}</p>
+                    </div>
+                </div>
+            ''', 'html.parser')
+
+            div.append(new_block)
+
+    elif rank_type == "list":
+
+        user_number = 0
+
+        for userdata in info:
+
+            user_number += 1
+
+            value_user = userdata[type_id]
+
+            if check_image(userdata['profile_pic']):
+                image = userdata['profile_pic']
+            else:
+                image = "icon.ico"
+
+
+            new_block = bs(f'''
+                <div class="row user" style="background-color: {bg}{op};">
                     <div class="d-flex col-auto">
-                        <img src="{image}" class="rounded-circle" alt="" width="50px">
+                        <img src="{image}" class="rounded-circle" alt="" width="{image_size}px">
                     </div>            
                     <div class="d-flex col flex-column">
                         <div class="infos">
-                            <p class="username">{userdata['display_name']}</p>
-                            <p class="value">{userdata['likes']} Curtidas</p>
+                            <p style="font-size: {font_size} !important; color: {font_color} !important; margin:0px;">Posição {user_number}</p>
+                            <p style="font-size: {font_size} !important; color: {font_color} !important; margin:0px;">{userdata['display_name']}</p>
+                            <p style="font-size: {font_size} !important; color: {font_color} !important; margin:0px;">{value_user} </p>
                         </div>
                     </div>
                 </div>
@@ -312,118 +471,8 @@ def update_ranks(data):
 
             div.append(new_block)
 
-        return str(soup)
-        
-    elif type_id == "shares":
 
-        bg = ranks_config['shares_bg']
-        op = ranks_config['shares_op']
-
-        with open(f"{local_work('appdata_path')}/html/ranks/shares/shares.html", 'r', encoding='utf-8') as file:
-            content_html = file.read()
-
-            soup = bs(content_html, 'html.parser')
-
-            div = soup.find("div", {"class": f"event_block"})
-
-        for user, userdata in info:
-
-            if check_image(userdata['profile_pic']):
-                image = userdata['profile_pic']
-            else:
-                image = "icon.ico"
-
-            new_block = bs(f'''
-                <div class="row user" style="background-color: {bg};opacity: {op};">
-                    <div class="d-flex col-auto">
-                        <img src="{image}" class="rounded-circle" alt="" width="50px">
-                    </div>            
-                    <div class="d-flex col flex-column">
-                        <div class="infos">
-                            <p class="username">{userdata['display_name']}</p>
-                            <p class="value">{userdata['shares']} Compartilhamentos</p>
-                        </div>
-                    </div>
-                </div>
-            ''', 'html.parser')
-
-            div.append(new_block)
-
-        return str(soup)
-        
-    elif type_id == "gifts":
-
-        bg = ranks_config['gifts_bg']
-        op = ranks_config['gifts_op']
-
-        with open(f"{local_work('appdata_path')}/html/ranks/gifts/gifts.html", 'r', encoding='utf-8') as file:
-            content_html = file.read()
-
-            soup = bs(content_html, 'html.parser')
-
-            div = soup.find("div", {"class": f"event_block"})
-
-        for user, userdata in info:
-
-            if check_image(userdata['profile_pic']):
-                image = userdata['profile_pic']
-            else:
-                image = "icon.ico"
-
-            new_block = bs(f'''
-                <div class="row user" style="background-color: {bg};opacity: {op};">
-                    <div class="d-flex col-auto">
-                        <img src="{image}" class="rounded-circle" alt="" width="50px">
-                    </div>               
-                    <div class="d-flex col flex-column">
-                        <div class="infos">
-                            <p class="username">{userdata['display_name']}</p>
-                            <p class="value">{userdata['gifts']} Presentes</p>
-                        </div>
-                    </div>
-                </div>
-            ''', 'html.parser')
-
-            div.append(new_block)
-
-        return str(soup)
-        
-    elif type_id == "points":
-
-        bg = ranks_config['points_bg']
-        op = ranks_config['points_op']
-
-        with open(f"{local_work('appdata_path')}/html/ranks/points/points.html", 'r', encoding='utf-8') as file:
-            content_html = file.read()
-
-            soup = bs(content_html, 'html.parser')
-
-            div = soup.find("div", {"class": f"event_block"})
-
-        for user, userdata in info:
-
-            if check_image(userdata['profile_pic']):
-                image = userdata['profile_pic']
-            else:
-                image = "icon.ico"
-
-            new_block = bs(f'''
-                <div class="row user" style="background-color: {bg};opacity: {op};">
-                    <div class="d-flex col-auto">
-                        <img src="{image}" class="rounded-circle" alt="" width="50px">
-                    </div>            
-                    <div class="d-flex col flex-column">
-                        <div class="infos">
-                            <p class="username">{userdata['display_name']}</p>
-                            <p class="value">{userdata['points']} Pontos</p>
-                        </div>
-                    </div>
-                </div>
-            ''', 'html.parser')
-
-            div.append(new_block)
-
-        return str(soup)
+    return str(soup)
 
 
 def update_alert(data):
@@ -471,15 +520,15 @@ def update_alert(data):
 
 def update_notif(data):
 
-    notifc_config_Data = manipulate_json(f"{local_work('appdata_path')}/config/notfic.json", "load")
-
-    duration = notifc_config_Data['HTML_REDEEM_TIME']
-
-    message = data['message']
-
-    html_file = f"{local_work('appdata_path')}/html/events/events.html"
-
     try:
+            
+        event_log_config_data = manipulate_json(f"{local_work('appdata_path')}/events/event_log_config.json","load")
+
+        duration = int(event_log_config_data['event-delay'])
+
+        message = data['message']
+
+        html_file = f"{local_work('appdata_path')}/html/events/events.html"
 
         with open(html_file, "r") as html:
             soup = bs(html, 'html.parser')
@@ -487,9 +536,14 @@ def update_notif(data):
         main_div = soup.find("div", {"class": f"enter"})
         main_div['style'] = f"animation-duration: {duration}s;"
 
-        messsage_tag = soup.find("span", {"class": "message"})
+        event_block = soup.find("div", {"class": f"event_block"})
+        event_block['style'] = f"background-color: {event_log_config_data['background-color']};color:{event_log_config_data['text-color']}"
 
-        messsage_tag.string = message
+        messsage_tag = soup.find("span", {"class": "message"})
+        messsage_tag['style'] = f"font-size:{event_log_config_data['font-events-overlay']}px;"
+
+        if message != None:
+            messsage_tag.string = message
 
         return str(soup)
 
@@ -552,13 +606,19 @@ def update_goal(data):
         if data['type_id'] == 'get_html':
 
             type_goal = data['type_goal']
-
+            
             data = {
                 'title_text_value' : goal_data[type_goal]['goal_text'],
-                'outer_bar' : goal_data[type_goal]['outer_bar'],
+                'goal_above' : goal_data[type_goal]['goal_above'],
+                'goal_type' : goal_data[type_goal]['goal_type'],
+                'background_color' : goal_data[type_goal]['outer_bar'],
                 'title_text' : goal_data[type_goal]['title_text'],
+                'goal_style' : goal_data[type_goal]['goal_style'],
+                'text_size' : goal_data[type_goal]['text_size'],
                 'progress_bar' : goal_data[type_goal]['progress_bar'],
+                'background_border' : goal_data[type_goal]['background_border'],
                 'progress_bar_background' : goal_data[type_goal]['progress_bar_background'],
+                'progress_bar_background_opacity' : goal_data[type_goal]['progress_bar_background_opacity'],
             }
 
             return data
@@ -567,33 +627,75 @@ def update_goal(data):
 
             type_goal = data['type_goal']
 
-            path = normpath_simple(f"{local_work('appdata_path')}/html/goal/{type_goal}/goal.html")
-            
+            goal_style = data['goal_style']
+            goal_text_type = data['goal_type']
+            goal_text_value = data['text_value']
+            font_size = data['text_size']
+            goal_above = data['goal_above']
+            background_opacity = data['background_bar_color_opacity']
+            background_color = data['background_color']
+            background_border = data['background_border']
+
+
+            background_opacity = convert_opacity_to_hex(float(background_opacity)) 
+
+            goal_value = goal_data[type_goal]['goal']
+            current_value = goal_data[type_goal]['current']
+
+            if goal_value == 0 or goal_value == None:
+                goal_value = 10
+
+            path = normpath_simple(f"{local_work('appdata_path')}/html/goal/{type_goal}/goal{goal_style}.html")
+
             with open(path, "r") as html:
                 soup = bs(html, 'html.parser')
 
             outer_bar = soup.find("div", {"class": "progress-outer"})
             title_text = soup.find("h3", {"class": "progress-title"})
-            goal_text = soup.find("span", {"id": "progress-title"})
             progress_bar = soup.find("div", {"class": "progress-bar"})
             progress_bar_bg = soup.find("div", {"class": "progress"})
+            progress_bar_width = soup.find("div",{"id": "progress-bar"})
 
-            goal_text.string = data['text_value']
-            outer_bar['style'] = f"background-color: {data['outer_color']}"
-            title_text['style'] = f"color: {data['text_color']}"
-            progress_bar['style'] = f"background-color: {data['bar_color']}"
+
+            if goal_text_type == 'percent':
+                goal_value_inner = f"{(int(current_value)/int(goal_value))*100}%"
+            elif goal_text_type == 'number':
+                goal_value_inner = f"{int(current_value)}/{int(goal_value)}"
+
+            progress_bar_width = (int(current_value)/int(goal_value))*100
+            
+            progress_bar['style'] = f"background-color: {data['bar_color']};width: {progress_bar_width}%;"
+
+            progress_div_list = [1,2,4]
+            if int(goal_style) in progress_div_list:
+
+                percentage = round((int(current_value)/int(goal_value))*100, 1)
+                progress_bar_value_div = soup.find("div",{"class": "progress-value"})
+                progress_bar_value_div.string = f"{percentage}%"
+
+            if goal_above == 1:
+                title_text['style'] = f"display: block !important;color: {data['text_color']};font-size:{font_size}px;"
+                title_text.string = f"{goal_text_value} : {goal_value_inner}"
+            else :
+                title_text['style'] = "display: none !important;"
+
+
+            outer_bar['style'] = f"background-color: {background_color}{background_opacity};border-color: {background_border}{background_opacity} "
             progress_bar_bg['style'] = f"background-color: {data['background_bar_color']}"
 
+            goal_data[type_goal]['goal_style'] = data['goal_style']
+            goal_data[type_goal]['goal_above'] = data['goal_above']
+            goal_data[type_goal]['goal_type'] = data['goal_type']
             goal_data[type_goal]['goal_text'] = data['text_value']
-            goal_data[type_goal]['outer_bar'] = data['outer_color']
             goal_data[type_goal]['title_text'] = data['text_color']
+            goal_data[type_goal]['text_size'] = data['text_size']
             goal_data[type_goal]['progress_bar'] = data['bar_color']
             goal_data[type_goal]['progress_bar_background'] = data['background_bar_color']
+            goal_data[type_goal]['background_color'] = data['background_color']
+            goal_data[type_goal]['background_border'] = data['background_border']
+            goal_data[type_goal]['progress_bar_background_opacity'] = data['background_bar_color_opacity']
 
             manipulate_json(f"{local_work('appdata_path')}/config/goal.json", "save", goal_data)
-
-            with open(path, "w", encoding="utf-8") as html_w:
-                html_w.write(str(soup))
                 
             return str(soup)
         
@@ -601,38 +703,289 @@ def update_goal(data):
 
             type_goal = data['type_goal']
 
-            path = normpath_simple(f"{local_work('appdata_path')}/html/goal/{type_goal}/goal.html")
-            
-            with open(path, "r") as html:
-                soup = bs(html, 'html.parser')
-
 
             data = {
+                'goal' : goal_data[type_goal]['goal'],
+                'current' : goal_data[type_goal]['current'],
                 'text_value' : goal_data[type_goal]['goal_text'],
-                'outer_color' : goal_data[type_goal]['outer_bar'],
+                'text_size' : goal_data[type_goal]['text_size'],
+                'goal_style' : goal_data[type_goal]['goal_style'],
+                'goal_above' : goal_data[type_goal]['goal_above'],
+                'goal_type' : goal_data[type_goal]['goal_type'],
+                'background_color' : goal_data[type_goal]['background_color'],
+                'text_value' : goal_data[type_goal]['goal_text'],
+                'text_size' : goal_data[type_goal]['text_size'],
                 'text_color' : goal_data[type_goal]['title_text'],
                 'bar_color' : goal_data[type_goal]['progress_bar'],
+                'progress_bar_background_opacity' : goal_data[type_goal]['progress_bar_background_opacity'],
+                'background_border' : goal_data[type_goal]['background_border'],
                 'background_bar_color' : goal_data[type_goal]['progress_bar_background'],
             }
 
-            
-            outer_bar = soup.find("div", {"class": "progress-outer"})
-            title_text = soup.find("h3", {"class": "progress-title"})
-            goal_text = soup.find("span", {"id": "progress-title"})
-            progress_bar = soup.find("div", {"class": "progress-bar"})
-            progress_bar_bg = soup.find("div", {"class": "progress"})
+            goal_style = data['goal_style']
 
-            goal_text.string = data['text_value']
-            outer_bar['style'] = f"background-color: {data['outer_color']}"
-            title_text['style'] = f"color: {data['text_color']}"
-            progress_bar['style'] = f"background-color: {data['bar_color']}"
-            progress_bar_bg['style'] = f"background-color: {data['background_bar_color']}"
-
+            path = normpath_simple(f"{local_work('appdata_path')}/html/goal/{type_goal}/goal{goal_style}.html")
 
             with open(path, "r") as html:
                 soup = bs(html, 'html.parser')
+
+            goal_text_value = data['text_value']
+
+            goal_value = data['goal']
+            current_value = data['current']
+
+            if goal_value == 0 or goal_value == None:
+                goal_value = 10
+
+            goal_text_type = data['goal_type']
+            goal_above = data['goal_above']
+            font_size = data['text_size']
+
+            background_opacity = convert_opacity_to_hex(float(data['progress_bar_background_opacity'])) 
+
+            background_color = data['background_color']
+            background_border = data['background_border']
+            
+            outer_bar = soup.find("div", {"class": "progress-outer"})
+            title_text = soup.find("h3", {"class": "progress-title"})
+            progress_bar = soup.find("div", {"class": "progress-bar"})
+            progress_bar_bg = soup.find("div", {"class": "progress"})
+            progress_bar_width = soup.find("div",{"id": "progress-bar"})
+
+            
+            if goal_text_type == 'percent':
+                percentage = round((int(current_value)/int(goal_value))*100, 1)
+                goal_value_inner = f"{percentage}%"
+            elif goal_text_type == 'number':
+                goal_value_inner = f"{int(current_value)}/{int(goal_value)}"
+
+
+            progress_bar_width = (int(current_value)/int(goal_value))*100
+
+            progress_bar['style'] = f"background-color: {data['bar_color']};width: {progress_bar_width}%;"
+
+            progress_div_list = [1,2,4]
+
+            if int(goal_style) in progress_div_list:
+                percentage = round((int(current_value)/int(goal_value))*100, 1)
+                progress_bar_value_div = soup.find("div",{"class": "progress-value"})
+                progress_bar_value_div.string = f"{percentage}%"
+
+            if goal_above == 1:
+                title_text['style'] = f"display: block !important;color: {data['text_color']};font-size:{font_size}px;"
+                title_text.string = f"{goal_text_value} : {goal_value_inner}"
+            else :
+                title_text['style'] = "display: none !important;"
+
+            outer_bar['style'] = f"background-color: {background_color}{background_opacity};border-color: {background_border}{background_opacity} "
+
+            progress_bar_bg['style'] = f"background-color: {data['background_bar_color']}"
+
             
             return str(soup)
+
+    except Exception as e:
+
+        error_log(e)
+
+        return True
+
+
+def create_votes_html(options_data,total_votes):
+
+    style_data = manipulate_json(f"{local_work('appdata_path')}/voting/style.json", "load")
+
+    style = style_data['style']
+
+
+    def create_progress_bar(option_data, percentage):
+
+        style_data = manipulate_json(f"{local_work('appdata_path')}/voting/style.json", "load")
+
+        background_opacity = convert_opacity_to_hex(float(style_data['progress_bar_background_opacity'])) 
+        style = style_data['style']
+
+        percentage = round(percentage, 1)
+
+        if style == "0":
+            html = f"""
+            <div class="progress-outer" style="background-color: {style_data['background_color']}{background_opacity}">
+                <h3 class="progress-title" style="color: {style_data['text_color']}; font-size: {style_data['text_size']}px">{option_data['name']} : {option_data['votes']} Votos | {percentage}%</h3>
+                <div class="progress" style="background-color: {style_data['progress_bar_background']}">
+                    <div class="progress-bar progress-bar-striped" id="progress-bar" style="background-color: {style_data['progress_bar']}; width: {percentage}%">
+                    </div>
+                </div>
+            </div>
+            """
+
+        elif style == "1":
+            html = f"""
+            <div class="progress-outer" style="background-color: {style_data['background_color']}{background_opacity}">
+                <h3 class="progress-title" style="color: {style_data['text_color']}; font-size: {style_data['text_size']}px">{option_data['name']} : {option_data['votes']} Votos | {percentage}%</h3>
+                <div class="progress-outer-bar">
+                    <div class="progress" style="background-color: {style_data['progress_bar_background']}">
+                        <div class="progress-bar progress-bar-striped progress-bar-info" id="progress-bar" style="background-color: {style_data['progress_bar']}; width: {percentage}%">
+                            <div class="progress-value">{percentage}>%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            """
+        elif style == "2":
+            html = f"""
+            <div class="progress-outer" style="background-color: {style_data['background_color']}{background_opacity}">
+                <h3 class="progress-title" style="color: {style_data['text_color']}; font-size: {style_data['text_size']}px">{option_data['name']} : {option_data['votes']} Votos | {percentage}%</h3>
+                <div class="progress" style="background-color: {style_data['progress_bar_background']}">
+                    <div class="progress-bar progress-bar-striped progress-bar-info active" id="progress-bar" style="background-color: {style_data['progress_bar']}; width: {option_data['votes']}%">
+                        <div class="progress-value">{percentage}%</div>
+                    </div>
+                </div>
+            </div>
+            """
+        elif style == "3":
+            html = f"""
+            <div class="progress-outer" style="background-color: {style_data['background_color']}{background_opacity}">
+                <h3 class="progress-title" style="color: {style_data['text_color']}; font-size: {style_data['text_size']}px">{option_data['name']} : {option_data['votes']} Votos | {percentage}%</h3>
+                <div class="progress" style="background-color: {style_data['progress_bar_background']}">
+                    <div class="progress-bar progress-bar-info active" id="progress-bar" style="background-color: {style_data['progress_bar']}; width: {percentage}%">
+                    </div>
+                </div>
+            </div>
+            """
+        elif style == "4":
+            html = f"""
+            <div class="progress-outer" style="background-color: {style_data['background_color']}{background_opacity}">
+                <h3 class="progress-title" style="color: {style_data['text_color']}; font-size: {style_data['text_size']}px">{option_data['name']} : {option_data['votes']} Votos | {percentage}%</h3>
+                <div class="progress" style="background-color: {style_data['progress_bar_background']}">
+                    <div class="progress-bar" id="progress-bar" style="background-color: {style_data['progress_bar']}; width: {percentage}%">
+                        <div class="progress-value">{percentage}%</div>
+                    </div>
+                </div>
+            </div>
+            """
+        elif style == "5":
+            html = f"""
+            <div class="progress-outer" style="background-color: {style_data['background_color']}{background_opacity}">
+                <h3 class="progress-title" style="color: {style_data['text_color']}; font-size: {style_data['text_size']}px">{option_data['name']} : {option_data['votes']} Votos | {percentage}%</h3>
+                <div class="progress">
+                    <div class="progress-bar" id="progress-bar" style="border-top-color: {style_data['progress_bar']}; width: {percentage}%">
+                    </div>
+                </div>
+            </div>
+            """
+
+        return html
+
+    def extract_style_tag(style):
+
+        path = f"{local_work('appdata_path')}/html/voting/voting{style}.html"
+
+        with open(path, "r") as html_file:
+            soup = bs(html_file, 'html.parser')
+            style_tag = soup.find('style')
+        
+        return style_tag
+
+
+    final_html = """
+    <html>
+    <head>
+        <meta charset="utf-8" />
+        <meta content="IE=edge" http-equiv="X-UA-Compatible" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css?family=Kanit" rel="stylesheet" />
+        <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"></script>
+        <title>Event</title>
+    </head>
+    """
+
+    style_tag = extract_style_tag(style)
+    final_html += f"\n    {style_tag}"
+
+    final_html += """
+
+    <body>
+    """
+
+    for option_name, option_data in options_data.items():
+
+        votes = option_data['votes']
+        percentage = (votes / total_votes) * 100
+        html = create_progress_bar(option_data,percentage)
+        final_html += f"\n    {html}"
+
+
+    final_html += """
+    </body>
+    </html>
+    """
+
+    return final_html
+
+
+def update_votes(data):
+
+    config_data = manipulate_json(f"{local_work('appdata_path')}/voting/style.json", "load")
+
+    try:
+
+        if data['type_id'] == 'get_html':
+
+            
+            data = {
+                'style' : config_data['style'],
+                'text_size' : config_data['text_size'],
+                'text_color' : config_data['text_color'],
+                'progress_bar' : config_data['progress_bar'],
+                'background_color' : config_data['background_color'],
+                'background_border' : config_data['background_border'],
+                'progress_bar_background' : config_data['progress_bar_background'],
+                'progress_bar_background_opacity' : config_data['progress_bar_background_opacity'],
+            }
+
+            return data
+        
+        elif data['type_id'] == 'save_html':
+
+            config_data['style'] = data['style']
+            config_data['text_color'] = data['text_color']
+            config_data['text_size'] = data['text_size']
+            config_data['progress_bar'] = data['bar_color']
+            config_data['progress_bar_background'] = data['background_bar_color']
+            config_data['background_color'] = data['background_color']
+            config_data['background_border'] = data['background_border']
+            config_data['progress_bar_background_opacity'] = data['background_bar_color_opacity']
+
+            manipulate_json(f"{local_work('appdata_path')}/voting/style.json", "save", config_data)
+
+            options_data = manipulate_json(f"{local_work('appdata_path')}/voting/votesEx.json", "load")
+            total_votes = len(options_data['voted'])
+
+            html = create_votes_html(options_data['options'], total_votes)
+                
+            return html
+        
+        elif data['type_id'] == 'update_votes':
+
+            data = {
+                'style' : config_data['style'],
+                'text_size' : config_data['text_size'],
+                'text_color' : config_data['text_color'],
+                'bar_color' : config_data['progress_bar'],
+                'background_border' : config_data['background_border'],
+                'background_bar_color' : config_data['progress_bar_background'],
+                'background_color' : config_data['background_color'],
+                'progress_bar_background_opacity' : config_data['progress_bar_background_opacity']
+            }
+
+            options_data = manipulate_json(f"{local_work('appdata_path')}/voting/votes.json", "load")
+            total_votes = len(options_data['voted'])
+
+            html = create_votes_html(options_data['options'], total_votes)
+
+            return html
 
     except Exception as e:
 
@@ -644,98 +997,133 @@ def update_goal(data):
 def replace_all(text, dic_res):
 
     try:
-        for i, j in dic_res.items():
-            text = text.replace(str(i), str(j))
+        
+        if isinstance(text, dict):
 
-        return text
+            error_log(f"{dic_res} - Dicionario com erro para replace.")
+            return None
+        
+        else:
+
+            if not text == None:
+                for i, j in dic_res.items():
+                    text = text.replace(str(i), str(j))
+            return text
 
     except Exception as e:
-        error_log(e)
 
-        return ''
+        error_log(e)
+        return text
 
 
 def messages_file_load(key):
 
-    with open(f"{local_work('appdata_path')}/messages/messages_file.json", "r", encoding='utf-8') as messages_file:
-        messages_data = json.load(messages_file)
+    messages_data = manipulate_json(f"{local_work('appdata_path')}/messages/messages_file.json", "load")
 
-    message = messages_data[key]
+    data = messages_data[key]
 
-    return message
+    return data
 
 
 def compare_and_insert_keys():
-    
+
     source_directory = f"{local_work('datadir')}/web/src"
     destination_directory = f"{local_work('appdata_path')}"
 
-    if not os.path.exists(destination_directory):
+    try:
 
-        shutil.copytree(source_directory, destination_directory)
+        if not os.path.exists(destination_directory):
 
-    def update_dict_recursive(dest_dict, source_dict):
-        for key, value in source_dict.items():
-            if key in dest_dict:
-                if isinstance(value, dict) and isinstance(dest_dict[key], dict):
-                    update_dict_recursive(dest_dict[key], value)
-            else:
-                dest_dict[key] = value
-                error_log(f"Chave '{key}' atualizada: {value}")
+            shutil.copytree(source_directory, destination_directory)
 
-    for root_directory, _, files in os.walk(source_directory):
+        path_giveaway = f"{local_work('appdata_path')}/html/giveaway"
+        path_follow = f"{local_work('appdata_path')}/html/goal/follow"
+        path_highlighted = f"{local_work('appdata_path')}/html/goal/follow"
+        path_ranks = f"{local_work('appdata_path')}/html/ranks"
+        path_tts = f"{local_work('appdata_path')}/temp/"
+
+        if os.path.exists(path_tts):
+
+            shutil.rmtree(path_tts)
         
-        for file in files:
+        if os.path.exists(path_follow):
 
-            if file.endswith('.json') and not file.endswith('gifts.json'):
+            shutil.rmtree(path_follow)
+        
+        if os.path.exists(path_giveaway):
 
-                source_file_path = os.path.join(root_directory, file)
-                destination_file_path = source_file_path.replace(source_directory, destination_directory)
+            shutil.rmtree(path_giveaway)
+        
+        if os.path.exists(path_highlighted):
 
-                if not os.path.exists(destination_file_path):
-                    error_log(f"File missing in the destination directory: {destination_file_path}")
-                    shutil.copy2(source_file_path, destination_file_path)
+            shutil.rmtree(path_highlighted)
 
-                try:
-                    with open(source_file_path, 'r', encoding='utf-8') as src_file, open(destination_file_path, 'r+', encoding='utf-8') as dest_file:
-                        data1 = json.load(src_file)
-                        data2 = json.load(dest_file)
+        if os.path.exists(path_ranks):
 
-                        if isinstance(data1, dict) and isinstance(data2, dict):
-                            update_dict_recursive(data2, data1)
-                            dest_file.seek(0)
-                            json.dump(data2, dest_file, indent=4, ensure_ascii=False)
-                            dest_file.truncate()
+            shutil.rmtree(path_ranks)
 
-                except json.JSONDecodeError as e:
-                    error_log(f"Error decoding the source JSON file: {source_file_path}")
+        for root, dirs, files in os.walk(source_directory):
+            
+            relative_path = os.path.relpath(root, source_directory)
+            destination_path = os.path.join(destination_directory, relative_path)
 
+            if not os.path.exists(destination_path):
+                os.makedirs(destination_path)
 
-    for root_directory, dirs, files in os.walk(destination_directory):
+            for file in files:
+                source_file = os.path.join(root, file)
+                destination_file = os.path.join(destination_path, file)
 
-        for d in dirs:
+                if not os.path.exists(destination_file):
+                    shutil.copy2(source_file, destination_file)
 
-            destination_path = os.path.join(root_directory, d)
-            source_path = destination_path.replace(destination_directory, source_directory)
+        def update_dict_recursive(dest_dict, source_dict):
+            
+            for key, value in source_dict.items():
 
-            if not os.path.exists(source_path):
-                if os.path.isdir(destination_path):
-                    error_log(f"File or directory in the destination directory that is not in the source directory: {destination_path}")
-                    shutil.rmtree(destination_path)
+                if key in dest_dict:
 
-        for file in files:
+                    if isinstance(value, dict) and isinstance(dest_dict[key], dict):
+                        update_dict_recursive(dest_dict[key], value)
 
-            destination_path = os.path.join(root_directory, file)
-            source_path = destination_path.replace(destination_directory, source_directory)
+                else:
 
-            if not os.path.exists(source_path):
-                if os.path.isfile(destination_path):
-                    error_log(f"File in the destination directory that is not in the source directory: {destination_path}")
-                    os.remove(destination_path)
+                    dest_dict[key] = value
 
+        for root_directory, _, files in os.walk(source_directory):
+            
+            for file in files:
 
-    return True
+                if file.endswith('.json') and not file.endswith('gifts.json'):
 
+                    source_file_path = os.path.join(root_directory, file)
+                    destination_file_path = source_file_path.replace(source_directory, destination_directory)
+
+                    try:
+
+                        with open(source_file_path, 'r', encoding='utf-8') as src_file, open(destination_file_path, 'r+', encoding='utf-8') as dest_file:
+                            
+                            data1 = json.load(src_file)
+                            data2 = json.load(dest_file)
+
+                            if isinstance(data1, dict) and isinstance(data2, dict):
+                                update_dict_recursive(data2, data1)
+                                dest_file.seek(0)
+                                json.dump(data2, dest_file, indent=4, ensure_ascii=False)
+                                dest_file.truncate()
+
+                    except json.JSONDecodeError as e:
+
+                        error_log(f"Error decoding the source JSON file: {source_file_path}")
+
+        return True
+    
+    except Exception as e:
+
+        error_message = f"Erro ao criar os arquivos internos {str(e)}."
+        messagebox.showerror("Erro", error_message)
+
+        return False
 
 def normpath_simple(path):
     
@@ -748,9 +1136,12 @@ def normpath_simple(path):
 
 def update_dict_gifts(dict_b):
 
-    dict_a_load = manipulate_json(f"{local_work('appdata_path')}/config/gifts.json","load")
-    dict_a = dict_a_load["gifts"]
+    dict_a_load = manipulate_json(f"{local_work('appdata_path')}/gifts/gifts.json","load")
 
+    dict_copy = dict_a_load.copy()
+    dict_a = dict_copy["gifts"]
+
+    itens_to_remove = []
 
     if not dict_a:
         dict_a.update(dict_b)
@@ -758,25 +1149,50 @@ def update_dict_gifts(dict_b):
         for id_, item_a in dict_a.items():
 
             if id_ in dict_b:
+                
                 item_b = dict_b[id_]
 
                 if item_a['name'] != item_b['name']:
-                    print(f"Atualizado 'name' para {id_}")
+
                     dict_a[id_]['name'] = item_b['name']
 
                 if item_a['value'] != item_b['value']:
-                    print(f"Atualizado 'value' para {id_}")
+
                     dict_a[id_]['value'] = item_b['value']
-                
+
                 if item_a['icon'] != item_b['icon']:
-                    print(f"Atualizado 'value' para {id_}")
+
                     dict_a[id_]['icon'] = item_b['icon']
+                
+                if not "time" in item_a:
+                    item_a['time'] = "00:00:00"
+
+                if "minutes" in item_a:
+                    del item_a['minutes']
+
+                if not "keys" in item_a:
+                    item_a['keys'] = []
+                
+                if not "key_status" in item_a:
+                    item_a['key_status'] = 0
+
+                if not "key_time" in item_a:
+                    item_a['key_time'] = 0
+
+                if not "status_subathon" in item_a:
+                    item_a['status_subathon'] = 0
 
             else:
-                print(f"Removendo item para {id_}")
-                del dict_a[id_]
 
-    manipulate_json(f"{local_work('appdata_path')}/config/gifts.json","save",dict_a_load)
+                itens_to_remove.append(id_)
+
+    for id_ in itens_to_remove:
+
+        del dict_a[id_]
+
+    manipulate_json(f"{local_work('appdata_path')}/gifts/gifts.json", "save", dict_a_load)
+
+    return True
 
 
 def check_file(file):
@@ -789,4 +1205,10 @@ def check_file(file):
         return True
     
     except Exception as e:
+
         return False
+    
+
+#dict_b_load = manipulate_json(f"{local_work('appdata_path')}/gifts/gifts.json","load")
+
+#update_dict_gifts(dict_b_load["gifts"])

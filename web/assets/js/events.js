@@ -62,7 +62,7 @@ function append_notice(data){
 
       message_user_inp = `${message_rec} <br><span class='small events-sub-color'>Mensagem : ${user_input}</span>`
 
-      message_span.innerHTML = user_input == "" ? message_rec : message_user_inp;
+      message_span.innerHTML = user_input == null || user_input == "" ? message_rec : message_user_inp;
 
       
       message_div = document.createElement('div');
@@ -103,7 +103,7 @@ function append_notice(data){
 
       var message_user_inp = `${message_rec} <br><span class='small events-sub-color'>Mensagem : ${user_input}</span>`
 
-      message_span.innerHTML = user_input == "" ? message_rec : message_user_inp;
+      message_span.innerHTML = user_input == null || user_input == "" ? message_rec : message_user_inp;
 
       message_div = document.createElement('div');
 
@@ -217,8 +217,6 @@ async function start_events_log(div_id) {
 
     var list = EventsParse['event-list'];
 
-    list.reverse();
-
     div_events.innerHTML = "";
 
     if (div_id == 'div-events') {
@@ -231,72 +229,75 @@ async function start_events_log(div_id) {
       var message_rec = list[i].message;
       var type_message = list[i].type;
       var user_input = list[i].user_input;
+      
+      if (message_rec != null){
 
-      var colorEvents = EventsParse["color-events"];
-      var ShowData = EventsParse["data-show-events"];
-
-      var showEvents = EventsParse["show-events"];
-      var showCommands = EventsParse["show-commands"];
-      var showMusic = EventsParse["show-music"];
-      var showFollow = EventsParse["show-follow"];
-      var showLikes = EventsParse["show-likes"];
-      var showGifts = EventsParse["show-gifts"];
-      var showChest = EventsParse["show-chest"];
-      var showStartGoal = EventsParse["show-goal-start"];
-      var showEndGoal = EventsParse["show-goal-end"];
-      var showShare = EventsParse["show-share"];
-      var showJoin = EventsParse["show-join"];
-
-
-      var message_span = document.createElement('span');
-      message_span.id = "message-chat";
-      message_span.style.color = colorEvents;
-
-      var message_user_inp = `${message_rec} <br><span class='small events-sub-color'>Mensagem : ${user_input}</span>`
-      message_span.innerHTML = user_input == "" ? message_rec : message_user_inp;
-
-      message_div = document.createElement('div');
-
-      if (ShowData == 1){
-
-        var time_chat = document.createElement("span");
-
-        time_chat.setAttribute('data-passed',dateString)
-        time_chat.classList.add("event-time-current");
-        time_chat.innerHTML = GetDateEvents(dateString);
-
-        message_div.appendChild(time_chat);
-
-      }
-
-      message_div.appendChild(message_span);
-
-      var div_event = document.createElement("div");
-
-      div_event.id = 'recent-message-block';
-      div_event.classList.add('chat-message', 'event-message');
-      div_event.style.fontSize = "16px";
-
-      div_event.appendChild(message_div);
-
-      const variableMappings = {
-        "music": showMusic,
-        "command": showCommands,
-        "event": showEvents,
-        "follow": showFollow,
-        "like": showLikes,
-        "gift": showGifts,
-        "chest": showChest,
-        "share": showShare,
-        "join": showJoin,
-        "goal_start" : showStartGoal,
-        "goal_end": showEndGoal,
-      };
+        var colorEvents = EventsParse["color-events"];
+        var ShowData = EventsParse["data-show-events"];
   
-      console.log(variableMappings[type_message])
-      if (variableMappings[type_message] == 1) {
+        var showEvents = EventsParse["show-events"];
+        var showCommands = EventsParse["show-commands"];
+        var showMusic = EventsParse["show-music"];
+        var showFollow = EventsParse["show-follow"];
+        var showLikes = EventsParse["show-likes"];
+        var showGifts = EventsParse["show-gifts"];
+        var showChest = EventsParse["show-chest"];
+        var showStartGoal = EventsParse["show-goal-start"];
+        var showEndGoal = EventsParse["show-goal-end"];
+        var showShare = EventsParse["show-share"];
+        var showJoin = EventsParse["show-join"];
+  
+  
+        var message_span = document.createElement('span');
+        message_span.id = "message-chat";
+        message_span.style.color = colorEvents;
+  
+        var message_user_inp = `${message_rec} <br><span class='small events-sub-color'>Mensagem : ${user_input}</span>`
+       
+        message_span.innerHTML = user_input == null || user_input == "" ? message_rec : message_user_inp;
+  
+        message_div = document.createElement('div');
+  
+        if (ShowData == 1){
+  
+          var time_chat = document.createElement("span");
+  
+          time_chat.setAttribute('data-passed',dateString)
+          time_chat.classList.add("event-time-current");
+          time_chat.innerHTML = GetDateEvents(dateString);
+  
+          message_div.appendChild(time_chat);
+  
+        }
+  
+        message_div.appendChild(message_span);
+  
+        var div_event = document.createElement("div");
+  
+        div_event.id = 'recent-message-block';
+        div_event.classList.add('chat-message', 'event-message');
+        div_event.style.fontSize = "16px";
+  
+        div_event.appendChild(message_div);
+  
+        const variableMappings = {
+          "music": showMusic,
+          "command": showCommands,
+          "event": showEvents,
+          "follow": showFollow,
+          "like": showLikes,
+          "gift": showGifts,
+          "chest": showChest,
+          "share": showShare,
+          "join": showJoin,
+          "goal_start" : showStartGoal,
+          "goal_end": showEndGoal,
+        };
+
+        if (variableMappings[type_message] == 1) {
         
-        div_events.appendChild(div_event);
+          div_events.appendChild(div_event);
+        }
       }
           
     }

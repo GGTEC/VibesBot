@@ -1,0 +1,10 @@
+{
+    "style": "0",
+    "text_size": 18,
+    "text_color" : "#ffffff",
+    "progress_bar": "#3f0365",
+    "background_color": "#000000",
+    "progress_bar_background": "#ffffff",
+    "background_border": "#ffffff",
+    "progress_bar_background_opacity": 1
+}

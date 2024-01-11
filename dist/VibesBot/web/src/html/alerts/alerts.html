@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="IE=edge" http-equiv="X-UA-Compatible" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+
+    <link href="https://fonts.googleapis.com/css?family=Kanit" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <title>Event</title>
+</head>
+<style>
+    body {
+        background-color: transparent;
+        overflow: hidden;
+        font-family: 'Kanit';
+    }
+
+    .event_block {
+        border: 2px solid #927aac;
+        border-left: 5px solid #927aac;
+        width: 100vw;
+        height: 100vh;
+        background-color: black;
+        padding: 1%;
+    }
+
+    p {
+        color: #fff;
+        text-align: left;
+        margin: 0%;
+        max-width: 100%;
+        overflow: hidden;
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .enter {
+
+        animation: fade-in 1.2s cubic-bezier(0.390, 0.575, 0.565, 1.000) both;
+    }
+
+
+    @keyframes fade-in {
+        0% {
+            opacity: 0;
+        }
+
+        10% {
+            opacity: 1;
+        }
+
+        90% {
+            opacity: 1;
+        }
+
+        100% {
+            opacity: 0;
+        }
+    }
+</style>
+
+<body>
+    <div class="enter event_block d-flex align-items-center justify-content-center">
+        <div class="card bg-transparent">
+            <img src="../../profile.png" class="rounded img" width="200px" />
+            <div class="card-body text-center mt-5">
+                <p class="text-center"><span class="message" style="font-size: 30px;">TEXT</span></p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

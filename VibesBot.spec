@@ -8,7 +8,7 @@ a = Analysis(
     ['VibesBot.py'],
     pathex=[],
     binaries=[],
-    datas=[('./web', 'web')],
+    datas=[('.env', '.'),('./web', 'web')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

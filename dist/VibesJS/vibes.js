@@ -1,6 +1,6 @@
 const { WebcastPushConnection } = require('./node/node_modules/tiktok-live-connector');
 const fs = require('fs');
-const WebSocket = require('ws');
+const WebSocket = require('./node/node_modules/ws');
 
 let username
 let sessionId
@@ -32,6 +32,7 @@ const wss = new WebSocket.Server({ port: 7788 });
 wss.on('connection', (ws) => {
 
     if (connectedClient === null) {
+
         connectedClient = ws;
         ws.on('close', () => {
             connectedClient = null;
@@ -83,10 +84,6 @@ function sendWebsocket(message) {
     if (connectedClient && connectedClient.readyState === WebSocket.OPEN) {
         connectedClient.send(JSON.stringify(message));
     }
-
-    if (message.type == "follow_event" || message.type == "error_event"){
-        console.log(message)
-    }
 }
 
 let tiktokLiveConnection = new WebcastPushConnection(username, {
@@ -100,7 +97,6 @@ let tiktokLiveConnection = new WebcastPushConnection(username, {
         "device_platform": "web"
     },
     sessionId: sessionId
-
 });
 
 
@@ -242,7 +238,8 @@ tiktokLiveConnection.on('chat', data => {
 
         const message = {
             type: "comment_event",
-            uniqueId: data.uniqueId,
+            userid: data.userId,
+            username: data.uniqueId,
             nickname: data.nickname,
             comment: data.comment,
             is_following: is_following,
@@ -252,6 +249,8 @@ tiktokLiveConnection.on('chat', data => {
             is_top_gifter: data.topGifterRank,
             profilePictureUrl: data.profilePictureUrl,
         };
+
+        console.log(message)
 
         sendWebsocket(message);
 
@@ -275,7 +274,8 @@ tiktokLiveConnection.on('gift', data => {
 
         const message = {
             type: "gift_event",
-            uniqueId: data.uniqueId,
+            userid: data.userId,
+            username: data.uniqueId,
             nickname: data.nickname,
             is_following: is_following,
             is_moderator: data.isModerator,
@@ -310,7 +310,8 @@ tiktokLiveConnection.on('like', data => {
 
         const message = {
             type: "like_event",
-            uniqueId: data.uniqueId,
+            userid: data.userId,
+            username: data.uniqueId,
             nickname: data.nickname,
             likes: data.likeCount,
             total_likes: data.totalLikeCount,
@@ -335,7 +336,8 @@ tiktokLiveConnection.on('member', data => {
     try {
         const message = {
             type: "join_event",
-            uniqueId: data.uniqueId,
+            userid: data.userId,
+            username: data.uniqueId,
             nickname: data.nickname,
             profilePictureUrl: data.profilePictureUrl,
         };
@@ -360,9 +362,9 @@ tiktokLiveConnection.on('roomUser', data => {
             userinfo = user.user;
 
             user_info = {
-                userId: userinfo.userId,
-                uniqueId: userinfo.uniqueId,
-                nickname: userinfo.nickname,
+                userid: data.userId,
+                username: data.uniqueId,
+                nickname: data.nickname,
                 profilePictureUrl: userinfo.profilePictureUrl,
                 followRole: userinfo.followRole,
                 userBadges: userinfo.userBadges,
@@ -393,8 +395,8 @@ tiktokLiveConnection.on('envelope', data => {
     try {
         const message = {
             type: "envelope_event",
-            userId: data.userId,
-            uniqueId: data.uniqueId,
+            userid: data.userId,
+            username: data.uniqueId,
             nickname: data.nickname,
             profilePictureUrl: data.profilePictureUrl,
             followRole: data.followRole,
@@ -423,7 +425,8 @@ tiktokLiveConnection.on('share', (data) => {
 
         const message = {
             type: "share_event",
-            uniqueId: data.uniqueId,
+            userid: data.userId,
+            username: data.uniqueId,
             nickname: data.nickname,
             profilePictureUrl: data.profilePictureUrl,
             is_following: is_following,
@@ -447,7 +450,8 @@ tiktokLiveConnection.on('follow', async (data) => {
 
         const message = {
             type: "follow_event",
-            uniqueId: data.uniqueId,
+            userid: data.userId,
+            username: data.uniqueId,
             nickname: data.nickname,
             profilePictureUrl: data.profilePictureUrl,
             is_following: is_following,

@@ -1,13 +1,13 @@
 {
     "status" : 1,
     "interval" : 10,
-    "likes_bg": "",
-    "likes_op": "",
-    "gifts_bg": "",
-    "gifts_op": "",
-    "shares_bg": "",
-    "shares_op": "",
-    "points_bg": "",
-    "points_op": ""
-
+    "max_users" : 3,
+    "rank_type" : "list",
+    "rank_side" : 1,
+    "font_size" :"12",
+    "font_color" : "#ffffff",
+    "card_size" : "10",
+    "image_size" : "70",
+    "bg": "#2e0f48",
+    "op": 1
 }

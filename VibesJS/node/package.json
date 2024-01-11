@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "socket.io-client": "^4.7.2",
-    "tiktok-live-connector": "^1.0.5"
-  }
-}

@@ -1,0 +1,13 @@
+{
+    "status": 0,
+    "command": "!voz",
+    "user_level": [
+        "follow"
+    ],
+    "delay": "60",
+    "last_use": 1704837956,
+    "cost_type": "likes",
+    "cost": "100",
+    "cost_status": 1,
+    "prefix": 0
+}
