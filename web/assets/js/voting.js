@@ -1,6 +1,6 @@
 async function votes(type_id) {
 
-    if (type_id == 'save_commands') {
+    if (type_id == 'save_command') {
 
         var command_status = document.getElementById('command-vote-status');
         var command_command = document.getElementById('vote-command');
@@ -8,8 +8,11 @@ async function votes(type_id) {
         var command_cost_status = document.getElementById('command-cost-status-vote');
         var command_cost = document.getElementById('command-cost-vote');
 
+        var command_whitelistStatus = document.getElementById('whitelist-status-vote');
+
         var command_status = command_status.checked ? 1 : 0;
         var command_cost_status = command_cost_status.checked ? 1 : 0;
+        var command_whitelistStatus = command_whitelistStatus.checked ? 1 : 0;
 
         var roles = [];
 
@@ -19,19 +22,22 @@ async function votes(type_id) {
 
         data = {
             type_id: type_id,
+            type_command : 'voting',
+            type_command_table: 'vote',
             command: command_command.value,
             status: command_status,
             delay: command_delay.value,
             user_level: roles,
             cost: command_cost.value,
-            cost_status: command_cost_status
+            cost_status: command_cost_status,
+            whitelist_status: command_whitelistStatus,
         }
 
         var formData = JSON.stringify(data);
 
-        window.pywebview.api.votes(formData)
+        window.pywebview.api.commands_default_py(formData)
 
-    } else if (type_id == 'get_commands') {
+    } else if (type_id == 'get_command') {
 
         var command_status = document.getElementById('command-vote-status');
         var command_command = document.getElementById('vote-command');
@@ -39,20 +45,23 @@ async function votes(type_id) {
         var command_cost_status = document.getElementById('command-cost-status-vote');
         var command_cost = document.getElementById('command-cost-vote');
 
+        var command_whitelistStatus = document.getElementById('whitelist-status-vote');
+
         data = {
-            type_id: type_id,
+            type_id : type_id,
+            type_command : "voting",
+            type_command_table: 'vote'
         }
 
-        var parse = await window.pywebview.api.votes(JSON.stringify(data));
+        var parse = await window.pywebview.api.commands_default_py(data);
 
         if (parse) {
-
-            parse = JSON.parse(parse)
 
             command_cost_get('vote', parse.cost_status)
 
             command_cost_status.checked = parse.cost_status == 1 ? true : false;
             command_status.checked = parse.status == 1 ? true : false;
+            command_whitelistStatus.checked = parse.whitelist_status == 1 ? true : false;
             command_command.value = parse.command
             command_delay.value = parse.delay
             command_cost.value = parse.cost

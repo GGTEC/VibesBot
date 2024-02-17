@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import time
 import threading
 import json
@@ -27,6 +28,7 @@ class WebSocketServer:
             'event': {},
             'tiktok': {},
             'alert' : {},
+            'alertvideo' : {},
             'votes': {},
             'giveaway': {},
             'rank_likes': {},
@@ -154,7 +156,7 @@ class WebSocketServer:
         message_type = json_data['type']
 
         types_goal = ['likes','gift','share','diamonds','max_viewer','follow']
-        types_normal = ['music','event','alert','rank_likes','rank_gifts','rank_shares','rank_points','votes', 'clock', 'highlighted']
+        types_normal = ['music','event','alert','alertvideo','rank_likes','rank_gifts','rank_shares','rank_points','votes', 'clock', 'highlighted']
 
         if message_type in types_goal:
 

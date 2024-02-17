@@ -204,13 +204,14 @@ function GetDateEvents(dateString){
 async function start_events_log(div_id) {
 
   var div_events = document.getElementById(div_id);
+  let messagesAddedCount = 0;
 
   data = {
     type_id : "get"
   }
 
   var Events = await window.pywebview.api.event_log(JSON.stringify(data));
-
+  
   if (Events) {
 
     EventsParse = JSON.parse(Events);
@@ -219,16 +220,12 @@ async function start_events_log(div_id) {
 
     div_events.innerHTML = "";
 
-    if (div_id == 'div-events') {
-      var max = list.length < 5 ? list.length : 5;
-    }
+    list.forEach((event) => {
 
-    for (var i = 0; i < max; i++) {
-
-      var dateString = list[i].timestamp;
-      var message_rec = list[i].message;
-      var type_message = list[i].type;
-      var user_input = list[i].user_input;
+      var dateString = event.timestamp;
+      var message_rec = event.message;
+      var type_message = event.type;
+      var user_input = event.user_input;
       
       if (message_rec != null){
 
@@ -247,39 +244,6 @@ async function start_events_log(div_id) {
         var showShare = EventsParse["show-share"];
         var showJoin = EventsParse["show-join"];
   
-  
-        var message_span = document.createElement('span');
-        message_span.id = "message-chat";
-        message_span.style.color = colorEvents;
-  
-        var message_user_inp = `${message_rec} <br><span class='small events-sub-color'>Mensagem : ${user_input}</span>`
-       
-        message_span.innerHTML = user_input == null || user_input == "" ? message_rec : message_user_inp;
-  
-        message_div = document.createElement('div');
-  
-        if (ShowData == 1){
-  
-          var time_chat = document.createElement("span");
-  
-          time_chat.setAttribute('data-passed',dateString)
-          time_chat.classList.add("event-time-current");
-          time_chat.innerHTML = GetDateEvents(dateString);
-  
-          message_div.appendChild(time_chat);
-  
-        }
-  
-        message_div.appendChild(message_span);
-  
-        var div_event = document.createElement("div");
-  
-        div_event.id = 'recent-message-block';
-        div_event.classList.add('chat-message', 'event-message');
-        div_event.style.fontSize = "16px";
-  
-        div_event.appendChild(message_div);
-  
         const variableMappings = {
           "music": showMusic,
           "command": showCommands,
@@ -295,12 +259,49 @@ async function start_events_log(div_id) {
         };
 
         if (variableMappings[type_message] == 1) {
+  
+          var message_span = document.createElement('span');
+          message_span.id = "message-chat";
+          message_span.style.color = colorEvents;
+    
+          var message_user_inp = `${message_rec} <br><span class='small events-sub-color'>Mensagem : ${user_input}</span>`
         
+          message_span.innerHTML = user_input == null || user_input == "" ? message_rec : message_user_inp;
+    
+          message_div = document.createElement('div');
+    
+          if (ShowData == 1){
+    
+            var time_chat = document.createElement("span");
+    
+            time_chat.setAttribute('data-passed',dateString)
+            time_chat.classList.add("event-time-current");
+            time_chat.innerHTML = GetDateEvents(dateString);
+    
+            message_div.appendChild(time_chat);
+    
+          }
+    
+          message_div.appendChild(message_span);
+    
+          var div_event = document.createElement("div");
+    
+          div_event.id = 'recent-message-block';
+          div_event.classList.add('chat-message', 'event-message');
+          div_event.style.fontSize = "16px";
+    
+          div_event.appendChild(message_div);
           div_events.appendChild(div_event);
+
+          messagesAddedCount++;
+        }
+
+        if (messagesAddedCount >= 5) {
+          return;
         }
       }
           
-    }
+    });
   }
 }
 

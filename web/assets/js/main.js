@@ -25,7 +25,7 @@ window.addEventListener('pywebviewready',async function() {
       
       progressBar_start.style.width = `0%`;
     
-      var functionsCount = 18;
+      var functionsCount = 20;
       var functionsExecuted = 0; 
 
       $('[data-toggle="tooltip"]').tooltip();
@@ -36,81 +36,84 @@ window.addEventListener('pywebviewready',async function() {
       progressBar_start.style.width = `${functionsExecuted * (100 / functionsCount)}%`; //atualize o progresso
       progress_span.innerHTML = 'Tooltips, inputs.'
 
+      get_version()
+      
+      functionsExecuted++;
+      progressBar_start.style.width = `${functionsExecuted * (100 / functionsCount)}%`; //atualize o progresso
+      progress_span.innerHTML = 'Start version.'
+
+      start_scroll_chat_log()
+
       functionsExecuted++;
       progressBar_start.style.width = `${functionsExecuted * (100 / functionsCount)}%`; //atualize o progresso
       progress_span.innerHTML = 'Start chat.'
-  
-      var disclosure = await window.pywebview.api.disclosure_py('get','null');
-  
-      if (disclosure){
-          document.getElementById('message-disclosure-send').value = disclosure
-  
-          progress_span.innerHTML = 'disclosure.'
-          functionsExecuted++;
-          progressBar_start.style.width = `${functionsExecuted * (100 / functionsCount)}%`; //atualize o progresso
-      }
+      
+      anima_status('get')
+
+      functionsExecuted++;
+      progressBar_start.style.width = `${functionsExecuted * (100 / functionsCount)}%`; //atualize o progresso
+      progress_span.innerHTML = 'Animation status.'
+
+      start_disclosure()
+
+      progress_span.innerHTML = 'Start disclosure.'
+      functionsExecuted++;
+      progressBar_start.style.width = `${functionsExecuted * (100 / functionsCount)}%`; //atualize o progresso
   
       start_selectpicker()
   
-      progress_span.innerHTML = 'selectpicker.'
+      progress_span.innerHTML = 'Start Selectpicker.'
       functionsExecuted++;
       progressBar_start.style.width = `${functionsExecuted * (100 / functionsCount)}%`; //atualize o progresso
   
   
       start_sidebar()
   
-      progress_span.innerHTML = 'sidebar.'
+      progress_span.innerHTML = 'Start Sidebar.'
       functionsExecuted++;
       progressBar_start.style.width = `${functionsExecuted * (100 / functionsCount)}%`; //atualize o progresso
   
   
       start_scroll()
-      start_scroll_chat_log()
-      start_scroll_event_log()
   
-      progress_span.innerHTML = 'scroll.'
+      progress_span.innerHTML = 'Start scroll.'
+      functionsExecuted++;
+      progressBar_start.style.width = `${functionsExecuted * (100 / functionsCount)}%`; //atualize o progresso
+
+      
+      start_scroll_event_log()
+
+      progress_span.innerHTML = 'Start scroll event log.'
       functionsExecuted++;
       progressBar_start.style.width = `${functionsExecuted * (100 / functionsCount)}%`; //atualize o progresso
   
   
       start_resizable()
   
-      progress_span.innerHTML = 'resizable.'
+      progress_span.innerHTML = 'Start resizable.'
       functionsExecuted++;
       progressBar_start.style.width = `${functionsExecuted * (100 / functionsCount)}%`; //atualize o progresso
   
   
       start_update_time_chat()
   
-      progress_span.innerHTML = 'auto update time chat.'
+      progress_span.innerHTML = 'Start Auto update time chat.'
       functionsExecuted++;
       progressBar_start.style.width = `${functionsExecuted * (100 / functionsCount)}%`; //atualize o progresso
   
       start_events_log('div-events')
   
-      progress_span.innerHTML = 'get event logs.'
+      progress_span.innerHTML = 'Get event logs.'
       functionsExecuted++;
       progressBar_start.style.width = `${functionsExecuted * (100 / functionsCount)}%`; //atualize o progresso
   
       start_event_updatetime()
   
-      progress_span.innerHTML = 'auto update time events.'
+      progress_span.innerHTML = 'Start Auto update time events.'
       functionsExecuted++;
       progressBar_start.style.width = `${functionsExecuted * (100 / functionsCount)}%`; //atualize o progresso
-  
       
       start_color_inputs()
-  
-  
-      $('#main').removeClass('d-none')
-      $('#loading').addClass('remove-loading')
-  
-      setTimeout(function() {
-        $('#loading').addClass('d-none');
-        
-        update_modal('get')
-      }, 1000);
-  
   
       connectWebSocket('likes');
       connectWebSocket('diamonds');
@@ -120,11 +123,23 @@ window.addEventListener('pywebviewready',async function() {
       connectWebSocket('share');   
       connectWebSocketVotes('votes')   
 
-      progress_span.innerHTML = 'ConnectWebsockets.'
+      progress_span.innerHTML = 'Start ConnectWebsockets.'
       functionsExecuted++;
       progressBar_start.style.width = `${functionsExecuted * (100 / functionsCount)}%`; //atualize o progresso
       
 
+      $('#main').removeClass('d-none')
+      $('#loading').addClass('remove-loading')
+  
+      setTimeout(function() {
+        
+        $('#loading').addClass('d-none');
+        
+        update_modal('get')
+
+      }, 1000);
+
+      
       progress_span.innerHTML = 'remove loading.'
       functionsExecuted++;
       progressBar_start.style.width = `${functionsExecuted * (100 / functionsCount)}%`; //atualize o progresso
@@ -133,7 +148,8 @@ window.addEventListener('pywebviewready',async function() {
       progress_span.innerHTML = 'Finish start.'
       functionsExecuted++;
       progressBar_start.style.width = `${functionsExecuted * (100 / functionsCount)}%`; //atualize o progresso
-  
+
+        
       const chatWindow = document.getElementById("chat-block-inner");
       chatWindow.scrollTop = chatWindow.scrollHeight;
 
@@ -147,7 +163,34 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+async function get_version(){
+
+  var version = document.getElementById('number-version');
+
+  var version_rec = await window.pywebview.api.get_version();
+
+  if (version_rec){
+
+    version.innerHTML = version_rec
+
+  }
+
+}
+  
+async function start_disclosure(){
+
+  var disclosure = await window.pywebview.api.disclosure_py('get','null');
+  
+  if (disclosure){
+
+      document.getElementById('message-disclosure-send').value = disclosure
+
+  }
+
+}
+
 function start_selectpicker(){
+  
   $('select').attr('data-container', 'body').selectpicker({
     liveSearch: true,
     showSubtext: true,
@@ -341,7 +384,6 @@ function start_color_inputs(){
     $("#vote-text-color-text").val($(this).val())
   });
 
-
   $("#vote-bar-color-button").click(function(event) {
     $("#vote-bar-color").click();
   });
@@ -443,6 +485,43 @@ function start_color_inputs(){
     $("#highlighted-color-border-text").val($(this).val())
   });
 
+  $("#alerts-text-color-button").click(function(event) {
+    $("#alerts-text-color-select").click();
+  });
+
+  $("#alerts-text-color-select").on('input', function(event) {
+    $("#alerts-text-color-span").css('background-color',$(this).val());
+    $("#alerts-text-color-text").val($(this).val())
+  });
+
+  $("#alerts-background-color-button").click(function(event) {
+    $("#alerts-background-color-select").click();
+  });
+
+  $("#alerts-background-color-select").on('input', function(event) {
+    $("#alerts-background-color-span").css('background-color',$(this).val());
+    $("#alerts-background-color-text").val($(this).val())
+  });
+
+  $("#alertsvideo-background-color-button").click(function(event) {
+    $("#alertsvideo-background-color-select").click();
+  });
+
+  $("#alertsvideo-background-color-select").on('input', function(event) {
+    $("#alertsvideo-background-color-span").css('background-color',$(this).val());
+    $("#alertsvideo-background-color-text").val($(this).val())
+  });
+
+
+  $("#alertsvideo-text-color-button").click(function(event) {
+    $("#alertsvideo-text-color-select").click();
+  });
+
+  $("#alertsvideo-text-color-select").on('input', function(event) {
+    $("#alertsvideo-text-color-span").css('background-color',$(this).val());
+    $("#alertsvideo-text-color-text").val($(this).val())
+  });
+
 }
 
 function update_specs_tiktok(specs){
@@ -517,7 +596,7 @@ function confirm_logout(){
   window.pywebview.api.logout_auth()
 }
 
-async function disclosure(event,type_id){
+async function disclosure(event, type_id){
 
   if (type_id == 'save'){
 
@@ -573,7 +652,7 @@ async function update_modal(type_id){
 
     if(status){
       
-      if (status){
+      if (status == true){
 
         var repoOwner = 'GGTEC'
         var repoName = 'VibesBot'
@@ -582,28 +661,25 @@ async function update_modal(type_id){
         .then(response => response.json())
         .then(data => {
 
-          let releasesList = document.querySelector("#update_body");
-
-          if (releasesList != undefined){
+          let ReleaseBody = document.querySelector("#update_body");
             
-            releasesList.innerHTML = "";
+          ReleaseBody.innerHTML = "";
 
-            const firstRelease = data; // Obter o primeiro item da lista
-            
-            const converter = new showdown.Converter()
+          const firstRelease = data;
+          
+          const converter = new showdown.Converter()
 
-            var html_release = converter.makeHtml(firstRelease.body);
+          var html_release = converter.makeHtml(firstRelease.body);
 
-            let releaseEl = document.createElement("div");
+          let releaseEl = document.createElement("div");
 
-            releaseEl.classList.add('version_block')
-            releaseEl.innerHTML = `
-              <p>Versão: ${firstRelease.tag_name}</p>
-              <p class='version_text'>${html_release}</p>
-            `;
+          releaseEl.classList.add('version_block')
+          releaseEl.innerHTML = `
+            <p>Versão: ${firstRelease.tag_name}</p>
+            <p class='version_text'>${html_release}</p>
+          `;
 
-            releasesList.appendChild(releaseEl);
-          }
+          ReleaseBody.appendChild(releaseEl);
           
         })
         .catch(error => console.error(error));
@@ -611,8 +687,16 @@ async function update_modal(type_id){
 
         $("#update-modal").modal("show");
 
-      } else {
-        document.getElementById('no-update').hidden = false
+      } else if (status == 'DEV'){
+
+        let ReleaseBody = document.querySelector("#update_body");
+        let ReleaseTitle = document.querySelector("#update_title");
+
+        ReleaseTitle.innerHTML = "Versão BETA";
+        ReleaseBody.innerHTML = "<h4>Esta Versão BETA não tem suporte direto do desenvolvedor, qualquer bug ou problema relatado já está sendo analizado e será solucionado no próximo update.<h4>";
+        
+        $("#update-modal").modal("show");
+
       }
     }
 
@@ -658,7 +742,7 @@ async function updateTimeDiff() {
   }
 }
 
-async function getFolder(id,type_id) {
+async function getFolder(id, type_id) {
 
   var dosya_path = await window.pywebview.api.select_file_py(type_id);
 
@@ -783,168 +867,175 @@ async function start_scroll_event_log(){
 async function start_scroll_chat_log(){
 
   const div_chat_scroll = document.getElementById("chat-block-inner");
-
-  const itensPorPagina = 1;
-  let paginaAtual = 20;
-
-  let currentListIndex = 0;
   
+  let messageidx = 0
+  let added = true
+
   async function handleScroll(){
   
-    if (div_chat_scroll.scrollTop === 0) {
-      
-      var messages = await window.pywebview.api.log_chat('get', null);
+    if (div_chat_scroll.scrollTop === 0 && added == true) {
+
+      added = false
+
+      messageidx = div_chat_scroll.childElementCount - 1;
+
+      var messages = await window.pywebview.api.log_chat('get', messageidx);
   
       if (messages) {
+        
+        if (messages != null ){
+
+          var message_data_parse = JSON.parse(messages);
   
-        var message_data_parse = JSON.parse(messages);
-
-        const dates = Object.keys(message_data_parse).reverse();
-
-        if (currentListIndex < dates.length) {
-
-          const currentDate = dates[currentListIndex];
-
-          const currentList = message_data_parse[currentDate];
-
-          if (currentList.length > 0) {
-
-            var messages_list = currentList.reverse()
+          var show_user_picture = message_data_parse.show_user_picture;
+          var user_picture_url =  message_data_parse.profile_pic;
+          var chat_color_border =  message_data_parse.chat_color_border;
+          var chat_color_name =  message_data_parse.chat_color_name;
+          var select_color_border =  message_data_parse.chat_border_select;
+          var select_color_name =  message_data_parse.chat_name_select;
+          var animation = message_data_parse.chat_animation;
+          var chat_newline =  message_data_parse.wrapp_message;
+          var text_size =  message_data_parse.font_size;
+          var chat_data =  message_data_parse.data_show;
+          var chat_time =  message_data_parse.chat_time;
+          var type_data =  message_data_parse.type_data;
+          var user_rec =  message_data_parse.display_name;
+          var user_id =  message_data_parse.userid;
+          var username_rec =  message_data_parse.username;
+          var message_rec =  message_data_parse.message;
+          var badges =  message_data_parse.badges;
+          var color_rec = chat_color_name == 1 ? select_color_name : "white";
+          var border_color = chat_color_border == 1 ? select_color_border : '#4f016c';
   
-            const startIndex = paginaAtual * itensPorPagina;
-            const endIndex = startIndex + itensPorPagina;
-            
-            const items = messages_list.slice(startIndex, endIndex);
-            
-            for (let i = 0; i < items.length; i++) {
-
-              var show_user_picture = items[i].show_user_picture;
-              var user_picture_url =  items[i].profile_pic;
-              var chat_color_border =  items[i].chat_color_border;
-              var chat_color_name =  items[i].chat_color_name;
-              var select_color_border =  items[i].chat_border_select;
-              var select_color_name =  items[i].chat_name_select;
-              var animation = items[i].chat_animation;
-              var chat_newline =  items[i].wrapp_message;
-              var text_size =  items[i].font_size;
-              var chat_data =  items[i].data_show;
-              var chat_time =  items[i].chat_time;
-              var type_data =  items[i].type_data;
-              var user_rec =  items[i].display_name;
-              var user_id =  items[i].userid;
-              var username_rec =  items[i].username;
-              var message_rec =  items[i].message;
-              var badges =  items[i].badges;
-              var color_rec = chat_color_name == 1 ? select_color_name : "white";
-              var border_color = chat_color_border == 1 ? select_color_border : '#4f016c';
-
-              if (type_data == 'passed'){
-
-                  let date = new Date(chat_time);
-                  let formattedDate = date.toLocaleDateString() + " " + date.toLocaleTimeString();
-                  var time_chat = document.createElement("span");
-                  time_chat.id = 'time_chat';
-                  time_chat.setAttribute("data-time", chat_time);
-                  time_chat.setAttribute("title", formattedDate);
-                  time_chat.classList.add("message-time");
-                  time_chat.innerHTML = 'Agora';
-
-              } else if (type_data == 'current'){
-
-                  var time_chat = document.createElement("span");
-                  time_chat.id = 'time_chat';
-                  time_chat.classList.add("message-time-current");
-                  time_chat.innerHTML = chat_time;
-
+          if (type_data == 'passed'){
+  
+              let date = new Date(chat_time);
+              let formattedDate = date.toLocaleDateString() + " " + date.toLocaleTimeString();
+              var time_chat = document.createElement("span");
+              time_chat.id = 'time_chat';
+              time_chat.setAttribute("data-time", chat_time);
+              time_chat.setAttribute("title", formattedDate);
+              time_chat.classList.add("message-time");
+              time_chat.innerHTML = 'Agora';
+  
+          } else if (type_data == 'current'){
+  
+              var time_chat = document.createElement("span");
+              time_chat.id = 'time_chat';
+              time_chat.classList.add("message-time-current");
+              time_chat.innerHTML = chat_time;
+  
+          }
+  
+          var username = document.createElement("span");
+  
+          username.id = 'user-chat';
+          username.innerHTML = user_rec;
+          username.style.color = `${color_rec}`;
+          username.setAttribute('onclick','pywebview.api.open_py("user","'+user_id+'")');
+  
+          var separator = document.createElement("span");
+          separator.innerHTML = ' :';
+  
+          var span_username = document.createElement("span");
+          span_username.classList.add('span_username');
+          span_username.title = username_rec
+          span_username.setAttribute('data-bs-placement', 'top');
+          span_username.setAttribute('data-toggle', 'tooltip');
+          span_username.appendChild(username);
+  
+          if (typeof badges === 'string' && badges.trim() !== '') {
+  
+              badges = badges.replace(/'/g, '"');
+  
+              const badgesArray = JSON.parse(badges);
+  
+              if (Array.isArray(badgesArray)) {
+  
+                  badgesArray.forEach(badge => {
+                      const span = createBadgeSpan(badge.name, badge.first_url, text_size);
+                      if (span) {
+                          span_username.appendChild(span);
+                      }
+                  });
+  
+              } else {
+                  console.error('A variável badges não é um array válido.');
               }
-
-              var username = document.createElement("span");
-              username.id = 'user-chat';
-              username.innerHTML = user_rec;
-              username.style.color = `${color_rec}`;
-              username.setAttribute('onclick','pywebview.api.open_py("user","'+user_id+'")');
-
-              var separator = document.createElement("span");
-              separator.innerHTML = ' :';
-
-              var span_username = document.createElement("span");
-              span_username.classList.add('span_username');
-              span_username.title = username_rec
-              span_username.setAttribute('data-bs-placement', 'top');
-              span_username.setAttribute('data-toggle', 'tooltip');
-              span_username.appendChild(username);
-
+              
+          } else {
+  
               badges.forEach(badge => {
-                  const span = createBadgeSpan(badge.name, badge.first_url, text_size);
+                  const span = createBadgeSpan(badge.name, badge.first_url,text_size);
                   if (span) {
                       span_username.appendChild(span);
                   }
               });
-
-              span_username.appendChild(separator);
-
-              message_rec = twemoji.parse(message_rec);
-
-              var span_message = document.createElement("span");
-              span_message.id = 'message-chat';
-              span_message.innerHTML = message_rec;
-              
-              var new_line = document.createElement("br");
-              
-              var div_message_block = document.createElement("div");
-
-              var padding_start = show_user_picture == 1 ? "ps-0"  : null;
-
-              div_message_block.id = 'chat-message-block'
-              div_message_block.classList.add('row','chat-message', 'chat-block-color', animation ,padding_start);
-              div_message_block.style.border = "3px solid "+ border_color + "";
-
-              var div_message = document.createElement("div");
-
-              div_message.id = 'message_block';
-              div_message.classList.add('col','ps-0');
-              div_message.style.fontSize = text_size + "px";
-
-
-              var div_profile_pic = document.createElement("div");
-
-              div_profile_pic.id = 'message_pic';
-              div_profile_pic.classList.add('col-2');
-              
-              var img_pic = document.createElement("img"); 
-              img_pic.classList.add('img-responsive','w-100','img-fluid');
-              img_pic.src = user_picture_url
-              img_pic.style.width = '70px'
-
-              div_profile_pic.appendChild(img_pic)
-              
-              chat_data == 1 ? div_message.appendChild(time_chat) : null;
-
-              div_message.appendChild(span_username);
-
-              chat_newline == 1 ? div_message.appendChild(new_line) : null;
-
-              div_message.appendChild(span_message);
-
-              show_user_picture == 1 ? div_message_block.appendChild(div_profile_pic) : null;
-
-              div_message_block.appendChild(div_message)
-              
-              var div_chat = document.querySelector('#chat-block-inner div:first-child');
-
-              div_chat.parentNode.insertBefore(div_message_block, div_chat);
-
-            }
-            $(".span_username").tooltip()
-            paginaAtual++;
-
-            if (endIndex >= currentList.length) {
-              currentListIndex++;
-              paginaAtual = 1;
-            }
-            
+      
           }
+  
+          span_username.appendChild(separator);
+  
+          message_rec = twemoji.parse(message_rec);
+  
+          var span_message = document.createElement("span");
+          span_message.id = 'message-chat';
+          span_message.innerHTML = message_rec;
+          
+          var new_line = document.createElement("br");
+          
+          var div_message_block = document.createElement("div");
+  
+          var padding_start = show_user_picture == 1 ? "ps-0"  : null;
+  
+          div_message_block.id = 'chat-message-block'
+          div_message_block.classList.add('row','chat-message', 'chat-block-color', animation ,padding_start);
+          div_message_block.style.border = "3px solid "+ border_color + "";
+  
+          var div_message = document.createElement("div");
+  
+          div_message.id = 'message_block';
+          div_message.classList.add('col','ps-0');
+          div_message.style.fontSize = text_size + "px";
+  
+  
+          var div_profile_pic = document.createElement("div");
+  
+          div_profile_pic.id = 'message_pic';
+          div_profile_pic.classList.add('col-2');
+          
+          var img_pic = document.createElement("img"); 
+          img_pic.classList.add('img-responsive','w-100','img-fluid');
+          img_pic.src = user_picture_url
+          img_pic.style.width = '70px'
+  
+          div_profile_pic.appendChild(img_pic)
+          
+          chat_data == 1 ? div_message.appendChild(time_chat) : null;
+  
+          div_message.appendChild(span_username);
+  
+          chat_newline == 1 ? div_message.appendChild(new_line) : null;
+  
+          div_message.appendChild(span_message);
+  
+          show_user_picture == 1 ? div_message_block.appendChild(div_profile_pic) : null;
+  
+          div_message_block.appendChild(div_message)
+          
+          var div_chat = document.querySelector('#chat-block-inner div:first-child');
+  
+          div_chat.parentNode.insertBefore(div_message_block, div_chat);
+  
+  
+          $(".span_username").tooltip()
+          
         }
+
+        messageidx++;
+
+        added = true
+          
       }
     }
   }
@@ -962,6 +1053,7 @@ function copy_username(element){
     navigator.clipboard.writeText(value);
 
 }
+
 async function userdata_modal(type_id,user){
 
   var useridElement = document.getElementById("user-edit-userid");
@@ -1066,7 +1158,6 @@ async function userdata_js(type_id,data){
               $('#userdata_table').DataTable().destroy();
           }
 
-
           var table = $('#userdata_table').DataTable( {
               pageLength: 8,
               destroy: true,
@@ -1115,15 +1206,82 @@ async function userdata_js(type_id,data){
                 userdata_parse[key].gifts,
                 `${removeBtn.outerHTML} | ${EditBtn.outerHTML}`
               ]);
-
               
-            }
+          }
 
       }
 
   
   } else if (type_id == 'remove'){
-      window.pywebview.api.userdata_py(type_id,data)
+
+      var user_removed = await window.pywebview.api.userdata_py(type_id,data)
+
+      if (user_removed){
+
+        var userdata_parse = await window.pywebview.api.userdata_py('get','None')
+        
+        if (userdata_parse){
+
+            if ($.fn.DataTable.isDataTable("#userdata_table")) {
+                $('#userdata_table').DataTable().clear().draw();
+                $('#userdata_table').DataTable().destroy();
+            }
+
+
+            var table = $('#userdata_table').DataTable( {
+                pageLength: 8,
+                destroy: true,
+                scrollX: true,
+                paging: true,
+                autoWidth: true,
+                ordering:  true,
+                retrieve : false,
+                processing: true,
+                responsive: false,
+                lengthMenu: [
+                    [10, 25, 50, -1],
+                    [10, 25, 50, 'All'],
+                ],
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/pt-BR.json'
+                }
+            } );
+
+
+            for (var key in userdata_parse) {
+
+                var removeBtn = document.createElement("button");
+                removeBtn.classList.add("btn", "bt-submit", "p-1", "m-1");
+                removeBtn.setAttribute("type", "button");
+                removeBtn.setAttribute("title", "Remover usuário");
+                removeBtn.setAttribute("data-toggle", "tooltip");
+                removeBtn.setAttribute("data-bs-placement", "top");
+                removeBtn.setAttribute("onclick", `userdata_modal("remove",'${userdata_parse[key].userid}')`);
+                removeBtn.innerHTML = 'Excluir'
+
+                var EditBtn = document.createElement("button");
+                EditBtn.classList.add("btn", "bt-submit", "p-1", "m-1");
+                EditBtn.setAttribute("type", "button");
+                EditBtn.setAttribute("title", "Editar usuário");
+                EditBtn.setAttribute("onclick", `userdata_modal('edit','${userdata_parse[key].userid}')`);
+                EditBtn.innerHTML = 'Editar'
+
+
+                var row = table.row.add([
+                  userdata_parse[key].display_name,
+                  userdata_parse[key].username,
+                  userdata_parse[key].points,
+                  userdata_parse[key].likes,
+                  userdata_parse[key].shares,
+                  userdata_parse[key].gifts,
+                  `${removeBtn.outerHTML} | ${EditBtn.outerHTML}`
+                ]);
+                
+            }
+        }
+
+      }
+
   } else if (type_id == 'destroy'){
 
     if ($.fn.DataTable.isDataTable("#userdata_table")) {
@@ -1131,11 +1289,59 @@ async function userdata_js(type_id,data){
       $('#userdata_table').DataTable().destroy();
 
   }
+
   }
 }
 
 async function getCheckedValue(element) {
   return element.checked ? 1 : 0;
+}
+
+async function anima_status(type_id){
+
+  
+  var checkbox = document.getElementById('anima-status');
+
+  const elements = document.querySelectorAll('.background span');
+
+  if (type_id == "save"){
+
+    if (checkbox.checked == false){
+
+      elements.forEach(element => {
+        element.style.display = 'none';
+      });
+
+    } else {
+
+      elements.forEach(element => {
+        element.style.display = 'block';
+      });
+
+    }
+
+    window.pywebview.api.animation(type_id,checkbox.checked)
+
+  } else if (type_id == "get"){
+
+    response = await window.pywebview.api.animation(type_id,'None')
+
+    if (response == "False"){
+
+      elements.forEach(element => {
+        element.style.display = 'none';
+      });
+
+    } else {
+
+      elements.forEach(element => {
+        element.style.display = 'block';
+      });
+
+    }
+  
+  }
+  
 }
 
 function connectWebSocket(type) {

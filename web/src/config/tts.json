@@ -1,6 +1,6 @@
 {
+    "type": "tts",
     "status": 1,
-    "prefix" : 1,
     "command" : "!voz",
     "user_level": [
           "spec",
@@ -10,5 +10,13 @@
     "delay": "5",
     "last_use": 0,
     "cost" : 0,
-    "cost_status" : 0
+    "cost_status" : 0,
+    "whitelist_status" : 0,
+    "whitelist": [],
+    "blacklist": [],
+    "prefix" : 1,
+    "emojis_filter" : 1,
+    "words_filter": 1,
+    "letters_filter": 1,
+    "blacklist_words": []
 }

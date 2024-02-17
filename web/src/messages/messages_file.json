@@ -89,6 +89,11 @@
         "status_s": 1,
         "response": "{nickname} --> É necessário inserir um nome de usuário para adicionar ao sorteio"
     },
+    "response_giveaway_nonames": {
+        "status": 1,
+        "status_s": 1,
+        "response": "A lista de nomes no sorteio está vazia."
+    },
     "commands_disabled": {
         "status": 1,
         "status_s": 1,
@@ -287,7 +292,7 @@
     "goal_end": {
         "status": 1,
         "status_s": 1,
-        "response": "A meta para {current}/{target}{type} foi alcançada"
+        "response": "A meta para {current}/{target} {type} foi alcançada"
     },
     "event_ttk_disconected": {
         "status": 1,
@@ -528,5 +533,30 @@
         "status": 1,
         "status_s": 1,
         "response": "Top 3 Presentes = {top-3}"
+    },
+    "user_in_blacklist" : {
+        "status": 1,
+        "status_s": 1,
+        "response": " {nickname} --> Você não tem permissão para utilizar o comando"
+    },
+    "response_namein_playing" :{
+        "status": 1,
+        "status_s": 1,
+        "response": " {nickname} --> Você já está jogando, aguarde."
+    },
+    "response_queue_playing" : {
+        "status": 1,
+        "status_s": 1,
+        "response": "Jogando agora : {players}"
+    },
+    "response_queue_end_match" : {
+        "status": 1,
+        "status_s": 1,
+        "response": "Partida finalizada"
+    },
+    "response_queue_move" : {
+        "status": 1,
+        "status_s": 1,
+        "response": "Usuário {user} movido {match_actual} para {match_move_top}."
     }
 }

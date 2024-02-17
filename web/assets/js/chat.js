@@ -172,14 +172,6 @@ function createBadgeSpan(name, imageUrl,text_size) {
         img.style.marginRight = '2px';
         div.appendChild(img);
     }
-
-    if (name && name !== "Moderator") {
-        const span = document.createElement('span');
-        span.style.fontSize = `${text_size - 2}px`;  
-        span.textContent = name;
-        div.appendChild(span);
-    }   
-    
     
     return div;
 }
@@ -275,12 +267,36 @@ function append_message(message_data_parse){
 
         span_username.appendChild(username);
 
-        badges.forEach(badge => {
-            const span = createBadgeSpan(badge.name, badge.first_url,text_size);
-            if (span) {
-                span_username.appendChild(span);
+        if (typeof badges === 'string' && badges.trim() !== '') {
+
+            badges = badges.replace(/'/g, '"');
+
+            const badgesArray = JSON.parse(badges);
+
+            if (Array.isArray(badgesArray)) {
+
+                badgesArray.forEach(badge => {
+                    const span = createBadgeSpan(badge.name, badge.first_url, text_size);
+                    if (span) {
+                        span_username.appendChild(span);
+                    }
+                });
+
+            } else {
+                console.error('A variável badges não é um array válido.');
             }
-        });
+
+        } else {
+
+            badges.forEach(badge => {
+                const span = createBadgeSpan(badge.name, badge.first_url,text_size);
+                if (span) {
+                    span_username.appendChild(span);
+                }
+            });
+    
+        }
+
 
         span_username.appendChild(separator);
 
@@ -381,11 +397,8 @@ function append_message_out(message_data_parse){
     var Moderator = message_data_parse.moderator;
     var subscriber = message_data_parse.subscriber;
 
-
     var color_rec = chat_color_name == 1 ? select_color_name : "white";
     var border_color = chat_color_border == 1 ? select_color_border : '#4f016c';
-
-    
 
     if (type_data == 'passed'){
 
@@ -424,12 +437,35 @@ function append_message_out(message_data_parse){
     
     span_username.appendChild(username);
 
-    badges.forEach(badge => {
-        const span = createBadgeSpan(badge.name, badge.first_url,text_size);
-        if (span) {
-            span_username.appendChild(span);
+        if (typeof badges === 'string' && badges.trim() !== '') {
+
+            badges = badges.replace(/'/g, '"');
+            
+            const badgesArray = JSON.parse(badges);
+
+            if (Array.isArray(badgesArray)) {
+
+                badgesArray.forEach(badge => {
+                    const span = createBadgeSpan(badge.name, badge.first_url, text_size);
+                    if (span) {
+                        span_username.appendChild(span);
+                    }
+                });
+
+            } else {
+                console.error('A variável badges não é um array válido.');
+            }
+
+        } else {
+
+            badges.forEach(badge => {
+                const span = createBadgeSpan(badge.name, badge.first_url,text_size);
+                if (span) {
+                    span_username.appendChild(span);
+                }
+            });
+    
         }
-    });
 
     span_username.appendChild(separator);
 
@@ -469,7 +505,6 @@ function append_message_out(message_data_parse){
 
     div_profile_pic.appendChild(img_pic)
     
-
     chat_data == 1 ? div_message.appendChild(time_chat) : null;
 
     div_message.appendChild(span_username);
@@ -482,9 +517,7 @@ function append_message_out(message_data_parse){
 
     div_message_block.appendChild(div_message)
 
-
     div_chat_out.appendChild(div_message_block);
-
 
     div_chat_out.scrollTop = div_chat_out.scrollHeight;
 

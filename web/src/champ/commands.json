@@ -1,5 +1,6 @@
 {
     "enter_camp" : {
+        "type": "enter_camp",
         "command" : "!camp",
         "status": 1,
         "user_level": [
@@ -8,9 +9,13 @@
         "delay": "5",
         "last_use": 0,
         "cost" : 0,
-        "cost_status" : 0
+        "cost_status" : 0,
+        "whitelist_status" : 0,
+        "whitelist": [],
+        "blacklist": []
     },   
     "add_camp" : {
+        "type": "add_camp",
         "command" : "!addcamp",
         "status": 1,
         "user_level": [
@@ -19,9 +24,13 @@
         "delay": "5",
         "last_use": 0,
         "cost" : 0,
-        "cost_status" : 0
+        "cost_status" : 0,
+        "whitelist_status" : 0,
+        "whitelist": [],
+        "blacklist": []
     },   
     "remove_camp" : {
+        "type": "remove_camp",
         "command" : "!removecamp",
         "status": 1,
         "user_level": [
@@ -30,7 +39,10 @@
         "delay": "5",
         "last_use": 0,
         "cost" : 0,
-        "cost_status" : 0
+        "cost_status" : 0,
+        "whitelist_status" : 0,
+        "whitelist": [],
+        "blacklist": []
     }
 }
 

@@ -1,4 +1,5 @@
 {
+    "type" : "voting",
     "status": 0,
     "command": "!v",
     "user_level": [
@@ -7,5 +8,8 @@
     "delay": "2",
     "last_use": 0,
     "cost": "100",
-    "cost_status": 1
+    "cost_status": 1,
+    "whitelist_status" : 0,
+    "whitelist": [],
+    "blacklist": []
 }

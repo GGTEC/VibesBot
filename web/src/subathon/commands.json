@@ -2,28 +2,46 @@
     "add_minutes": {
         "command": "!madd",
         "status": 1,
-        "delay": 10,
+        "delay": "10",
         "last_use": 0,
-        "user_level": "mod",
-        "cost" : 0,
-        "cost_status" : 0
-    },    
+        "user_level": [
+            "moderator"
+        ],
+        "cost": "0",
+        "cost_status": 0,
+        "type": "add_minutes",
+        "whitelist_status": 0,
+        "whitelist": [],
+        "blacklist": []
+    },
     "remove_minutes": {
-        "command": "!mremover",
+        "command": "!mremove",
         "status": 1,
-        "delay": 10,
+        "delay": "10",
         "last_use": 0,
-        "user_level": "mod",
-        "cost" : 0,
-        "cost_status" : 0
-    },    
+        "user_level": [
+            "moderator"
+        ],
+        "cost": "0",
+        "cost_status": 0,
+        "type": "remove_minutes",
+        "whitelist_status": 0,
+        "whitelist": [],
+        "blacklist": []
+    },
     "clear_minutes": {
-        "command": "!mlimpar",
+        "command": "!mclear",
         "status": 1,
-        "delay": 10,
+        "delay": "10",
         "last_use": 0,
-        "user_level": "mod",
-        "cost" : 0,
-        "cost_status" : 0
+        "user_level": [
+            "moderator"
+        ],
+        "cost": "0",
+        "cost_status": 0,
+        "type": "clear_minutes",
+        "whitelist_status": 0,
+        "whitelist": [],
+        "blacklist": []
     }
 }

@@ -1,5 +1,6 @@
 {   
     "user_balance" : {
+        "type" : "user_balance",
         "command" : "!saldo",
         "status": 1,
         "user_level": [
@@ -9,9 +10,13 @@
         "delay": "5",
         "last_use": 0,
         "cost" : 0,
-        "cost_status" : 0
+        "cost_status" : 0,
+        "whitelist_status" : 0,
+        "whitelist": [],
+        "blacklist": []
     },
     "mod_balance" : {
+        "type" : "mod_balance",
         "command" : "!baluser",
         "status": 1,
         "user_level": [
@@ -21,9 +26,13 @@
         "delay": "5",
         "last_use": 0,
         "cost" : 0,
-        "cost_status" : 0
+        "cost_status" : 0,
+        "whitelist_status" : 0,
+        "whitelist": [],
+        "blacklist": []
     },
     "mod_balance_take" : {
+        "type" : "mod_balance_take",
         "command" : "!baltake",
         "status": 1,
         "user_level": [
@@ -32,9 +41,13 @@
         "delay": "5",
         "last_use": 0,
         "cost" : 0,
-        "cost_status" : 0
+        "cost_status" : 0,
+        "whitelist_status" : 0,
+        "whitelist": [],
+        "blacklist": []
     },
     "mod_balance_give" : {
+        "type" : "mod_balance_give",
         "command" : "!balgive",
         "status": 1,
         "user_level": [
@@ -43,9 +56,13 @@
         "delay": "5",
         "last_use": 0,
         "cost" : 0,
-        "cost_status" : 0
+        "cost_status" : 0,
+        "whitelist_status" : 0,
+        "whitelist": [],
+        "blacklist": []
     },
     "top_likes" : {
+        "type" : "top_likes",
         "command" : "!toplikes",
         "status": 1,
         "user_level": [
@@ -54,9 +71,13 @@
         "delay": "5",
         "last_use": 0,
         "cost" : 0,
-        "cost_status" : 0
+        "cost_status" : 0,
+        "whitelist_status" : 0,
+        "whitelist": [],
+        "blacklist": []
     },
     "top_points":  {
+        "type" : "top_points",
         "command" : "!toppoints",
         "status": 1,
         "user_level": [
@@ -65,9 +86,13 @@
         "delay": "5",
         "last_use": 0,
         "cost" : 0,
-        "cost_status" : 0
+        "cost_status" : 0,
+        "whitelist_status" : 0,
+        "whitelist": [],
+        "blacklist": []
     },
     "top_shares":   {
+        "type" : "top_shares",
         "command" : "!topshares",
         "status": 1,
         "user_level": [
@@ -76,9 +101,13 @@
         "delay": "5",
         "last_use": 0,
         "cost" : 0,
-        "cost_status" : 0
+        "cost_status" : 0,
+        "whitelist_status" : 0,
+        "whitelist": [],
+        "blacklist": []
     },
     "top_gifts":   {
+        "type" : "top_gifts",
         "command" : "!topgifts",
         "status": 1,
         "user_level": [
@@ -87,6 +116,9 @@
         "delay": "5",
         "last_use": 0,
         "cost" : 0,
-        "cost_status" : 0
+        "cost_status" : 0,
+        "whitelist_status" : 0,
+        "whitelist": [],
+        "blacklist": []
     }
 }

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 import os
 import shutil
@@ -11,10 +12,7 @@ import tkinter.messagebox as messagebox
 from dotenv import load_dotenv
 from random import randint
 from bs4 import BeautifulSoup as bs
-from datetime import datetime
-from discord_webhook import DiscordWebhook, DiscordEmbed
-from logerror import LogManager
-
+from errorlog import ErrorManager
 
 if getattr(sys, 'frozen', False):
     if '_PYIBoot_SPLASH' in os.environ and importlib.util.find_spec("pyi_splash"):
@@ -55,76 +53,34 @@ def local_work(type_id):
 
 load_dotenv(dotenv_path=os.path.join(local_work('datadir'), '.env'))
 
+def clear_logs():
+
+    
+    errormanager = ErrorManager()
+
+    errormanager.clear_logs()
+
+    return True
+
+
+def get_recent_logs():
+
+    
+    errormanager = ErrorManager()
+
+    return errormanager.get_recent_logs()
+
 
 def error_log(ex):
 
-    curr_version = "1.6.7"
+    
+    errormanager = ErrorManager()
 
-    logdatabase = LogManager()
-
-    now = datetime.now()
-    time_error = now.strftime("%d/%m/%Y %H:%M:%S")
-
-    trace = []
-    error_type = "Unknown"
-    error_message = ""
-
-    if isinstance(ex, BaseException):
-
-        tb = ex.__traceback__
-
-        while tb is not None:
-            trace.append({
-                "filename": tb.tb_frame.f_code.co_filename,
-                "name": tb.tb_frame.f_code.co_name,
-                "lineno": tb.tb_lineno
-            })
-            tb = tb.tb_next
-
-        error_type = type(ex).__name__
-
-        error_message = str(ex)
-
-    else:
-
-        error_message = ex
-
-    error = str(f'Erro = type: {error_type} | message: {error_message} | trace: {trace} | time: {time_error} | Version : {curr_version}')
-
-    logdatabase.save_log(error)
-
-    data = manipulate_json(f"{local_work('appdata_path')}/auth/auth.json", "load")
-
-    if data["error_status"] == True:
-
-        username = data["USERNAME"]
-        
-        if username == None or username == "":
-            username = "Não autenticado"
-        
-
-        WEBHOOKURL = os.getenv('WEBHOOKURLERROR')
-
-        webhook_login = DiscordWebhook(url=WEBHOOKURL)
-
-        embed_login = DiscordEmbed(
-            title='Relátorio de erro',
-            description= F'https://www.tiktok.com/@{username}' ,
-            color= '03b2f8'
-        )
-
-        embed_login.add_embed_field(
-            name='Erro',
-            value=error,
-        )
-
-        embed_login.set_author(name=username, url=f'https://www.tiktok.com/@{username}')
-        
-        webhook_login.add_embed(embed_login)
-        webhook_login.execute() 
+    errormanager.error_log(ex)
 
 
 class DictDot:
+
     def __init__(self, data):
         self.data = data
 
@@ -148,88 +104,10 @@ def manipulate_json(custom_path, type_id, data=None):
                 json.dump(data, file, indent=4, ensure_ascii=False)
 
     except FileNotFoundError:
-        print(f'The file {custom_path} was not found.')
+        error_log(f'O arquivo {custom_path} não foi encontrado.')
 
     except Exception as e:
         error_log(custom_path)
-        error_log(e)
-
-
-def manipulate_json_user(custom_path, type_id, line, data=None):
-
-    try:
-
-        if type_id == 'load':
-
-            with open(custom_path, 'r',encoding='utf-8') as file:
-                loaded_data = json.load(file)
-
-            return loaded_data
-        
-        elif type_id == 'save':
-
-            with open(custom_path, 'w',encoding='utf-8') as file:
-                json.dump(data, file, indent=4, ensure_ascii=False)
-
-    except FileNotFoundError:
-        print(f'The file {custom_path} was not found.')
-
-    except Exception as e:
-        if not isinstance(e, json.JSONDecodeError):
-            error_log(f"{custom_path} - {line} ")
-            error_log(e)
-
-
-def send_message(data):
-
-    try:
-
-        status_commands_data = manipulate_json(f"{local_work('appdata_path')}/commands/commands_config.json", "load")
-
-        type_message = data['type']
-        message = data['message']
-
-        status_error_time = status_commands_data['STATUS_ERROR_TIME']
-        status_error_user = status_commands_data['STATUS_ERROR_USER']
-        status_tts = status_commands_data['STATUS_TTS']
-        status_music = status_commands_data['STATUS_MUSIC']
-        status_music_error = status_commands_data['STATUS_MUSIC_ERROR']
-        status_music_confirm = status_commands_data['STATUS_MUSIC_CONFIRM']
-
-        if type_message == 'CHAT':
-            return True
-
-        elif type_message == 'ERROR_TIME':
-
-            if status_error_time == 1:
-                return True
-
-        elif type_message == 'ERROR_USER':
-
-            if status_error_user == 1:
-                return True
-
-        elif type_message == 'STATUS_TTS':
-
-            if status_tts == 1:
-                return True
-
-        elif type_message == 'STATUS_MUSIC':
-
-            if status_music == 1:
-                return True
-
-        elif type_message == 'STATUS_MUSIC_CONFIRM':
-
-            if status_music_confirm == 1:
-                return True
-
-        elif type_message == 'STATUS_MUSIC_ERROR':
-
-            if status_music_error == 1:
-                return True
-
-    except Exception as e:
         error_log(e)
 
 
@@ -249,90 +127,6 @@ def find_between(s, first, last):
         return False
 
 
-def calculate_time(started):
-
-    try:
-
-        utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
-        utc_date = datetime.fromisoformat(started).replace(tzinfo=pytz.utc)
-
-        gmt_minus_3_now = utc_now.astimezone(pytz.timezone("Etc/GMT+3"))
-        gmt_minus_3_date = utc_date.astimezone(pytz.timezone("Etc/GMT+3"))
-
-        difference = gmt_minus_3_now - gmt_minus_3_date
-
-        days = difference.days
-        hours = difference.seconds//3600
-        minutes = (difference.seconds//60) % 60
-        sec = difference.seconds % 60
-
-        time_in_live = {
-            'days': str(days),
-            'hours': str(hours),
-            'minutes': str(minutes),
-            'sec': str(sec)
-        }
-
-        return time_in_live
-
-    except Exception as e:
-
-        error_log(e)
-
-        return 'none'
-
-
-def check_delay(delay_command, last_use):
-
-    message_error = messages_file_load("response_delay_error")
-
-    last_command_time = last_use
-    delay_compare = int(delay_command)
-
-    current_time = int(time.time())
-
-    if current_time >= last_command_time + delay_compare:
-
-        message = 'OK'
-        value = True
-
-        return message, value, current_time
-
-    else:
-
-        remaining_time = last_command_time + delay_compare - current_time
-
-        message = replace_all(message_error['response'],{'{seconds}' : str(remaining_time)})
-
-        message_error['response'] = message
-
-        value = False
-        current_time = ''
-
-        return message_error, value, current_time
-
-
-def copy_file(source, dest):
-
-    copy = 0
-
-    try:
-
-        shutil.copy2(source, dest)
-
-    except Exception as e:
-
-        error_log(e)
-        
-        copy = 1
-
-        return copy
-
-    copy = 1
-
-    return copy
-
-
 def check_image(image):
 
     try:
@@ -348,8 +142,6 @@ def check_image(image):
         return False
     
     except Exception as e:
-        print(e)
-        print(image)
 
         return False
     
@@ -477,40 +269,80 @@ def update_ranks(data):
 
 def update_alert(data):
 
-    notifc_config_Data = manipulate_json(f"{local_work('appdata_path')}/config/notfic.json", "load")
     alert_config_data = manipulate_json(f"{local_work('appdata_path')}/config/alerts.json", "load")
-
-    duration = notifc_config_Data['HTML_ALERT_TIME']
 
     message = data['message']
     img = data['img']
-    
-    image_size = alert_config_data['image_size']
-    font_size = alert_config_data['font_size']
-    background_color = alert_config_data['background_color']
+    duration = data['duration']
 
-    html_file = f"{local_work('appdata_path')}/html/alerts/alerts.html"
+    font_alerts  = alert_config_data["font_alerts"]
+    color_alerts  = alert_config_data["color_alerts"]
+    background_alerts  = alert_config_data["background_alerts"]
+    opacity_alerts  = alert_config_data["opacity_alerts"]
+    delay_alerts  = alert_config_data["delay_alerts"]
+    image_size = alert_config_data["image_size"]
+
+    font_alertsvideo  = alert_config_data["font_alertsvideo"]
+    color_alertsvideo = alert_config_data["color_alertsvideo"]
+    background_alertsvideo = alert_config_data["background_alertsvideo"]
+    opacity_alertsvideo = alert_config_data["opacity_alertsvideo"]
+    image_sizevideo = alert_config_data["image_sizevideo"]
+
+    opacity_alerts_cv = convert_opacity_to_hex(float(opacity_alerts)) 
+    opacity_alertsvideo_cv = convert_opacity_to_hex(float(opacity_alertsvideo)) 
 
     try:
 
-        with open(html_file, "r") as html:
-            soup = bs(html, 'html.parser')
+        if img.endswith('.mp4') or img.endswith('.gif'):
 
-        main_div = soup.find("div", {"class": f"enter"})
-        main_div['style'] = f'animation-duration: {duration}s'
+            html_file_video = f"{local_work('appdata_path')}/html/alertsvideo/alertsvideo.html"
 
-        event_block = soup.find("div", {"class": f"event_block"})
-        event_block['style'] = f'background-color: {background_color}'
+            with open(html_file_video, "r") as html:
 
-        img_tag = soup.find("img", {"class": "img"})
-        img_tag['src'] = img
-        img_tag['width'] = image_size
+                soup = bs(html, 'html.parser')
 
-        messsage_tag = soup.find("span", {"class": "message"})
-        messsage_tag.string = message
-        messsage_tag['style'] = f"font-size:{font_size};"
+                event_block = soup.find("div", {"class": f"event_block"})
+                event_block['style'] = f'background-color: {background_alertsvideo}{opacity_alertsvideo_cv}; animation-duration: {duration}s'
 
-        return str(soup)
+                video_tag = soup.find("iframe")
+                video_tag['src'] = f'{img}?controls=0'
+                video_tag['width'] = image_sizevideo
+                video_tag['height'] = image_sizevideo
+
+                messsage_tag = soup.find("span", {"class": "message"})
+
+                if message == "" or message == None:
+                    messsage_tag['style'] = f"display: none;"
+                else:
+                    messsage_tag.string = message
+                    messsage_tag['style'] = f"font-size:{font_alertsvideo}px ; color: {color_alertsvideo}"
+
+                return str(soup)
+        
+
+        else:
+
+            html_file = f"{local_work('appdata_path')}/html/alerts/alerts.html"
+
+            with open(html_file, "r") as html:
+
+                soup = bs(html, 'html.parser')
+
+                main_div = soup.find("div", {"class": f"enter"})
+                main_div['style'] = f'animation-duration: {delay_alerts}s'
+
+                event_block = soup.find("div", {"class": f"event_block"})
+                event_block['style'] = f'background-color: {background_alerts}{opacity_alerts_cv};'
+
+                img_tag = soup.find("img", {"class": "img"})
+                img_tag['src'] = img
+                img_tag['width'] = image_size
+
+                messsage_tag = soup.find("span", {"class": "message"})
+                messsage_tag.string = message
+                messsage_tag['style'] = f"font-size:{font_alerts}px ;color: {color_alerts}"
+
+                return str(soup)
 
     except Exception as e:
 
@@ -540,7 +372,7 @@ def update_notif(data):
         event_block['style'] = f"background-color: {event_log_config_data['background-color']};color:{event_log_config_data['text-color']}"
 
         messsage_tag = soup.find("span", {"class": "message"})
-        messsage_tag['style'] = f"font-size:{event_log_config_data['font-events-overlay']}px;"
+        messsage_tag['style'] = f"font-size:{event_log_config_data['font-events-overlay']}px;color:{event_log_config_data['text-color']}"
 
         if message != None:
             messsage_tag.string = message
@@ -605,25 +437,36 @@ def update_goal(data):
 
         if data['type_id'] == 'get_html':
 
-            type_goal = data['type_goal']
+            from database import GoalManager
             
+            type_goal = data['type_goal']
+
+            goal_manager = GoalManager()
+            goal_data = goal_manager.get_goal(type_goal)
+
+
             data = {
-                'title_text_value' : goal_data[type_goal]['goal_text'],
-                'goal_above' : goal_data[type_goal]['goal_above'],
-                'goal_type' : goal_data[type_goal]['goal_type'],
-                'background_color' : goal_data[type_goal]['outer_bar'],
-                'title_text' : goal_data[type_goal]['title_text'],
-                'goal_style' : goal_data[type_goal]['goal_style'],
-                'text_size' : goal_data[type_goal]['text_size'],
-                'progress_bar' : goal_data[type_goal]['progress_bar'],
-                'background_border' : goal_data[type_goal]['background_border'],
-                'progress_bar_background' : goal_data[type_goal]['progress_bar_background'],
-                'progress_bar_background_opacity' : goal_data[type_goal]['progress_bar_background_opacity'],
+                'title_text_value' : goal_data['goal_text'],
+                'goal_above' : goal_data['goal_above'],
+                'goal_type' : goal_data['goal_type'],
+                'title_text' : goal_data['title_text'],
+                'goal_style' : goal_data['goal_style'],
+                'text_size' : goal_data['text_size'],
+                'progress_bar' : goal_data['progress_bar'],
+                'background_border' : goal_data['background_border'],
+                'background_color' : goal_data['background_color'],
+                'progress_bar_background' : goal_data['progress_bar_background'],
+                'progress_bar_background_opacity' : goal_data['progress_bar_background_opacity'],
             }
 
             return data
         
         elif data['type_id'] == 'save_html':
+
+
+            from database import GoalManager
+            
+            goal_manager = GoalManager()
 
             type_goal = data['type_goal']
 
@@ -635,7 +478,6 @@ def update_goal(data):
             background_opacity = data['background_bar_color_opacity']
             background_color = data['background_color']
             background_border = data['background_border']
-
 
             background_opacity = convert_opacity_to_hex(float(background_opacity)) 
 
@@ -683,43 +525,36 @@ def update_goal(data):
             outer_bar['style'] = f"background-color: {background_color}{background_opacity};border-color: {background_border}{background_opacity} "
             progress_bar_bg['style'] = f"background-color: {data['background_bar_color']}"
 
-            goal_data[type_goal]['goal_style'] = data['goal_style']
-            goal_data[type_goal]['goal_above'] = data['goal_above']
-            goal_data[type_goal]['goal_type'] = data['goal_type']
-            goal_data[type_goal]['goal_text'] = data['text_value']
-            goal_data[type_goal]['title_text'] = data['text_color']
-            goal_data[type_goal]['text_size'] = data['text_size']
-            goal_data[type_goal]['progress_bar'] = data['bar_color']
-            goal_data[type_goal]['progress_bar_background'] = data['background_bar_color']
-            goal_data[type_goal]['background_color'] = data['background_color']
-            goal_data[type_goal]['background_border'] = data['background_border']
-            goal_data[type_goal]['progress_bar_background_opacity'] = data['background_bar_color_opacity']
+            goal_manager.save_html(data,type_goal)
 
-            manipulate_json(f"{local_work('appdata_path')}/config/goal.json", "save", goal_data)
                 
             return str(soup)
         
         elif data['type_id'] == 'update_goal':
 
+            from database import GoalManager
+            
             type_goal = data['type_goal']
 
+            goal_manager = GoalManager()
+            goal_data = goal_manager.get_goal(type_goal)
 
             data = {
-                'goal' : goal_data[type_goal]['goal'],
-                'current' : goal_data[type_goal]['current'],
-                'text_value' : goal_data[type_goal]['goal_text'],
-                'text_size' : goal_data[type_goal]['text_size'],
-                'goal_style' : goal_data[type_goal]['goal_style'],
-                'goal_above' : goal_data[type_goal]['goal_above'],
-                'goal_type' : goal_data[type_goal]['goal_type'],
-                'background_color' : goal_data[type_goal]['background_color'],
-                'text_value' : goal_data[type_goal]['goal_text'],
-                'text_size' : goal_data[type_goal]['text_size'],
-                'text_color' : goal_data[type_goal]['title_text'],
-                'bar_color' : goal_data[type_goal]['progress_bar'],
-                'progress_bar_background_opacity' : goal_data[type_goal]['progress_bar_background_opacity'],
-                'background_border' : goal_data[type_goal]['background_border'],
-                'background_bar_color' : goal_data[type_goal]['progress_bar_background'],
+                'goal' : goal_data['goal'],
+                'current' : goal_data['current'],
+                'text_value' : goal_data['goal_text'],
+                'text_size' : goal_data['text_size'],
+                'goal_style' : goal_data['goal_style'],
+                'goal_above' : goal_data['goal_above'],
+                'goal_type' : goal_data['goal_type'],
+                'text_value' : goal_data['goal_text'],
+                'text_size' : goal_data['text_size'],
+                'text_color' : goal_data['title_text'],
+                'bar_color' : goal_data['progress_bar'],
+                'background_color' : goal_data['background_color'],
+                'background_border' : goal_data['background_border'],
+                'background_bar_color' : goal_data['progress_bar_background'],
+                'progress_bar_background_opacity' : goal_data['progress_bar_background_opacity'],
             }
 
             goal_style = data['goal_style']
@@ -1016,15 +851,6 @@ def replace_all(text, dic_res):
         return text
 
 
-def messages_file_load(key):
-
-    messages_data = manipulate_json(f"{local_work('appdata_path')}/messages/messages_file.json", "load")
-
-    data = messages_data[key]
-
-    return data
-
-
 def compare_and_insert_keys():
 
     source_directory = f"{local_work('datadir')}/web/src"
@@ -1040,11 +866,6 @@ def compare_and_insert_keys():
         path_follow = f"{local_work('appdata_path')}/html/goal/follow"
         path_highlighted = f"{local_work('appdata_path')}/html/goal/follow"
         path_ranks = f"{local_work('appdata_path')}/html/ranks"
-        path_tts = f"{local_work('appdata_path')}/temp/"
-
-        if os.path.exists(path_tts):
-
-            shutil.rmtree(path_tts)
         
         if os.path.exists(path_follow):
 
@@ -1080,18 +901,14 @@ def compare_and_insert_keys():
         def update_dict_recursive(dest_dict, source_dict):
             
             for key, value in source_dict.items():
-
                 if key in dest_dict:
-
                     if isinstance(value, dict) and isinstance(dest_dict[key], dict):
                         update_dict_recursive(dest_dict[key], value)
-
                 else:
-
                     dest_dict[key] = value
 
         for root_directory, _, files in os.walk(source_directory):
-            
+
             for file in files:
 
                 if file.endswith('.json') and not file.endswith('gifts.json'):
@@ -1107,14 +924,37 @@ def compare_and_insert_keys():
                             data2 = json.load(dest_file)
 
                             if isinstance(data1, dict) and isinstance(data2, dict):
+
                                 update_dict_recursive(data2, data1)
+                                
                                 dest_file.seek(0)
+
                                 json.dump(data2, dest_file, indent=4, ensure_ascii=False)
                                 dest_file.truncate()
 
                     except json.JSONDecodeError as e:
+                        print(f"Error decoding the source JSON file: {source_file_path}")
+                        print(e)
 
-                        error_log(f"Error decoding the source JSON file: {source_file_path}")
+        
+        queue_data = manipulate_json(f"{local_work('appdata_path')}/queue/queue.json", "load")
+
+        if type(queue_data["priority"]) == list:
+
+            queue_data["priority"] = {}
+            queue_data["normal"] = {}
+
+            manipulate_json(f"{local_work('appdata_path')}/queue/queue.json", "save", queue_data)
+            
+        gifts_data = manipulate_json(f"{local_work('appdata_path')}/gifts/gifts.json","load")
+
+        if not "video" in gifts_data:
+
+            gifts_data["video"] = ""
+            gifts_data["video_status"] = 0
+            gifts_data["video_time"] = 50
+
+            manipulate_json(f"{local_work('appdata_path')}/gifts/gifts.json", "save", gifts_data)
 
         return True
     
@@ -1125,6 +965,7 @@ def compare_and_insert_keys():
 
         return False
 
+
 def normpath_simple(path):
     
     path_norm = os.path.normpath(path)
@@ -1132,67 +973,6 @@ def normpath_simple(path):
     path_norm_simple = path_norm.replace('\\', '/')
     
     return path_norm_simple
-
-
-def update_dict_gifts(dict_b):
-
-    dict_a_load = manipulate_json(f"{local_work('appdata_path')}/gifts/gifts.json","load")
-
-    dict_copy = dict_a_load.copy()
-    dict_a = dict_copy["gifts"]
-
-    itens_to_remove = []
-
-    if not dict_a:
-        dict_a.update(dict_b)
-    else:
-        for id_, item_a in dict_a.items():
-
-            if id_ in dict_b:
-                
-                item_b = dict_b[id_]
-
-                if item_a['name'] != item_b['name']:
-
-                    dict_a[id_]['name'] = item_b['name']
-
-                if item_a['value'] != item_b['value']:
-
-                    dict_a[id_]['value'] = item_b['value']
-
-                if item_a['icon'] != item_b['icon']:
-
-                    dict_a[id_]['icon'] = item_b['icon']
-                
-                if not "time" in item_a:
-                    item_a['time'] = "00:00:00"
-
-                if "minutes" in item_a:
-                    del item_a['minutes']
-
-                if not "keys" in item_a:
-                    item_a['keys'] = []
-                
-                if not "key_status" in item_a:
-                    item_a['key_status'] = 0
-
-                if not "key_time" in item_a:
-                    item_a['key_time'] = 0
-
-                if not "status_subathon" in item_a:
-                    item_a['status_subathon'] = 0
-
-            else:
-
-                itens_to_remove.append(id_)
-
-    for id_ in itens_to_remove:
-
-        del dict_a[id_]
-
-    manipulate_json(f"{local_work('appdata_path')}/gifts/gifts.json", "save", dict_a_load)
-
-    return True
 
 
 def check_file(file):
@@ -1207,8 +987,29 @@ def check_file(file):
     except Exception as e:
 
         return False
+
+
+def get_version(type_id):
+
+    try:
+
+        if type_id == "online":
+
+            response = req.get("https://api.github.com/repos/GGTEC/VibesBot/releases/latest")
+            response_json = json.loads(response.text)
+
+            if "tag_name" in response_json:
+                version = response_json["tag_name"]
+            else:
+                version = "2.0.8"
+
+            return version
+        
+        elif type_id == "code":
+
+            return "2.0.8"
     
+    except Exception as e:
 
-#dict_b_load = manipulate_json(f"{local_work('appdata_path')}/gifts/gifts.json","load")
-
-#update_dict_gifts(dict_b_load["gifts"])
+        error_log(e)
+        return "0.0.0"    

@@ -26,7 +26,7 @@ async function giveaway_js(type_id) {
 
         }
 
-    } else if ( type_id == 'get_style' ) {
+    } else if (type_id == 'get_style' ) {
 
         var giveaway_color1 = document.getElementById('giveaway-color1-text');
         var giveaway_color1_span = document.getElementById('giveaway-color1-span');
@@ -50,7 +50,7 @@ async function giveaway_js(type_id) {
 
         }
 
-    } else if (type_id == 'get_commands') {
+    } else if (type_id == 'get_command') {
         
         var command_giveaway_select = document.getElementById('command-giveaway-select');
 
@@ -60,13 +60,19 @@ async function giveaway_js(type_id) {
         var command_giveaway_cost_status = document.getElementById('command-cost-status-giveaway'); 
         var command_giveaway_cost = document.getElementById('command-cost-giveaway');
 
+        var command_giveaway_whitelistStatus = document.getElementById('whitelist-status-queue');
+
         var giveaway_command_edit = document.getElementById('command_giveaway_form');
 
-        var giveaway_command_data = await window.pywebview.api.giveaway_py(type_id,command_giveaway_select.value);
+        data = {
+            type_id : type_id,
+            type_command : command_giveaway_select.value,
+            type_command_table: 'giveaway'
+        }
 
-        if (giveaway_command_data){
+        var giveaway_parse = await window.pywebview.api.commands_default_py(data);
 
-            var giveaway_parse = JSON.parse(giveaway_command_data);
+        if (giveaway_parse){
 
             giveaway_command_edit.hidden = false
 
@@ -74,6 +80,7 @@ async function giveaway_js(type_id) {
 
             command_giveaway_status.checked = giveaway_parse.status == 1 ? true : false;
             command_giveaway_cost_status.checked = giveaway_parse.cost_status == 1 ? true : false;
+            command_giveaway_whitelistStatus.checked = giveaway_parse.whitelist_status == 1 ? true : false;
             command_giveaway_command.value = giveaway_parse.command
             command_giveaway_delay.value = giveaway_parse.delay
             command_giveaway_cost.value = giveaway_parse.cost
@@ -92,7 +99,6 @@ async function giveaway_js(type_id) {
 
             name_list_parse = JSON.parse(name_list_parse)
 
-
             $("#giveaway-modal").modal("show");
     
             var tbody_give = document.getElementById('giveaway-list-body');
@@ -105,7 +111,6 @@ async function giveaway_js(type_id) {
     
             })
             
-    
         }
 
     } else if (type_id == 'save_config'){
@@ -148,7 +153,7 @@ async function giveaway_js(type_id) {
     
         window.pywebview.api.giveaway_py(type_id, formData);
 
-    } else if (type_id == 'save_commands'){
+    } else if (type_id == 'save_command'){
 
         var command_giveaway_select = document.getElementById('command-giveaway-select');
 
@@ -157,9 +162,13 @@ async function giveaway_js(type_id) {
         var command_giveaway_delay = document.getElementById('command-giveaway-delay');
         var command_giveaway_cost_status = document.getElementById('command-cost-status-giveaway'); 
         var command_giveaway_cost = document.getElementById('command-cost-giveaway');
+        var command_giveaway_whitelistStatus = document.getElementById('whitelist-status-queue');
 
         var command_status = command_giveaway_status.checked ? 1 : 0;
         var cost_status = command_giveaway_cost_status.checked ? 1 : 0;
+        var whitelist_status = command_giveaway_whitelistStatus.checked ? 1 : 0;
+        
+        var giveaway_command_edit = document.getElementById('command_giveaway_form');
 
         var roles = []; 
 
@@ -168,17 +177,24 @@ async function giveaway_js(type_id) {
         });
 
         data  = {
+            type_id : type_id,
+            type_command_table: 'giveaway',
             type_command: command_giveaway_select.value,
             command: command_giveaway_command.value,
             status: command_status,
             delay: command_giveaway_delay.value,
             user_level: roles,
             cost: command_giveaway_cost.value,
-            cost_status: cost_status
+            cost_status: cost_status,
+            whitelist_status: whitelist_status
         }
 
         var formData = JSON.stringify(data);
-        window.pywebview.api.giveaway_py(type_id,formData);
+
+        window.pywebview.api.commands_default_py(formData);
+
+        
+        giveaway_command_edit.hidden = true
 
     } else if (type_id == 'add_user'){
 

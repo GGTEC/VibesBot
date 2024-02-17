@@ -1,56 +1,92 @@
 {
       "execute_giveaway": {
+            "type": "execute_giveaway",
             "command": "!execute",
             "status": 1,
             "delay": 10,
             "last_use": 0,
-            "user_level": "mod",
+            "user_level": [
+                  "moderador"
+            ],
             "cost" : 0,
-            "cost_status" : 0
+            "cost_status" : 0,
+            "whitelist_status" : 0,
+            "whitelist": [],
+            "blacklist": []
       },
       "clear_giveaway": {
+            "type": "clear_giveaway",
             "command": "!limpar_sorteio",
             "status": 1,
             "delay": 10,
             "last_use": 0,
-            "user_level": "mod",
+            "user_level": [
+                  "moderador"
+            ],
             "cost" : 0,
-            "cost_status" : 0
+            "cost_status" : 0,
+            "whitelist_status" : 0,
+            "whitelist": [],
+            "blacklist": []
       },
       "check_name": {
+            "type": "check_name",
             "command": "!check_user",
             "status": 1,
             "delay": 10,
             "last_use": 0,
-            "user_level": "mod",
+            "user_level": [
+                  "moderador"
+            ],
             "cost" : 0,
-            "cost_status" : 0
+            "cost_status" : 0,
+            "whitelist_status" : 0,
+            "whitelist": [],
+            "blacklist": []
       },
       "check_self_name": {
+            "type": "check_self_name",
             "command": "!selfcheck",
             "status": 1,
             "delay": 10,
             "last_use": 0,
-            "user_level": "mod",
+            "user_level": [
+                  "moderador"
+            ],
             "cost" : 0,
-            "cost_status" : 0
+            "cost_status" : 0,
+            "whitelist_status" : 0,
+            "whitelist": [],
+            "blacklist": []
       },
       "add_user": {
+            "type": "add_user",
             "command": "!useradd",
             "status": 1,
             "delay": 10,
             "last_use": 0,
-            "user_level": "mod",
+            "user_level": [
+                  "moderador"
+            ],
             "cost" : 0,
-            "cost_status" : 0
+            "cost_status" : 0,
+            "whitelist_status" : 0,
+            "whitelist": [],
+            "blacklist": []
       },
       "enter": {
+            "type" : "enter",
             "command": "!sorteio",
             "status": 1,
             "delay": 10,
             "last_use": 0,
-            "user_level": "mod",
+            "user_level": [
+                  "moderador"
+            ],
             "cost" : 0,
-            "cost_status" : 0
+            "cost_status" : 0,
+            "whitelist_status" : 0,
+            "whitelist": [],
+            "blacklist": []
       }
 }

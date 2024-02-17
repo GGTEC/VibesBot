@@ -330,7 +330,6 @@
         </nav>
       </div>
       <div class="tab-content h-100 w-100" id="v-pills-tabContent">
-
         <div class="tab-pane active vh-100" id="v-pills-start" role="tabpanel" aria-labelledby="v-pills-start-tab">
           <div class="background">
             <span></span>
@@ -551,7 +550,7 @@
                 <i class="fa-solid fa-trophy fa-2xl mt-5 mb-0"></i>
                   <p>Campeonato</p>
               </button>
-              <button class="btn redeem-block-bt " type="button" onclick="show_commands_div('subathon-commands-div')">
+              <button class="btn redeem-block-bt" type="button" onclick="show_commands_div('subathon-commands-div')">
                 <i class="fa-solid fa-stopwatch-20 mt-4 mb-0"></i>
                 <p>Subathon</p>
               </button>
@@ -598,11 +597,34 @@
                     <label for="new-command-response">Resposta do comando (Será exibido na tela)</label>
                     <input type="text" class="form-control bg-dark mt-3" id="new-command-response" placeholder="Digite a resposta do comando"/>
                   </div>
-                  <div class="form-group mt-2">
+                  <div class="form-group mt-3">
                     <label for="new-delay">Tempo de recarga</label>
-                    <input type="number" class="form-control bg-dark mt-3" min="5" value="5" id="new-delay" required />
+                    <input type="number" class="form-control bg-dark mt-3" min="5" value="5" id="new-delay"/>
                   </div>
-                  <div class="form-group mb-3 mt-4">
+                  <div class="form-group mt-5">
+                    <label for="type-command-create">Selecione o tipo de comando</label>
+                    <select class="form-control bg-dark mt-3" id="type-command-create" onchange="command_type_select('create')">
+                      <option value="tts">
+                        Texto falado da mensagem (Exibe o texto na tela)
+                      </option>
+                      <option value="audio">
+                        Audio mp3 sem texto na tela
+                      </option>
+                      <option value="video">
+                        Video/gif sem texto na tela
+                      </option>
+                      <option value="videotext">
+                        Video/gif com texto na tela
+                      </option>
+                      <option value="audiotext">
+                        Audio mp3 com texto na tela
+                      </option>
+                      <option value="text">
+                        Texto simples exibido na tela
+                      </option>
+                    </select>
+                  </div>
+                  <div class="form-group mt-5">
                     <label for="user-level-command">Permissão</label>
                     <select class="form-control bg-dark mt-3" id="user-level-command" multiple>
                       <option value="spec" selected>
@@ -635,6 +657,24 @@
                     <div class="row mt-3">
                       <div class="col">
                         <p class="form-check-label">
+                          Ativar Whitelist ou Permissão exclusiva para utilizar comando
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="whitelist-status" type="checkbox" onchange="whitelist('create')"/>
+                          <label for="whitelist-status" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <p class="small">*A Whitelist e Blacklist podem ser modificadas editando o comando depois de criado.</p>
+
+                  <div class="form-group mt-5">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
                           Ativar custo para utilizar comando
                         </p>
                       </div>
@@ -653,29 +693,6 @@
                     </div>
                     <p class="small mt-3 mb-2">Para desativar o custo, desative no seletor.</p>
                   </div>
-                  <div class="form-group mt-3">
-                    <label for="type-command-create">Selecione o tipo de comando</label>
-                    <select class="form-control bg-dark mt-3" id="type-command-create" onchange="command_type_select('create')">
-                      <option value="tts">
-                        Texto falado da mensagem (Exibe o texto na tela)
-                      </option>
-                      <option value="audio">
-                        Audio mp3 sem texto na tela
-                      </option>
-                      <option value="video">
-                        Video/gif sem texto na tela
-                      </option>
-                      <option value="videotext">
-                        Video/gif com texto na tela
-                      </option>
-                      <option value="audiotext">
-                        Audio mp3 com texto na tela
-                      </option>
-                      <option value="text">
-                        Texto simples exibido na tela
-                      </option>
-                    </select>
-                  </div>
                   <div id="command-audio-div" hidden>
                     <div class="form-group mt-3" >
                       <label for="sound-command">Arquivo de audio .mp3</label>
@@ -690,8 +707,13 @@
                   </div>
                   <div id="command-video-div" hidden>
                     <div class="form-group mt-3" >
-                      <label for="sound-command">Arquivo de video .mp4/.gif</label>
+                      <label for="video-command">Arquivo de video .mp4</label>
                       <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar" id="video-command" onclick="getFolder('video-command','video')" required />
+                    </div>
+                    <div class="form-group mt-3">
+                      <label for="time-video-command">Duração de exibição na tela (segundos)</label>
+                      <input class="w-100" type="range" min="0" max="100" value="50" id="time-video-command" step="1" oninput="rangevalue_videotime_command.innerText = this.value" />
+                      <output id="rangevalue_videotime_command">50</output>
                     </div>
                   </div>
                   <div class="form-group mt-5">
@@ -883,6 +905,7 @@
                   </button>
 
                   <p class="small mt-3">Testes de comandos disponíveis apenas para edição de comandos já criados</p>
+
                 </div>
               </div>
             </div>
@@ -988,6 +1011,61 @@
                     <div class="row mt-3">
                       <div class="col">
                         <p class="form-check-label">
+                          Ativar Whitelist ou Permissão exclusiva para utilizar comando
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="whitelist-status-edit" type="checkbox"/>
+                          <label for="whitelist-status-edit" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group mt-3">
+
+                    <label for="whitelist-command-edit">Whitelist (Quem pode utilizar o comando)</label>
+
+                    <div class="input-group none-flex">
+
+                      <input type="text" class="form-control bg-dark mt-3" id="whitelist-command-edit">
+
+                      <button class="btn bt-submit mt-3" type="button" onclick="whitelist('add_whitelist', 'whitelist-command-edit', 'edit-command')" >
+                        Adicionar
+                      </button>
+
+                      <button class="btn bt-submit mt-3" type="button" onclick="whitelist('show_whitelist','whitelist-command-edit', 'edit-command')" >
+                        Exibir lista
+                      </button>
+
+                    </div>
+                  </div>
+
+                  <div class="form-group mt-3">
+
+                    <label for="blacklist-command-edit">Blacklist (Quem não pode utilizar o comando)</label>
+
+                    <div class="input-group none-flex">
+
+                      <input type="text" class="form-control bg-dark mt-3" id="blacklist-command-edit"/>
+
+                      <button class="btn bt-submit mt-3" type="button" onclick="blacklist('add_blacklist', 'blacklist-command-edit', 'edit-command')" >
+                        Adicionar
+                      </button>
+  
+                      <button class="btn bt-submit mt-3" type="button" onclick="blacklist('show_blacklist','blacklist-command-edit', 'edit-command')" >
+                        Exibir lista
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                  <div class="form-group mt-5">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
                           Ativar custo para utilizar comando
                         </p>
                       </div>
@@ -1016,6 +1094,12 @@
                       </option>
                       <option value="audiotext">
                         Audio mp3 com texto na tela
+                      </option>                      
+                      <option value="video">
+                        Video/gif sem texto na tela
+                      </option>
+                      <option value="videotext">
+                        Video/gif com texto na tela
                       </option>
                       <option value="text">
                         Texto simples exibido na tela
@@ -1032,6 +1116,18 @@
                       <input class="w-100" type="range" min="0" max="100" value="50" id="audio-volume-command-edit" step="1"
                         oninput="rangevalue_audio_command_edit.innerText = this.value" />
                       <output id="rangevalue_audio_command_edit">50</output>
+                    </div>
+                  </div>
+                  <div id="command-video-div-edit" hidden>
+                    <div class="form-group mt-5">
+                      <label for="video-command-edit">Arquivo de video .mp4</label>
+                      <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar" id="video-command-edit" onclick="getFolder('video-command-edit','video')" required />
+                    </div>
+                    <div class="form-group mt-5">
+                      <label for="time-video-command-edit">Duração de exibição na tela (segundos)</label>
+                      <input class="w-100" type="range" min="0" max="100" value="50" id="time-video-command-edit" step="1"
+                        oninput="rangevalue_videotime_command_edit.innerText = this.value" />
+                      <output id="rangevalue_videotime_command_edit">50</output>
                     </div>
                   </div>
                   <div class="form-group mt-5">
@@ -1223,7 +1319,7 @@
                       <button type="button" class="btn bt-submit" onclick="commands_fun('edit')">
                         Salvar
                       </button>
-                      <button type="button" class="btn bt-submit ms-4" onclick="test_js('edit_command')">
+                      <button type="button" class="btn bt-submit ms-2" onclick="test_js('edit_command')">
                         Testar
                       </button>
                   </div>
@@ -1295,7 +1391,7 @@
                 <div class="bg-dark form-block">
                   <label for="command-player-edit">Selecione o comando para configurar e clique em editar.</label>
                   <div class="input-group none-flex mt-3">
-                    <select class="form-control bg-dark" id="command-player-edit" onchange="sr_config_js('event','hideconfig')">
+                    <select class="form-control bg-dark" id="command-player-edit" onchange="music_commands('hideconfig')">
                       <option value="request">
                         Comando para receber pedidos de musica
                       </option>
@@ -1312,7 +1408,7 @@
                         Comando para saber a próxima musica
                       </option>
                     </select>
-                    <button class="btn bt-submit" type="button" onclick="sr_config_js('event','get_command')">
+                    <button class="btn bt-submit" type="button" onclick="music_commands('get_command')">
                       Editar
                     </button>
                   </div>
@@ -1370,6 +1466,62 @@
                       </option>
                     </select>
                   </div>
+
+                  <div class="form-group mt-5">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Ativar Whitelist ou Permissão exclusiva para utilizar comando
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="whitelist-status-player" type="checkbox"/>
+                          <label for="whitelist-status-player" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group mt-3">
+
+                    <label for="whitelist-command-player">Whitelist (Quem pode utilizar o comando)</label>
+
+                    <div class="input-group none-flex">
+
+                      <input type="text" class="form-control bg-dark mt-3" id="whitelist-command-player">
+
+                      <button class="btn bt-submit mt-3" type="button" onclick="whitelistDefault('add_whitelist', 'whitelist-command-player', 'command-player-edit', 'player')" >
+                        Adicionar
+                      </button>
+
+                      <button class="btn bt-submit mt-3" type="button" onclick="whitelistDefault('show_whitelist', 'whitelist-command-player', 'command-player-edit', 'player')" >
+                        Exibir lista
+                      </button>
+
+                    </div>
+                  </div>
+
+                  <div class="form-group mt-3">
+
+                    <label for="blacklist-command-player">Blacklist (Quem não pode utilizar o comando)</label>
+
+                    <div class="input-group none-flex">
+
+                      <input type="text" class="form-control bg-dark mt-3" id="blacklist-command-player"/>
+
+                      <button class="btn bt-submit mt-3" type="button" onclick="blacklistDefault('add_blacklist', 'blacklist-command-player', 'command-player-edit', 'player')" >
+                        Adicionar
+                      </button>
+  
+                      <button class="btn bt-submit mt-3" type="button" onclick="blacklistDefault('show_blacklist', 'blacklist-command-player', 'command-player-edit', 'player')" >
+                        Exibir lista
+                      </button>
+
+                    </div>
+
+                  </div>
+
                   <div class="form-group mt-4">
                     <div class="row mt-3">
                       <div class="col">
@@ -1385,6 +1537,7 @@
                       </div>
                     </div>
                   </div>
+
                   <div id="command-costdiv-player" hidden>
                     <div class="form-group mt-3">
                       <label for="command-cost-player">Custo do comando</label>
@@ -1393,7 +1546,7 @@
                   </div>
 
                   <div class="d-flex flex-row mt-4">
-                      <button type="button" class="btn bt-submit" onclick="sr_config_js('event','save_command')">
+                      <button type="button" class="btn bt-submit" onclick="music_commands('save_command')">
                         Salvar
                       </button>
 
@@ -1450,7 +1603,7 @@
                         Comando para adicionar um nome na fila de espera (Recomendado moderador) !addfila nomedeusuário
                       </option>
                     </select>
-                    <button class="btn bt-submit" type="button" onclick="queue_js('get_commands')">
+                    <button class="btn bt-submit" type="button" onclick="queue_js('get_command')">
                       Editar
                     </button>
                   </div>
@@ -1508,19 +1661,61 @@
                       </option>
                     </select>
                   </div>
-                  <div class="form-group mt-3" id="queue-spend" hidden>
+                  <div class="form-group mt-5">
                     <div class="row mt-3">
                       <div class="col">
-                        <p class="form-check-label">Remover saldo de usuário com base do custo do comando quando moderador adicionar na fila</p>
+                        <p class="form-check-label">
+                          Ativar Whitelist ou Permissão exclusiva para utilizar comando
+                        </p>
                       </div>
                       <div class="col-2">
                         <div class="material-switch bg-white d-flex justify-content-end">
-                          <input id="command-queue-spend-status" type="checkbox" />
-                          <label for="command-queue-spend-status" class="form-check-label"></label>
+                          <input id="whitelist-status-queue" type="checkbox"/>
+                          <label for="whitelist-status-queue" class="form-check-label"></label>
                         </div>
                       </div>
                     </div>
                   </div>
+
+                  <div class="form-group mt-3">
+
+                    <label for="whitelist-command-create">Whitelist (Quem pode utilizar o comando)</label>
+
+                    <div class="input-group none-flex">
+
+                      <input type="text" class="form-control bg-dark mt-3" id="whitelist-command-queue">
+
+                      <button class="btn bt-submit mt-3" type="button" onclick="whitelistDefault('add_whitelist', 'whitelist-command-queue', 'command-queue-select', 'queue')" >
+                        Adicionar
+                      </button>
+
+                      <button class="btn bt-submit mt-3" type="button" onclick="whitelistDefault('show_whitelist', 'whitelist-command-queue', 'command-queue-select', 'queue')" >
+                        Exibir lista
+                      </button>
+
+                    </div>
+                  </div>
+
+                  <div class="form-group mt-3">
+
+                    <label for="blacklist-command-edit">Blacklist (Quem não pode utilizar o comando)</label>
+
+                    <div class="input-group none-flex">
+
+                      <input type="text" class="form-control bg-dark mt-3" id="blacklist-command-queue"/>
+
+                      <button class="btn bt-submit mt-3" type="button" onclick="blacklistDefault('add_blacklist', 'blacklist-command-queue', 'command-queue-select', 'queue')" >
+                        Adicionar
+                      </button>
+  
+                      <button class="btn bt-submit mt-3" type="button" onclick="blacklistDefault('show_blacklist','blacklist-command-queue', 'command-queue-select', 'queue')" >
+                        Exibir lista
+                      </button>
+
+                    </div>
+
+                  </div>
+
                   <div class="form-group mt-4">
                     <div class="row mt-3">
                       <div class="col">
@@ -1544,7 +1739,7 @@
                   </div>
 
                   <div class="d-flex flex-row mt-4">
-                    <button type="button" class="btn bt-submit" onclick="queue_js('save_commands')">
+                    <button type="button" class="btn bt-submit" onclick="queue_js('save_command')">
                       Salvar
                     </button>
                     <button type="button" class="btn bt-submit ms-2" onclick="test_js('queue_command')">
@@ -1594,7 +1789,7 @@
                         limpar o contador
                       </option>
                     </select>
-                    <button class="btn bt-submit" type="button" onclick="subathon_js('get_commands')">
+                    <button class="btn bt-submit" type="button" onclick="subathon_js('get_command')">
                       Editar
                     </button>
                   </div>
@@ -1652,6 +1847,60 @@
                       </option>
                     </select>
                   </div>
+                  <div class="form-group mt-5">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Ativar Whitelist ou Permissão exclusiva para utilizar comando
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="whitelist-status-subathon" type="checkbox"/>
+                          <label for="whitelist-status-subathon" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+  
+                  <div class="form-group mt-3">
+  
+                    <label for="whitelist-command-subathon">Whitelist (Quem pode utilizar o comando)</label>
+  
+                    <div class="input-group none-flex">
+  
+                      <input type="text" class="form-control bg-dark mt-3" id="whitelist-command-subathon">
+  
+                      <button class="btn bt-submit mt-3" type="button" onclick="whitelistDefault('add_whitelist', 'whitelist-command-subathon', 'command-subathon-select', 'subathon')" >
+                        Adicionar
+                      </button>
+  
+                      <button class="btn bt-submit mt-3" type="button" onclick="whitelistDefault('show_whitelist', 'whitelist-command-subathon', 'command-subathon-select', 'subathon')" >
+                        Exibir lista
+                      </button>
+  
+                    </div>
+                  </div>
+  
+                  <div class="form-group mt-3">
+  
+                    <label for="blacklist-command-subathon">Blacklist (Quem não pode utilizar o comando)</label>
+  
+                    <div class="input-group none-flex">
+  
+                      <input type="text" class="form-control bg-dark mt-3" id="blacklist-command-subathon"/>
+  
+                      <button class="btn bt-submit mt-3" type="button" onclick="blacklistDefault('add_blacklist', 'blacklist-command-subathon', 'command-subathon-select', 'subathon')" >
+                        Adicionar
+                      </button>
+  
+                      <button class="btn bt-submit mt-3" type="button" onclick="blacklistDefault('show_blacklist','blacklist-command-subathon', 'command-subathon-select', 'subathon')" >
+                        Exibir lista
+                      </button>
+  
+                    </div>
+  
+                  </div>
                   <div class="form-group mt-4">
                     <div class="row mt-3">
                       <div class="col">
@@ -1675,7 +1924,7 @@
                   </div>
 
                   <div class="d-flex flex-row mt-4">
-                    <button type="button" class="btn bt-submit" onclick="subathon_js('save_commands')">
+                    <button type="button" class="btn bt-submit" onclick="subathon_js('save_command')">
                       Salvar
                     </button>
                     <button type="button" class="btn bt-submit ms-2" onclick="test_js('subathon_command')">
@@ -1732,7 +1981,7 @@
                         Comando para adicionar um nome na lista do sorteio (Recomendado moderador)
                       </option>
                     </select>
-                    <button class="btn bt-submit" type="button" onclick="giveaway_js('get_commands')">
+                    <button class="btn bt-submit" type="button" onclick="giveaway_js('get_command')">
                       Editar
                     </button>
                   </div>
@@ -1740,10 +1989,6 @@
               </div>
               <div class="internal-block">
                 <div class="bg-dark form-block mt-0" id="command_giveaway_form" hidden>
-                  <div class="form-group mt-3">
-                    <label for="command-giveaway-command">Comando</label>
-                    <input type="text" class="form-control bg-dark mt-3" id="command-giveaway-command" />
-                  </div>
                   <div class="form-group mt-4">
                     <div class="row mt-3">
                       <div class="col">
@@ -1756,6 +2001,10 @@
                         </div>
                       </div>
                     </div>
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="command-giveaway-command">Comando</label>
+                    <input type="text" class="form-control bg-dark mt-3" id="command-giveaway-command" />
                   </div>
                   <div class="form-group mt-2">
                     <label for="command-player-delay">Tempo de recarga</label>
@@ -1794,6 +2043,60 @@
                     <div class="row mt-3">
                       <div class="col">
                         <p class="form-check-label">
+                          Ativar Whitelist ou Permissão exclusiva para utilizar comando
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="whitelist-status-giveaway" type="checkbox"/>
+                          <label for="whitelist-status-giveaway" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group mt-3">
+
+                    <label for="whitelist-command-create">Whitelist (Quem pode utilizar o comando)</label>
+
+                    <div class="input-group none-flex">
+
+                      <input type="text" class="form-control bg-dark mt-3" id="whitelist-command-giveaway">
+
+                      <button class="btn bt-submit mt-3" type="button" onclick="whitelistDefault('add_whitelist', 'whitelist-command-giveaway', 'command-giveaway-select', 'giveaway')" >
+                        Adicionar
+                      </button>
+
+                      <button class="btn bt-submit mt-3" type="button" onclick="whitelistDefault('show_whitelist','whitelist-command-giveaway', 'command-giveaway-select', 'giveaway')" >
+                        Exibir lista
+                      </button>
+
+                    </div>
+                  </div>
+
+                  <div class="form-group mt-3">
+
+                    <label for="blacklist-command-edit">Blacklist (Quem não pode utilizar o comando)</label>
+
+                    <div class="input-group none-flex">
+
+                      <input type="text" class="form-control bg-dark mt-3" id="blacklist-command-giveaway"/>
+
+                      <button class="btn bt-submit mt-3" type="button" onclick="blacklistDefault('add_blacklist', 'blacklist-command-giveaway', 'command-giveaway-select', 'giveaway')" >
+                        Adicionar
+                      </button>
+  
+                      <button class="btn bt-submit mt-3" type="button" onclick="blacklistDefault('show_blacklist','blacklist-command-giveaway', 'command-giveaway-select', 'giveaway')" >
+                        Exibir lista
+                      </button>
+
+                    </div>
+
+                  </div>
+                  <div class="form-group mt-5">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
                           Ativar custo para utilizar comando
                         </p>
                       </div>
@@ -1814,7 +2117,7 @@
 
 
                   <div class="d-flex flex-row mt-4">
-                    <button type="button" class="btn bt-submit" onclick="giveaway_js('save_commands')">
+                    <button type="button" class="btn bt-submit" onclick="giveaway_js('save_command')">
                       Salvar
                     </button>
                     <button type="button" class="btn bt-submit ms-3" onclick="test_js('giveaway_command')">
@@ -1849,7 +2152,7 @@
              </div>
               <div class="internal-block">
                 <div class="bg-dark form-block">
-                  <label for="command-giveaway-select">Selecione o comando para configurar e clique em editar.</label>
+                  <label for="command-balance-select">Selecione o comando para configurar e clique em editar.</label>
                   <div class="input-group none-flex mt-3">
                     <select class="form-control bg-dark" id="command-balance-select" onchange="balance_command('change')">
                       <option value="user_balance">
@@ -1940,6 +2243,60 @@
                     <div class="row mt-3">
                       <div class="col">
                         <p class="form-check-label">
+                          Ativar Whitelist ou Permissão exclusiva para utilizar comando
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="whitelist-status-balance" type="checkbox"/>
+                          <label for="whitelist-status-balance" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group mt-3">
+
+                    <label for="whitelist-command-create">Whitelist (Quem pode utilizar o comando)</label>
+
+                    <div class="input-group none-flex">
+
+                      <input type="text" class="form-control bg-dark mt-3" id="whitelist-command-balance">
+
+                      <button class="btn bt-submit mt-3" type="button" onclick="whitelistDefault('add_whitelist', 'whitelist-command-balance', 'command-balance-select' ,'balance')" >
+                        Adicionar
+                      </button>
+
+                      <button class="btn bt-submit mt-3" type="button" onclick="whitelistDefault('show_whitelist', 'whitelist-command-balance', 'command-balance-select' ,'balance')" >
+                        Exibir lista
+                      </button>
+
+                    </div>
+                  </div>
+
+                  <div class="form-group mt-3">
+
+                    <label for="blacklist-command-edit">Blacklist (Quem não pode utilizar o comando)</label>
+
+                    <div class="input-group none-flex">
+
+                      <input type="text" class="form-control bg-dark mt-3" id="blacklist-command-balance"/>
+
+                      <button class="btn bt-submit mt-3" type="button" onclick="blacklistDefault('add_blacklist', 'blacklist-command-balance', 'command-balance-select' ,'balance')" >
+                        Adicionar
+                      </button>
+  
+                      <button class="btn bt-submit mt-3" type="button" onclick="blacklistDefault('show_blacklist','blacklist-command-balance', 'command-balance-select', 'balance')" >
+                        Exibir lista
+                      </button>
+
+                    </div>
+
+                  </div>
+                  <div class="form-group mt-5">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
                           Ativar custo para utilizar comando
                         </p>
                       </div>
@@ -1970,131 +2327,319 @@
             </div>
           </div>
           <div id="tts-commands-div" hidden>
-            <div class="internal-top">
-              <span>Comando para texto-falado</span>
-              <button type="button" class="btn" onclick="hide_commands_div('tts-commands-div')" data-toggle="tooltip" data-bs-placement="left" title="Voltar">
-                <i class="fa-sharp fa-solid fa-chevron-left fa-xl"></i>
-              </button>
-            </div>
-            <div class="h-scroll flex-wrap flex-wrap justify-content-center">
-              <div class="background">
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-             </div>
-             <div class="internal-block">
-              <div class="bg-dark form-block" id="form-div-tts">
-                <div class="form-group mt-3">
-                  <div class="row mt-3">
-                    <div class="col">
-                      <p class="form-check-label">
-                        Status do comando
-                      </p>
-                    </div>
-                    <div class="col-2">
-                      <div class="material-switch bg-white d-flex justify-content-end">
-                        <input id="command-tts-status" type="checkbox" />
-                        <label for="command-tts-status" class="form-check-label"></label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="form-group mt-3">
-                  <label for="tts-command">Comando</label>
-                  <input type="text" class="form-control bg-dark mt-3" id="tts-command" placeholder="Digite o comando" required pattern="[^\s]+" />
-                  <p class="small mt-2">Utilize qualquer prefixo (!,@,#,$), O comando não deve conter espaços</p>
-                </div>
-                <div class="form-group mt-3">
-                  <label for="tts-delay">Tempo de recarga</label>
-                  <input type="number" class="form-control bg-dark mt-3" min="5" value="5" id="tts-delay" required />
-                </div>
-                <div class="form-group mt-3">
-                  <label for="user-level-tts">Permissão</label>
-                  <select class="form-control bg-dark mt-3" id="user-level-tts" multiple>
-                    <option value="spec">
-                      Todos
-                    </option>
-                    <option value="follow">
-                      Seguidor
-                    </option>
-                    <option value="gifts">
-                      Presenteador
-                    </option>
-                    <option value="Likes">
-                      Curtidor (Likes)
-                    </option>
-                    <option value="shares">
-                      Compartilhador
-                    </option>
-                    <option value="subscriber">
-                      Inscrito
-                    </option>
-                    <option value="subscriber_custom">
-                      Inscrito (Manual)
-                    </option>
-                    <option value="moderator">
-                      Moderador
-                    </option>
-                  </select>
-                </div>
-                <div class="form-group mt-4">
-                  <div class="row mt-3">
-                    <div class="col">
-                      <p class="form-check-label">
-                        Ativar prefixo "Usuário falou" antes do texto
-                      </p>
-                    </div>
-                    <div class="col-2">
-                      <div class="material-switch bg-white d-flex justify-content-end">
-                        <input id="command-tts-prefix" type="checkbox" />
-                        <label for="command-tts-prefix" class="form-check-label"></label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <p class="small">O prefixo pode ser alterado nas configurações de Textos para Eventos/Erros</p>
-                <div class="form-group mt-3">
-                  <div class="row mt-3">
-                    <div class="col">
-                      <p class="form-check-label">
-                        Ativar custo para utilizar comando
-                      </p>
-                    </div>
-                    <div class="col-2">
-                      <div class="material-switch bg-white d-flex justify-content-end">
-                        <input id="command-cost-status-tts" type="checkbox" onchange="command_cost('tts')"/>
-                        <label for="command-cost-status-tts" class="form-check-label"></label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div id="command-costdiv-tts" hidden>
-                  <div class="form-group mt-3">
-                    <label for="command-cost-tts">Custo do comando</label>
-                    <input type="number" class="form-control bg-dark mt-3" id="command-cost-tts"/>
-                  </div>
-                </div>
-
-
-
-                <div class="d-flex flex-row mt-4">
-                  <button type="button" class="btn bt-submit" onclick="tts_command('save')">
-                    Salvar
-                  </button>
-                  <button type="button" class="btn bt-submit ms-2" onclick="test_js('tts_command')">
-                    Testar
-                  </button>
-                </div>
+            <div id="tts-commands-div-int">
+              <div class="internal-top">
+                <span>Comando para texto-falado</span>
+                <button type="button" class="btn" onclick="hide_commands_div('tts-commands-div')" data-toggle="tooltip" data-bs-placement="left" title="Voltar">
+                  <i class="fa-sharp fa-solid fa-chevron-left fa-xl"></i>
+                </button>
               </div>
-             </div>
+              <div class="internal-block w-100">
+                <div class="background">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+               </div>
+               <div class="grid-buttons-goal">
+                <button class="btn redeem-block-bt" type="button" onclick="toggle_div_int('config-tts-div','tts-commands-div-int')">
+                  <i class="fa-solid fa-gears fa-2xl"></i>
+                    <p>Configurações</p>
+                </button>
+                <button class="btn redeem-block-bt" type="button" onclick="toggle_div_int('command-tts-div','tts-commands-div-int')">
+                  <i class="fa-solid fa-list-ul fa-2xl"></i>
+                    <p>Comando</p>
+                </button>
+              </div>
+              </div>
+            </div>
+            <div id="command-tts-div" hidden>
+              <div class="internal-top">
+                <h4>Comando para texto-falado</h4>
+                <button type="button" class="btn" onclick="toggle_div_int('tts-commands-div-int','command-tts-div')" data-toggle="tooltip" data-bs-placement="left" title="Voltar">
+                  <i class="fa-sharp fa-solid fa-chevron-left fa-xl"></i>
+                </button>
+              </div>
+              <div class="h-scroll flex-wrap flex-wrap justify-content-center">
+                <div class="background">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+               </div>
+               <div class="internal-block">
+                <div class="bg-dark form-block" hidden>
+                  <label for="command-tts-select">Selecione o comando para configurar e clique em editar.</label>
+                  <div class="input-group none-flex mt-3">
+                    <select class="form-control bg-dark" id="command-tts-select" >
+                      <option selected value="tts">
+                        Usuário enviar mensagem tts
+                      </option>
+                    </select>
+                    <button class="btn bt-submit" type="button">
+                      Editar
+                    </button>
+                  </div>
+                </div>
+                <div class="bg-dark form-block" id="form-div-tts">
+                  <div class="form-group mt-3">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Status do comando
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="command-tts-status" type="checkbox" />
+                          <label for="command-tts-status" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="tts-command">Comando</label>
+                    <input type="text" class="form-control bg-dark mt-3" id="tts-command" placeholder="Digite o comando" required pattern="[^\s]+" />
+                    <p class="small mt-2">Utilize qualquer prefixo (!,@,#,$), O comando não deve conter espaços</p>
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="tts-delay">Tempo de recarga</label>
+                    <input type="number" class="form-control bg-dark mt-3" min="5" value="5" id="tts-delay" required />
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="user-level-tts">Permissão</label>
+                    <select class="form-control bg-dark mt-3" id="user-level-tts" multiple>
+                      <option value="spec">
+                        Todos
+                      </option>
+                      <option value="follow">
+                        Seguidor
+                      </option>
+                      <option value="gifts">
+                        Presenteador
+                      </option>
+                      <option value="Likes">
+                        Curtidor (Likes)
+                      </option>
+                      <option value="shares">
+                        Compartilhador
+                      </option>
+                      <option value="subscriber">
+                        Inscrito
+                      </option>
+                      <option value="subscriber_custom">
+                        Inscrito (Manual)
+                      </option>
+                      <option value="moderator">
+                        Moderador
+                      </option>
+                    </select>
+                  </div>
+
+                  <div class="form-group mt-5">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Ativar Whitelist ou Permissão exclusiva para utilizar comando
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="whitelist-status-tts" type="checkbox"/>
+                          <label for="whitelist-status-tts" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group mt-3">
+
+                    <label for="whitelist-command-create">Whitelist (Quem pode utilizar o comando)</label>
+
+                    <div class="input-group none-flex">
+
+                      <input type="text" class="form-control bg-dark mt-3" id="whitelist-command-tts">
+
+                      <button class="btn bt-submit mt-3" type="button" onclick="blacklistDefault('add_whitelist', 'whitelist-command-tts', 'command-tts-select', 'tts')" >
+                        Adicionar
+                      </button>
+
+                      <button class="btn bt-submit mt-3" type="button" onclick="blacklistDefault('show_whitelist', 'whitelist-command-tts', 'command-tts-select', 'tts')" >
+                        Exibir lista
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="form-group mt-3">
+
+                    <label for="blacklist-command-edit">Blacklist (Quem não pode utilizar o comando)</label>
+
+                    <div class="input-group none-flex">
+
+                      <input type="text" class="form-control bg-dark mt-3" id="blacklist-command-tts"/>
+
+                      <button class="btn bt-submit mt-3" type="button" onclick="blacklistDefault('add_blacklist', 'blacklist-command-tts', 'command-tts-select', 'tts')" >
+                        Adicionar
+                      </button>
+  
+                      <button class="btn bt-submit mt-3" type="button" onclick="blacklistDefault('show_blacklist','blacklist-command-tts', 'command-tts-select', 'tts')" >
+                        Exibir lista
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                  <p class="small">O prefixo pode ser alterado nas configurações de Textos para Eventos/Erros</p>
+                  <div class="form-group mt-3">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Ativar custo para utilizar comando
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="command-cost-status-tts" type="checkbox" onchange="command_cost('tts')"/>
+                          <label for="command-cost-status-tts" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="command-costdiv-tts" hidden>
+                    <div class="form-group mt-3">
+                      <label for="command-cost-tts">Custo do comando</label>
+                      <input type="number" class="form-control bg-dark mt-3" id="command-cost-tts"/>
+                    </div>
+                  </div>
+                  <div class="d-flex flex-row mt-4">
+                    <button type="button" class="btn bt-submit" onclick="tts_command('save_command')">
+                      Salvar
+                    </button>
+                    <button type="button" class="btn bt-submit ms-2" onclick="test_js('tts_command')">
+                      Testar
+                    </button>
+                  </div>
+                </div>
+               </div>
+              </div>
+            </div>
+            <div id="config-tts-div" hidden>
+              <div class="internal-top">
+                <h4>Configurações para texto-falado</h4>
+                <button type="button" class="btn" onclick="toggle_div_int('tts-commands-div-int','config-tts-div')" data-toggle="tooltip" data-bs-placement="left" title="Voltar">
+                  <i class="fa-sharp fa-solid fa-chevron-left fa-xl"></i>
+                </button>
+              </div>
+              <div class="h-scroll flex-wrap flex-wrap justify-content-center">
+                <div class="background">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+               </div>
+               <div class="internal-block">
+                <div class="bg-dark form-block">
+                  <div class="form-group mt-4">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Ativar prefixo "Usuário falou" antes do texto
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="tts-prefix" type="checkbox" />
+                          <label for="tts-prefix" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <p class="small">O prefixo pode ser alterado nas configurações de Textos para Eventos/Erros</p>
+
+                  <div class="form-group mt-4">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Ativar filtro automático para emojis na frase
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="tts-emojis" type="checkbox" />
+                          <label for="tts-emojis" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mt-4">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Ativar filtro automático para palavras repetidas na frase
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="tts-repetitions-words" type="checkbox" />
+                          <label for="tts-repetitions-words" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mt-4">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Ativar filtro automático para letras repetidas na palavra
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="tts-repetitions-letters" type="checkbox" />
+                          <label for="tts-repetitions-letters" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group mt-4">
+                    <label for="tts-blacklist">Blacklist de palavras</label>
+                    <textarea class="bg-dark w-100 text-white mt-3 p-2" id="tts-blacklist" cols="30" rows="10"></textarea>
+                  </div>
+
+                  
+
+                  <div class="d-flex flex-row mt-4">
+                    <button type="button" class="btn bt-submit" onclick="tts_command('save_config')">
+                      Salvar
+                    </button>
+                  </div>
+
+                </div>
+               </div>
+              </div>
             </div>
           </div>
           <div id="vote-commands-div" hidden>
@@ -2119,6 +2664,19 @@
                 <span></span>
              </div>
              <div class="internal-block">
+              <div class="bg-dark form-block" hidden>
+                <label for="command-vote-select">Selecione o comando para configurar e clique em editar.</label>
+                <div class="input-group none-flex mt-3">
+                  <select class="form-control bg-dark" id="command-vote-select" >
+                    <option selected value="voting">
+                      Usuário enviar mensagem tts
+                    </option>
+                  </select>
+                  <button class="btn bt-submit" type="button">
+                    Editar
+                  </button>
+                </div>
+              </div>
               <div class="bg-dark form-block" id="form-div-vote">
                 <div class="form-group mt-3">
                   <div class="row mt-3">
@@ -2173,6 +2731,60 @@
                     </option>
                   </select>
                 </div>
+                <div class="form-group mt-5">
+                  <div class="row mt-3">
+                    <div class="col">
+                      <p class="form-check-label">
+                        Ativar Whitelist ou Permissão exclusiva para utilizar comando
+                      </p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="whitelist-status-vote" type="checkbox"/>
+                        <label for="whitelist-status-vote" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group mt-3">
+
+                  <label for="whitelist-command-create">Whitelist (Quem pode utilizar o comando)</label>
+
+                  <div class="input-group none-flex">
+
+                    <input type="text" class="form-control bg-dark mt-3" id="whitelist-command-vote">
+
+                    <button class="btn bt-submit mt-3" type="button" onclick="whitelistDefault('add_whitelist', 'whitelist-command-vote', 'command-vote-select', 'vote')" >
+                      Adicionar
+                    </button>
+
+                    <button class="btn bt-submit mt-3" type="button" onclick="whitelistDefault('show_whitelist','whitelist-command-vote', 'command-vote-select', 'vote')" >
+                      Exibir lista
+                    </button>
+
+                  </div>
+                </div>
+
+                <div class="form-group mt-3">
+
+                  <label for="blacklist-command-edit">Blacklist (Quem não pode utilizar o comando)</label>
+
+                  <div class="input-group none-flex">
+
+                    <input type="text" class="form-control bg-dark mt-3" id="blacklist-command-vote"/>
+
+                    <button class="btn bt-submit mt-3" type="button" onclick="blacklistDefault('add_blacklist', 'blacklist-command-vote', 'command-vote-select', 'vote')" >
+                      Adicionar
+                    </button>
+
+                    <button class="btn bt-submit mt-3" type="button" onclick="blacklistDefault('show_blacklist','blacklist-command-vote', 'command-vote-select', 'vote')" >
+                      Exibir lista
+                    </button>
+
+                  </div>
+
+                </div>
                 <div class="form-group mt-3">
                   <div class="row mt-3">
                     <div class="col">
@@ -2195,21 +2807,13 @@
                   </div>
                 </div>
 
-
-                <button type="button" class="btn bt-submit mt-4" onclick="votes('save_commands')">
-                  Salvar
-                </button>
-
                 <div class="d-flex flex-row mt-4">
-                  <div class="form-group mt-3">
-                    <label for="vote-command-test">Mensagem para teste (não será enviado no chat do tiktok)</label>
-                    <input type="text" class="form-control bg-dark mt-3" id="vote-command-test" placeholder="Digite o comando"/>
-                  </div>
-                  <div class="form-group mt-3">
-                    <button type="button" class="btn bt-submit" onclick="test_js('votes_command')">
-                      Testar
-                    </button>
-                  </div>
+                  <button type="button" class="btn bt-submit" onclick="votes('save_command')">
+                    Salvar
+                  </button>
+                  <button type="button" class="btn bt-submit ms-2" onclick="test_js('votes_command')">
+                    Testar
+                  </button>
                 </div>
               </div>
              </div>
@@ -2310,6 +2914,60 @@
                         Moderador
                       </option>
                     </select>
+                  </div>
+                  <div class="form-group mt-5">
+                    <div class="row mt-3">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Ativar Whitelist ou Permissão exclusiva para utilizar comando
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="whitelist-status-camp" type="checkbox"/>
+                          <label for="whitelist-status-camp" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+  
+                  <div class="form-group mt-3">
+  
+                    <label for="whitelist-command-camp">Whitelist (Quem pode utilizar o comando)</label>
+  
+                    <div class="input-group none-flex">
+  
+                      <input type="text" class="form-control bg-dark mt-3" id="whitelist-command-camp">
+  
+                      <button class="btn bt-submit mt-3" type="button" onclick="whitelistDefault('add_whitelist', 'whitelist-command-camp','command-camp-select', 'champ')" >
+                        Adicionar
+                      </button>
+  
+                      <button class="btn bt-submit mt-3" type="button" onclick="whitelistDefault('show_whitelist','whitelist-command-camp','command-camp-select', 'champ')" >
+                        Exibir lista
+                      </button>
+  
+                    </div>
+                  </div>
+  
+                  <div class="form-group mt-3">
+  
+                    <label for="blacklist-command-camp">Blacklist (Quem não pode utilizar o comando)</label>
+  
+                    <div class="input-group none-flex">
+  
+                      <input type="text" class="form-control bg-dark mt-3" id="blacklist-command-camp"/>
+  
+                      <button class="btn bt-submit mt-3" type="button" onclick="blacklistDefault('add_blacklist', 'blacklist-command-camp','command-camp-select', 'champ')" >
+                        Adicionar
+                      </button>
+  
+                      <button class="btn bt-submit mt-3" type="button" onclick="blacklistDefault('show_blacklist','blacklist-command-camp','command-camp-select', 'champ')" >
+                        Exibir lista
+                      </button>
+  
+                    </div>
+  
                   </div>
                   <div class="form-group mt-3">
                     <div class="row mt-3">
@@ -2500,6 +3158,28 @@
                         oninput="rangevalue_ttk_goal.innerText = this.value" />
                       <output id="rangevalue_ttk_goal">50</output>
                     </div>
+                    <div class="form-group mt-5">
+                      <div class="row">
+                        <div class="col">
+                          <p class="form-check-label">Ativar Notificação de video</p>
+                        </div>
+                        <div class="col">
+                          <div class="material-switch bg-white d-flex justify-content-end">
+                            <input id="goal-video-status" type="checkbox" />
+                            <label for="goal-video-status" class="form-check-label"></label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group mt-3" >
+                      <label for="video-goal">Arquivo de video .mp4</label>
+                      <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar" id="video-goal" onclick="getFolder('video-goal','video')" required />
+                    </div>
+                    <div class="form-group mt-3">
+                      <label for="video-time-goal">Duração de exibição na tela (segundos)</label>
+                      <input class="w-100" type="range" min="0" max="100" value="50" id="video-time-goal" step="1" oninput="rangevalue_videotime_goal.innerText = this.value" />
+                      <output id="rangevalue_videotime_goal">0</output>
+                    </div>
                     <div class="form-group mt-3">
                       <button class="btn bt-submit" type="button" onclick="ttk_goal('save')">
                         Salvar
@@ -2507,8 +3187,10 @@
                       <button class="btn bt-submit" type="button" onclick="test_js('goal')">
                         Testar meta
                       </button>
+                      <button class="btn bt-submit" type="button" onclick="ttk_goal('reset')">
+                        Reiniciar meta
+                      </button>
                     </div>
-  
                   </div>
                 </div>
               </div>
@@ -2748,7 +3430,6 @@
                     </div>
                   </div>
                 </div>
-
                 <div class="bg-dark form-block mt-5" id="alert-follow" hidden>
                   <h5>Notificações para follow</h5>
                   <div class="row mt-5">
@@ -2774,7 +3455,39 @@
                       oninput="rangevalue_ttk_follow.innerText = this.value" />
                     <output id="rangevalue_ttk_follow">50</output>
                   </div>
-                  <button type="button" class="bt-submit btn bg-dark mt-5" onclick="ttk_alerts('save_sound_follow')">
+                  <div class="form-group mt-5">
+                    <div class="row">
+                      <div class="col">
+                        <p class="form-check-label">Ativar Notificação de video</p>
+                      </div>
+                      <div class="col">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="follow-video-status" type="checkbox" />
+                          <label for="follow-video-status" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mt-3" >
+                    <label for="video-follow">Arquivo de video .mp4</label>
+                    <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar" id="video-follow" onclick="getFolder('video-follow','video')" required />
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="video-time-follow">Duração de exibição na tela (segundos)</label>
+                    <input class="w-100" type="range" min="0" max="100" value="50" id="video-time-follow" step="1" oninput="rangevalue_videotime_follow.innerText = this.value" />
+                    <output id="rangevalue_videotime_follow">0</output>
+                  </div>
+
+                  <div class="d-flex flex-row mt-5">
+                    <button type="button" class="bt-submit btn bg-dark " onclick="ttk_alerts('save_sound_follow')">
+                      Salvar
+                    </button>
+                    <button type="button" class="bt-submit btn bg-dark ms-2" onclick="test_js('follow_alert')">
+                      Testar
+                    </button>
+                  </div>
+
+                  <button type="button" class="bt-submit btn bg-dark mt-5" >
                     Salvar
                   </button>
                 </div>
@@ -2798,18 +3511,47 @@
                     <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar" id="file-select-ttk-like" onclick="getFolder('file-select-ttk-like','sound')" required />
                   </div>
                   <div class="form-group mt-3">
-                    <label for="ttk-like-delay">Tempo de delay em segundos para notificações de likes (Bom para evitar flood ao chat de notificações)</label>
-                    <input type="number" class="form-control bg-dark mt-3" id="ttk-like-delay"/>
-                  </div>
-                  <div class="form-group mt-3">
                     <label for="audio-volume-ttk-like">Volume</label>
                     <input class="w-100" type="range" min="0" max="100" value="50" id="audio-volume-ttk-like" step="1"
                       oninput="rangevalue_ttk_like.innerText = this.value" />
                     <output id="rangevalue_ttk_like">50</output>
                   </div>
-                  <button type="button" class="bt-submit btn bg-dark mt-5" onclick="ttk_alerts('save_sound_like')">
-                    Salvar
-                  </button>
+                  <div class="form-group mt-5">
+                    <div class="row">
+                      <div class="col">
+                        <p class="form-check-label">Ativar Notificação de video</p>
+                      </div>
+                      <div class="col">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="like-video-status" type="checkbox" />
+                          <label for="like-video-status" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mt-3" >
+                    <label for="video-like">Arquivo de video .mp4</label>
+                    <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar" id="video-like" onclick="getFolder('video-like','video')" required />
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="video-time-like">Duração de exibição na tela (segundos)</label>
+                    <input class="w-100" type="range" min="0" max="100" value="50" id="video-time-like" step="1" oninput="rangevalue_videotime_like.innerText = this.value" />
+                    <output id="rangevalue_videotime_like">0</output>
+                  </div>
+                  <div class="form-group mt-5">
+                    <label for="ttk-like-delay">Tempo de delay em segundos para notificações de likes (Bom para evitar flood ao chat de notificações)</label>
+                    <input type="number" class="form-control bg-dark mt-3" id="ttk-like-delay"/>
+                  </div>
+                  
+                  <div class="d-flex flex-row mt-5">
+                    <button type="button" class="bt-submit btn bg-dark " onclick="ttk_alerts('save_sound_like')">
+                      Salvar
+                    </button>
+                    <button type="button" class="bt-submit btn bg-dark ms-2" onclick="test_js('like_alert')">
+                      Testar
+                    </button>
+                  </div>
+
                 </div>
                 <div class="bg-dark form-block mt-5" id="alert-share" hidden>
                   <h5>Notificações para Compartilhamentos</h5>
@@ -2840,9 +3582,38 @@
                         oninput="rangevalue_ttk_share.innerText = this.value" />
                       <output id="rangevalue_ttk_share">50</output>
                     </div>
-                    <button type="button" class="bt-submit btn bg-dark mt-5" onclick="ttk_alerts('save_sound_share')">
-                      Salvar
-                    </button>
+                    <div class="form-group mt-3">
+                      <div class="row">
+                        <div class="col">
+                          <p class="form-check-label">Ativar Notificação de video</p>
+                        </div>
+                        <div class="col">
+                          <div class="material-switch bg-white d-flex justify-content-end">
+                            <input id="share-video-status" type="checkbox" />
+                            <label for="share-video-status" class="form-check-label"></label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group mt-3" >
+                      <label for="video-share">Arquivo de video .mp4</label>
+                      <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar" id="video-share" onclick="getFolder('video-share','video')" required />
+                    </div>
+                    <div class="form-group mt-3">
+                      <label for="video-time-share">Duração de exibição na tela (segundos)</label>
+                      <input class="w-100" type="range" min="0" max="100" value="50" id="video-time-share" step="1" oninput="rangevalue_videotime_share.innerText = this.value" />
+                      <output id="rangevalue_videotime_share">0</output>
+                    </div>
+    
+
+                    <div class="d-flex flex-row mt-5">
+                      <button type="button" class="bt-submit btn bg-dark " onclick="ttk_alerts('save_sound_share')">
+                        Salvar
+                      </button>
+                      <button type="button" class="bt-submit btn bg-dark ms-2" onclick="test_js('share_alert')">
+                        Testar
+                      </button>
+                    </div>
                 </div>
               </div>
             </div>
@@ -2907,10 +3678,10 @@
               <div class="internal-block">
                 <div class="bg-dark form-block">
                   <h6>Notificações Globais <i class="fa-solid fa-circle-question sm"></i></h6>
-                  <p>A notificação é executada se não ouver nenhuma notificação configurada individualmente para o presente recebido ou o presente não for encontrado na lista de presentes configuráveis</p>
-                  <div class="row mt-3">
+                  <p class="mt-1 small">A notificação é executada se não ouver nenhuma notificação configurada individualmente para o presente recebido ou o presente não for encontrado na lista de presentes configuráveis</p>
+                  <div class="row mt-5">
                     <div class="col">
-                      <p class="form-check-label">Ativar Notificação</p>
+                      <p class="form-check-label">Ativar Notificação de audio</p>
                     </div>
                     <div class="col">
                       <div class="material-switch bg-white d-flex justify-content-end">
@@ -2928,6 +3699,27 @@
                     <input class="w-100" type="range" min="0" max="100" value="50" id="global-gift-volume" step="1"
                       oninput="rangevalue_global_gift_volume.innerText = this.value" />
                     <output id="rangevalue_global_gift_volume">50</output>
+                  </div>
+
+                  <div class="row mt-5">
+                    <div class="col">
+                      <p class="form-check-label">Ativar Notificação de video</p>
+                    </div>
+                    <div class="col">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="global-gift-video-status" type="checkbox" />
+                        <label for="global-gift-video-status" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mt-3" >
+                    <label for="global-video-gift">Arquivo de video .mp4</label>
+                    <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar" id="global-video-gift" onclick="getFolder('global-video-gift','video')" required />
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="global-video-time-gift">Duração de exibição na tela (segundos)</label>
+                    <input class="w-100" type="range" min="0" max="100" value="50" id="global-video-time-gift" step="1" oninput="rangevalue_globalvideotime_gift.innerText = this.value" />
+                    <output id="rangevalue_globalvideotime_gift">0</output>
                   </div>
                   <button type="button" class="btn bt-submit mt-4" onclick="ttk_gift('global_gift_save')">Salvar</button>
                 </div>
@@ -2981,28 +3773,28 @@
             </div>
             <div class="internal-block w-100">
               <div class="background">
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-             </div>
-             <div class="grid-buttons-goal">
-              <button class="btn redeem-block-bt" type="button" onclick="toggle_div_int('config-queue-div','queue-div')">
-                <i class="fa-solid fa-gears fa-2xl"></i>
-                  <p>Configurações</p>
-              </button>
-              <button class="btn redeem-block-bt" type="button" onclick="toggle_div_int('commom-queue','queue-div')">
-                <i class="fa-solid fa-list-ul fa-2xl"></i>
-                  <p>Fila de espera</p>
-              </button>
-            </div>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+              </div>
+              <div class="grid-buttons-goal">
+                  <button class="btn redeem-block-bt" type="button" onclick="toggle_div_int('config-queue-div','queue-div')">
+                    <i class="fa-solid fa-gears fa-2xl"></i>
+                      <p>Configurações</p>
+                  </button>
+                  <button class="btn redeem-block-bt" type="button" onclick="toggle_div_int('commom-queue','queue-div')">
+                    <i class="fa-solid fa-list-ul fa-2xl"></i>
+                      <p>Fila de espera</p>
+                  </button>
+                </div>
             </div>
           </div>
           <div id="config-queue-div" hidden>
@@ -3043,6 +3835,8 @@
                     </div>
                   </div>
                 </div>
+                <p class="small">*Quando ativada os usuários com os cargos selecionados serão adicionados sempre na primeira partida.
+                </p>
                 <div class="form-group mt-3">
                   <div class="row mt-3">
                     <div class="col">
@@ -3058,9 +3852,22 @@
                     </div>
                   </div>
                 </div>
-                <p class="small">Quando ativada os usuários com os cargos selecionados abaixo serão adicionados na tabela
-                  da fila prioritária
+                <p class="small">*Quando ativada os usuários com os cargos selecionados serão adicionados em uma fila diferente.
                 </p>
+
+                <div class="form-group mt-5" >
+                  <div class="row mt-3">
+                    <div class="col">
+                      <p class="form-check-label">Remover saldo de usuário com base do custo do comando quando moderador adicionar na fila</p>
+                    </div>
+                    <div class="col-2">
+                      <div class="material-switch bg-white d-flex justify-content-end">
+                        <input id="queue-spend-status" type="checkbox" />
+                        <label for="queue-spend-status" class="form-check-label"></label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 <div class="form-group mt-5">
                   <label for="queue-role">Cargos da fila prioritária</label>
                   <select class="form-control bg-dark mt-3" id="queue-role" multiple>
@@ -3090,9 +3897,20 @@
                     </option>
                   </select>
                 </div> 
+
+                <div class="form-group mt-3">
+                  <label for="queue-limit">Máximo de usuários em uma partida</label>
+                  <input type="number" class="form-control bg-dark mt-3" value="3" id="queue-limit" />
+                </div>
+
                 <button type="button" class="btn bt-submit mt-5" onclick="queue_js('save_config')">
                   Salvar
                 </button>
+
+                <button type="button" class="btn bt-submit mt-5" onclick="queue_js('get_ended')">
+                  Exibir partidas finalizadas
+                </button>
+
               </div>
 
              </div>
@@ -3131,22 +3949,14 @@
                       Adicionar
                     </button>
                   </div>
-                  <div class="input-group mt-5 mb-3">
+                  <div class=" input-group mt-5 mb-3">
                     <label for="clear_queue" class="w-100 mb-3">Limpar toda fila de espera</label>
                     <button type="button" class="btn bt-submit" onclick="queue_js('clear_queue')">
                       Limpar
                     </button>
                   </div>
-                  <table class="table table-dark table-striped w-100 mt-5" id="queuelist_table">
-                    <thead>
-                      <tr>
-                        <th>Pos</th>
-                        <th>Usuário</th>
-                        <th>Remover</th>
-                      </tr>
-                    </thead>
-                    <tbody></tbody>
-                  </table>
+                  <div class="w-100" id="queuelist_table_playing"></div>
+                  <div class="w-100" id="queuelist_table_normal"></div>
                 </div>
               </div>
               <div class="bg-dark form-block" id="queue-pri-div">
@@ -3166,16 +3976,7 @@
                       Limpar
                     </button>
                   </div>
-                  <table class="table table-dark table-striped w-100 mt-5" id="queuelist_table_pri">
-                    <thead>
-                      <tr>
-                        <th>Pos</th>
-                        <th>Usuário</th>
-                        <th>Remover</th>
-                      </tr>
-                    </thead>
-                    <tbody></tbody>
-                  </table>
+                  <div class="w-100" id="queuelist_table_pri"></div>
                 </div>
               </div>
              </div>
@@ -4204,51 +5005,56 @@
                 <span></span>
               </div>
               <div class="grid-buttons-commands">
-              <button class="btn redeem-block-bt" type="button"
-                onclick="toggle_div('show','config-discord-div')">
-                <i class="fa-solid fa-bell fa-2xl mt-5 mb-0"></i>
-                <p>Alertas Chat/Discord</p>
-              </button>
-              <button class="btn redeem-block-bt" type="button"
-                onclick="toggle_div('show','config-responses-div')">
-                <i class="fa-solid fa-reply fa-2xl mt-5 mb-0"></i>
-                <p>Respostas para eventos</p>
-              </button>
-              <button class="btn redeem-block-bt" type="button"
-                onclick="toggle_div('show','config-music-div')">
-                <i class="fa-solid fa-music fa-2xl mt-5 mb-0"></i>
-                <p>Pedidos de música</p>
-              </button>
-              <button class="btn redeem-block-bt" type="button"
-                onclick="toggle_div('show','config-chat-div')">
-                <i class="fa-solid fa-comments fa-2xl mt-5 mb-0"></i>
-                <p>Chat</p>
-              </button>
-              <button class="btn redeem-block-bt" type="button"
-                onclick="toggle_div('show','config-points-div')">
-                <i class="fa-solid fa-coins fa-2xl mt-5 mb-0"></i>
-                <p>Pontos</p>
-              </button>
-              <button class="btn redeem-block-bt" type="button"
-                onclick="toggle_div('show','config-roles-div')">
-                <i class="fa-solid fa-user-shield fa-2xl mt-5 mb-0"></i>
-                <p>Cargos</p>
-              </button>
-              <button class="btn redeem-block-bt" type="button"
-                onclick="toggle_div('show','config-subathon-div')">
-                <i class="fa-solid fa-stopwatch-20 mt-4 mb-0"></i>
-                <p>Subathon</p>
-              </button>
-              <button class="btn redeem-block-bt" type="button"
-                onclick="toggle_div('show','config-events-div')">
-                <i class="fa-solid fa-calendar-day fa-2xl mt-5 mb-0"></i>
-                <p>Registro de eventos</p>
-              </button>
-              <button class="btn redeem-block-bt" type="button"
-                onclick="toggle_div('show','userdata-div')" >
-                <i class="fa-solid fa-users fa-2xl mt-5 mb-0"></i>
-                <p>Registros de usuários</p>
-              </button>
+                <button class="btn redeem-block-bt" type="button"
+                  onclick="toggle_div('show','config-discord-div')">
+                  <i class="fa-solid fa-bell fa-2xl mt-5 mb-0"></i>
+                  <p>Alertas Chat/Discord</p>
+                </button>
+                <button class="btn redeem-block-bt" type="button"
+                  onclick="toggle_div('show','config-responses-div')">
+                  <i class="fa-solid fa-reply fa-2xl mt-5 mb-0"></i>
+                  <p>Respostas para eventos</p>
+                </button>
+                <button class="btn redeem-block-bt" type="button"
+                  onclick="toggle_div('show','config-music-div')">
+                  <i class="fa-solid fa-music fa-2xl mt-5 mb-0"></i>
+                  <p>Pedidos de música</p>
+                </button>
+                <button class="btn redeem-block-bt" type="button"
+                  onclick="toggle_div('show','config-chat-div')">
+                  <i class="fa-solid fa-comments fa-2xl mt-5 mb-0"></i>
+                  <p>Chat</p>
+                </button>
+                <button class="btn redeem-block-bt" type="button"
+                  onclick="toggle_div('show','config-points-div')">
+                  <i class="fa-solid fa-coins fa-2xl mt-5 mb-0"></i>
+                  <p>Pontos</p>
+                </button>
+                <button class="btn redeem-block-bt" type="button"
+                  onclick="toggle_div('show','config-roles-div')">
+                  <i class="fa-solid fa-user-shield fa-2xl mt-5 mb-0"></i>
+                  <p>Cargos</p>
+                </button>
+                <button class="btn redeem-block-bt" type="button"
+                  onclick="toggle_div('show','config-subathon-div')">
+                  <i class="fa-solid fa-stopwatch-20 mt-4 mb-0"></i>
+                  <p>Subathon</p>
+                </button>
+                <button class="btn redeem-block-bt" type="button"
+                  onclick="toggle_div('show','config-events-div')">
+                  <i class="fa-solid fa-calendar-day fa-2xl mt-5 mb-0"></i>
+                  <p>Registro de eventos</p>
+                </button>
+                <button class="btn redeem-block-bt" type="button"
+                  onclick="toggle_div('show','config-alerts-div')">
+                  <i class="fa-solid fa-bell fa-2xl mt-5 mb-0"></i>
+                  <p>Overlay de alertas</p>
+                </button>
+                <button class="btn redeem-block-bt" type="button"
+                  onclick="toggle_div('show','userdata-div')" >
+                  <i class="fa-solid fa-users fa-2xl mt-5 mb-0"></i>
+                  <p>Registros de usuários</p>
+                </button>
               </div>
             </div>
           </div>
@@ -4468,6 +5274,10 @@
                           <option value="error_tts_no_text">
                             Erro | É necessário fornecer um texto para ser falado
                           </option>
+
+                          <option value="error_tts_no_text_command">
+                            Erro | O comadno criado está sem texto para ser falado
+                          </option>
                           
                           <option value="error_user_level">
                             Erro | Você precisa ter um determinado nível para usar o comando
@@ -4503,6 +5313,10 @@
                           
                           <option value="giveaway_status_disabled">
                             Sorteio | Nenhum sorteio ativo no momento ou o sorteio está pausado
+                          </option>
+
+                          <option value="response_giveaway_nonames">
+                            Sorteio | Nenhum nome na lista do sorteio
                           </option>
                           
                           <option value="response_user_giveaway">
@@ -4630,11 +5444,11 @@
                           </option>
                           
                           <option value="response_queue">
-                            Fila | Você foi adicionado à fila de espera
+                            Fila | Usuário adicionado à fila de espera (Comando usuário)
                           </option>
                           
                           <option value="response_add_queue">
-                            Fila | Nome adicionado à fila
+                            Fila | Nome adicionado à fila de espera (Comando moderador ou interface)
                           </option>
                           
                           <option value="response_namein_queue">
@@ -4650,9 +5464,34 @@
                           </option>
                           
                           <option value="response_get_queue">
-                            Fila | Estão na fila: Lista dos 5 primeiros
+                            Fila | Verificar usuários que estão na fila de espera
+                          </option>
+
+                          <option value="response_clear_queue">
+                            Fila | Fila de espera comum foi limpa
+                          </option>
+
+                          <option value="response_clear_queue_pri">
+                            Fila | Fila de espera prioritária foi limpa
+                          </option>
+
+                          <option value="response_queue_playing">
+                            Fila | Jogadores jogando (Enviado ao pressionar o botão "Jogando" na interface)
+                          </option>
+
+                          <option value="response_queue_end_match">
+                            Fila | Partida finalizada
+                          </option>
+
+                          <option value="response_queue_move">
+                            Fila | Usuário movido de partida
+                          </option>
+
+                          <option value="response_namein_playing">
+                            Fila | Já está jogando
                           </option>
                           
+
                           <option value="skip_votes">
                             Música | Voto de skip adicionado, votos necessários = determinado número/mínimo
                           </option>
@@ -4832,24 +5671,47 @@
                           <option value="command_vote_started">
                             Votação | Votação iniciada
                           </option>
+
                           <option value="response_end_champ">
                             Campeonato | Sequencia de partidas do campeonato foi finalizada
                           </option>
+
                           <option value="response_add_winner">
                             Campeonato | Usuário ganhou o campeonato
                           </option>
+
                           <option value="response_add_champ">
                             Campeonato | Usuário já esta na lista do campeonato
                           </option>
+
                           <option value="response_in_champ">
                             Campeonato | Usuário já esta na lista do campeonato
                           </option>
+
                           <option value="response_not_in_champ">
                             Campeonato | Usuário não esta na lista do campeonato
                           </option>
+
                           <option value="response_remove_champ">
                             Campeonato | Usuário removido da lista do campeonato
                           </option>
+
+                          <option value="subathon_minutes_remove">
+                            Subathon | Minutos removidos do subathon
+                          </option>
+
+                          <option value="subathon_minutes_add">
+                            Subathon | Minutos adicionados ao subathon
+                          </option>
+
+                          <option value="subathon_minutes_add">
+                            Subathon | Contador do subathon zerado
+                          </option>
+
+                          <option value="user_in_blacklist">
+                            Blacklist | Usuário não tem permissão para utilizar o comando
+                          </option>
+
                         </select>
                         <button class="btn bt-submit mt-3" type="button" onclick="config_responses_js('get_response')" >
                           Carregar
@@ -5452,7 +6314,7 @@
                     <input class="mt-4" type="range" min="0" max="100" value="18" id="slider-font-events" step="1" oninput="rangevalue_config_events.innerText = this.value" />
                     <output id="rangevalue_config_events">18px</output>
                   </div>
-                  <div class="form-group d-flex flex-column">
+                  <div class="form-group mt-3">
                     <label for="font-events-overlay">Tamanho da fonte no Overlay de eventos </label>
                     <input class="mt-4" type="range" min="0" max="100" value="18" id="font-events-overlay" step="1" oninput="rangevalue_config_events_overlay.innerText = this.value" />
                     <output id="rangevalue_config_events_overlay">18px</output>
@@ -5644,6 +6506,146 @@
               </div>
             </div>
           </div>
+          <div id="config-alerts-div" hidden>
+            <div class="internal-top">
+              <span>Registro de eventos</span>
+              <button class="btn" onclick="toggle_div('hide','config-alerts-div')" data-toggle="tooltip"
+                data-bs-placement="left" title="Voltar">
+                <i class="fa-sharp fa-solid fa-chevron-left fa-xl"></i>
+              </button>
+            </div>
+            <div class="h-scroll flex-wrap justify-content-center">
+              <div class="background">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+             </div>
+              <div class="internal-block">
+                <div class="bg-dark form-block">
+
+                  <h5>Configurações do overlay geral</h5>
+                  <div class="form-group mt-5">
+                    <label for="slider-font-alerts">Tamanho da fonte</label>
+                    <input class="mt-4" type="range" min="0" max="100" value="18" id="slider-font-alerts" step="1" oninput="rangevalue_config_alers.innerText = this.value" />
+                    <output id="rangevalue_config_alers">18px</output>
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="alerts-text-color-text">Cor do texto do Overlay</label>
+                    <div class="input-group none-flex mt-2">
+                      <span class="color-span mt-3" id="alerts-text-color-span"></span>
+                      <input type="color" id="alerts-text-color-select"/>
+                      <input type="text" class="form-control bg-dark mt-3" id="alerts-text-color-text"/>
+                      <button type="button" class="btn bt-submit mt-3" id="alerts-text-color-button">Selecionar</button>
+                    </div>
+                  </div>
+                  <div class="form-group mt-3">
+                    <label for="alerts-background-color-text">Cor de fundo do Overlay</label>
+                    <div class="input-group none-flex mt-2">
+                      <span class="color-span mt-3" id="alerts-background-color-span"></span>
+                      <input type="color" id="alerts-background-color-select"/>
+                      <input type="text" class="form-control bg-dark mt-3" id="alerts-background-color-text"/>
+                      <button type="button" class="btn bt-submit mt-3" id="alerts-background-color-button">Selecionar</button>
+                    </div>
+                  </div>
+
+                  <div class="form-group mt-5 mb-5">
+                    <label for="slider-opacity-alerts">Tansparência do fundo</label>
+                    <input class="w-100" type="range" min="0" max="1" value="50" id="slider-opacity-alerts" step="0.1" oninput="rangevaluessalertsopacity.innerText = this.value" />
+                    <output id="rangevaluessalertsopacity">0</output>
+                    <p class="small">0 = Sem transparência, 1 = totalmente transparente</p>
+                    <p class="small">*Salve para visualizar as alterações</p>
+                  </div>
+
+                  <div class="form-group mt-5">
+                    <label for="alert-imagesize">Tamanho da imagem (pixels)</label>
+                    <input type="number" class="form-control bg-dark mt-3" id="alert-imagesize"/>
+                  </div>
+
+                  <div class="form-group mt-5">
+                    <label for="alert-delay">Tempo exibindo a notificação em segundos</label>
+                    <input type="number" class="form-control bg-dark mt-3" id="alert-delay"/>
+                  </div>
+
+                  <button type="button" class="bt-submit btn bg-dark mt-5" onclick="test_js('alerts_overlay')">
+                    Testar
+                  </button>
+
+                  <div class="form-group" style="margin-top: 15%;">
+                    <label for="iframe-link-alerts">Link para Vincular o Overlay de Alertas</label>
+
+                    <div class="input-group none-flex mt-2">
+                      <input type="text" class="form-control bg-dark mt-3" id="iframe-link-alerts" value="http://127.0.0.1:7000/src/html/alerts/iframe.html" readonly/>
+                    </div>
+
+                  </div>
+                  
+
+                </div>
+                <div class="bg-dark form-block">
+                
+                  <h5 class="mt-5">Configurações oo overlay para videos</h5>
+
+                  <div class="form-group mt-5">
+                    <label for="slider-font-alerts">Tamanho da fonte Para videos</label>
+                    <input class="mt-4" type="range" min="0" max="100" value="18" id="slider-font-alertsvideo" step="1" oninput="rangevalue_config_alertsvideo.innerText = this.value" />
+                    <output id="rangevalue_config_alertsvideo">18px</output>
+                  </div>
+
+                  <div class="form-group mt-5">
+                    <label for="alertsvideo-text-color-text">Cor do texto do Overlay Para videos</label>
+                    <div class="input-group none-flex mt-2">
+                      <span class="color-span mt-3" id="alertsvideo-text-color-span"></span>
+                      <input type="color" id="alertsvideo-text-color-select"/>
+                      <input type="text" class="form-control bg-dark mt-3" id="alertsvideo-text-color-text"/>
+                      <button type="button" class="btn bt-submit mt-3" id="alertsvideo-text-color-button">Selecionar</button>
+                    </div>
+                  </div>
+                  <div class="form-group mt-5">
+                    <label for="alertsvideo-background-color-text">Cor de fundo do Overlay  Para videos</label>
+                    <div class="input-group none-flex mt-2">
+                      <span class="color-span mt-3" id="alertsvideo-background-color-span"></span>
+                      <input type="color" id="alertsvideo-background-color-select"/>
+                      <input type="text" class="form-control bg-dark mt-3" id="alertsvideo-background-color-text"/>
+                      <button type="button" class="btn bt-submit mt-3" id="alertsvideo-background-color-button">Selecionar</button>
+                    </div>
+                  </div>
+
+                  <div class="form-group mt-5 mb-5">
+                    <label for="slider-opacity-alertsvideo">Tansparência do fundo</label>
+                    <input class="w-100" type="range" min="0" max="1" value="50" id="slider-opacity-alertsvideo" step="0.1" oninput="rangevaluessalertsvideoopacity.innerText = this.value" />
+                    <output id="rangevaluessalertsvideoopacity">0</output>
+                    <p class="small">0 = Sem transparência, 1 = totalmente transparente</p>
+                  </div>   
+                  <div class="form-group mt-4">
+                    <label for="alertsvideo-imagesize">Tamanho da imagem (pixels)</label>
+                    <input type="number" class="form-control bg-dark mt-3" id="alertsvideo-imagesize"/>
+                    <p class="small">*Salve para visualizar as alterações</p>
+                  </div>
+                  <button type="button" class="bt-submit btn bg-dark mt-5" onclick="test_js('alerts_video_overlay')">
+                    Testar
+                  </button>
+                  <button type="button" class="bt-submit btn bg-dark mt-5" onclick="ttk_alerts('save_overlay')">
+                    Salvar
+                  </button>
+
+                  <div class="form-group"  style="margin-top: 15%;">
+                    <label for="iframe-link-alertvideo">Link para Vincular o Overlay de Alertas em video</label>
+                    <div class="input-group none-flex mt-2">
+                      <input type="text" class="form-control bg-dark mt-3" id="iframe-link-alertvideo" value="http://127.0.0.1:7000/src/html/alertsvideo/iframe.html" readonly/>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           <div id="config-subathon-div" hidden>
             <div id="subathon-main-div">
               <div class="internal-top">
@@ -5704,7 +6706,6 @@
                <div class="internal-block">
                 <div class="bg-dark form-block">
                   
-                  <h5>Configurações Subathon.</h5>
                   <div class="row">
                     <div class="col">
                       <p class="form-check-label">
@@ -5895,7 +6896,7 @@
             <div class="d-flex card bg-dark form-block align-self-center">
               <img src="./src/about.png" class="rounded mx-auto d-block" width="150px" />
               <div class="card-body text-center">
-                <h4 class="card-title m-3">VibesBot V1.6.7</h4>
+                <h4 class="card-title m-3" >VibesBot <span id="number-version"></span></h4>
               </div>
               <div class="card-footer">
                 <div>
@@ -5904,8 +6905,8 @@
                   </button>
                 </div>
                 <div>
-                  <div class="form-group mt-2">
-                    <div class="row mt-3">
+                  <div class="form-group mt-2 mb-0">
+                    <div class="row mt-3 mb-0">
                       <div class="col">
                         <p class="form-check-label">
                           Ativar debug Visual
@@ -5915,6 +6916,21 @@
                         <div class="material-switch bg-white d-flex justify-content-end">
                           <input id="debug-status" type="checkbox" onclick="debug_status('debug-save')"/>
                           <label for="debug-status" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group mt-0">
+                    <div class="row">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Ativar animação
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="anima-status" type="checkbox" onclick="anima_status('save')"/>
+                          <label for="anima-status" class="form-check-label"></label>
                         </div>
                       </div>
                     </div>
@@ -5978,7 +6994,7 @@
         <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
           <div class="modal-content bg-dark custom-border-modal">
             <div class="modal-header">
-              <h2>Atualização disponível!</h2>
+              <h2 id="update_title">Atualização disponível!</h2>
               <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
               aria-label="Close"></button>
             </div>
@@ -6059,9 +7075,9 @@
                 <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar" id="gift-name"/>
               </div>
 
-              <div class="row mt-3">
+              <div class="row mt-5">
                 <div class="col">
-                  <p class="form-check-label">Ativar Notificação</p>
+                  <p class="form-check-label">Ativar Notificação de audio</p>
                 </div>
                 <div class="col">
                   <div class="material-switch bg-white d-flex justify-content-end">
@@ -6070,7 +7086,8 @@
                   </div>
                 </div>
               </div>
-              <div class="form-group mt-3">
+
+              <div class="form-group mt-2">
                 <label for="file-select-sound-gift">Arquivo de audio .mp3</label>
                 <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar"
                   id="file-select-sound-gift" onclick="getFolder('file-select-sound-gift','sound')" required />
@@ -6081,6 +7098,27 @@
                 <input class="w-100" type="range" min="0" max="100" value="50" id="audio-volume-ttk-gift" step="1"
                   oninput="rangevalue_ttk_gift.innerText = this.value" />
                 <output id="rangevalue_ttk_gift">50</output>
+              </div>
+
+              <div class="row mt-5">
+                <div class="col">
+                  <p class="form-check-label">Ativar Notificação de video</p>
+                </div>
+                <div class="col">
+                  <div class="material-switch bg-white d-flex justify-content-end">
+                    <input id="gift-video-status" type="checkbox" />
+                    <label for="gift-video-status" class="form-check-label"></label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group mt-3" >
+                <label for="video-gift">Arquivo de video .mp4</label>
+                <input type="text" class="form-control bg-dark mt-3" placeholder="Clique para selecionar" id="video-gift" onclick="getFolder('video-gift','video')" required />
+              </div>
+              <div class="form-group mt-3">
+                <label for="video-time-gift">Duração de exibição na tela (segundos)</label>
+                <input class="w-100" type="range" min="0" max="100" value="50" id="video-time-gift" step="1" oninput="rangevalue_videotime_gift.innerText = this.value" />
+                <output id="rangevalue_videotime_gift">0</output>
               </div>
 
               <div class="form-group mt-5">
@@ -6098,7 +7136,8 @@
                   </div>
                 </div>
               </div>
-              <div class="form-group mt-5" id="key_press_gift">
+
+              <div class="form-group mt-3" id="key_press_gift">
                 <div class="row mt-2">
                   <p>Selecione a(s) tecla(s) para pressionar</p>
                   <div class="col">
@@ -6268,8 +7307,16 @@
                 </div>
               </div>
 
-              <button type="button" class="btn bt-submit mt-2" id="save-gift-notification">Salvar</button>
+              <div class="d-flex flex-row mt-2">
 
+                <button type="button" class="btn bt-submit" id="save-gift-notification">Salvar</button>
+
+                <button type="button" class="btn bt-submit ms-2" id="test-gift-notification">
+                  Testar
+                </button>
+
+              </div>
+              
             </div>
           </div>
         </div>
@@ -6401,36 +7448,78 @@
           </div>
         </div>
       </div>
-      <div class="modal fade" id="errorlog-modal" data-backdrop="static" tabindex="-1">
+      <div class="modal fade" id="list-queue-ended" data-backdrop="static" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-fullscreen">
           <div class="modal-content bg-dark custom-border-modal">
             <div class="modal-header">
-              <div class="d-flex flex-row">
-                <h5>Relatório de erros</h5>
-                <button type="button" class="btn bt-submit btn-sm ms-3"
-                  onclick="show_error_log('clear-errorlog')">
-                  Limpar Relatório<i class="fa-solid fa-brush ms-1"></i>
-                </button>
-              </div>
-              <div class="form-group ms-1 w-50">
-                <div class="row mt-3">
-                  <div class="col">
-                    <p class="form-check-label">
-                      Enviar relatorio de erros ao desenvolvedor automaticamente
-                    </p>
-                  </div>
-                  <div class="col-2">
-                    <div class="material-switch bg-white d-flex justify-content-end">
-                      <input id="rel-status" type="checkbox" onclick="debug_status('rel-save')"/>
-                      <label for="rel-status" class="form-check-label"></label>
-                    </div>
-                  </div>
-                </div>
+              <div>
+                <h5>Lista de partidas finalizadas da fila</h5>
               </div>
               <div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                   aria-label="Close"></button>
               </div>
+            </div>
+            <div class="modal-body">
+              <div class="h-scroll">
+                <div class="w-100">
+                  <table class="table table-dark table-striped w-100" id="table_ended">
+                    <thead>
+                      <tr>
+                        <th scope="col">Horário</th>
+                        <th scope="col">Usuários</th>
+                      </tr>
+                    </thead>
+                    <tbody id="table_ended_body">
+
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="errorlog-modal" data-backdrop="static" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen">
+          <div class="modal-content bg-dark custom-border-modal">
+
+            <div class="modal-header d-flex flex-column">
+
+                <div class="d-flex flex-row w-100">
+                  <div class="w-100">
+                    <h5>Relatório de erros</h5>
+                  </div>
+                  <div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                </div>
+
+
+                <div class="d-flex flex-row justify-content-between w-100 mt-2">
+
+                  <button type="button" class="btn bt-submit btn-sm" onclick="show_error_log('clear-errorlog')">
+                    Limpar Relatório<i class="fa-solid fa-brush ms-1"></i>
+                  </button>
+                  
+                  <div class="form-group w-50">
+                    <div class="row">
+                      <div class="col">
+                        <p class="form-check-label">
+                          Enviar relatorio de erros ao desenvolvedor automaticamente
+                        </p>
+                      </div>
+                      <div class="col-2">
+                        <div class="material-switch bg-white d-flex justify-content-end">
+                          <input id="rel-status" type="checkbox" onclick="debug_status('rel-save')"/>
+                          <label for="rel-status" class="form-check-label"></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+
             </div>
             <div class="modal-body">
               <div class="d-flex" style="height: 80vh;">
@@ -6462,17 +7551,20 @@
                     <img src="..." class="img-fluid rounded-start m-auto" style="width: 125px;" alt="..." id="profile-pic-card">
                   </div>
                   <div class="col-md-8">
-                    <div class="card-body">
-                      <div class="d-flex flex-row">                      
-                        <h5 class="card-title" id="display-name-card"></h5>
-                        <button class="btn btn-sm bt-submit" style="font-size: 12px;" title="Copiar" id="copy-username" data-copy-value="" type="button" onclick="copy_username(this)">
+
+                    <div class="card-body">                    
+                      <h5 class="card-title" id="display-name-card"></h5>
+
+                      <div class="d-flex flex-row">  
+                        <p class="card-text" id="username-card"></p>
+                        <button class="btn btn-sm bt-submit ms-3" style="font-size: 12px;" title="Copiar" id="copy-username" data-copy-value="" type="button" onclick="copy_username(this)">
                           <i class="fa-solid fa-copy"></i>
                         </button>
                       </div>
 
-                      <p class="card-text" id="username-card"></p>
                     </div>
                   </div>
+                  
                 </div>
                 <div class="d-flex flex-row mt-2">
                     <button type="button" class="btn bt-submit" id="open-profile">Abrir perfil</button>
@@ -6548,7 +7640,62 @@
           </div>
         </div>
       </div>
+      <div class="modal fade" id="command_whitelist" tabindex="-1" aria-hidden="true">
 
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+
+          <div class="modal-content bg-dark custom-border-modal h-50">
+
+            <div class="modal-body m-1">
+
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+
+              <table class="table table-dark table-striped w-100" id="whitelist_table">
+
+                <thead>
+                  <tr>
+                    <th>Usuário</th>
+                    <th>Remover</th>
+                  </tr>
+                </thead>
+
+                <tbody></tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="command_blacklist" tabindex="-1" aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+
+          <div class="modal-content bg-dark custom-border-modal h-50">
+
+            <div class="modal-body m-1">
+
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+
+              <table class="table table-dark table-striped w-100" id="blacklist_table">
+
+                <thead>
+                  <tr>
+                    <th>Usuário</th>
+                    <th>Remover</th>
+                  </tr>
+                </thead>
+
+                <tbody></tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
   </div>
   
   <script>

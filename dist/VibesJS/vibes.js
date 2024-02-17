@@ -81,6 +81,8 @@ wss.on('connection', (ws) => {
 
 function sendWebsocket(message) {
 
+    console.log(message)
+
     if (connectedClient && connectedClient.readyState === WebSocket.OPEN) {
         connectedClient.send(JSON.stringify(message));
     }
@@ -122,10 +124,12 @@ async function RoomInfo() {
 }
 
 async function getGiftsData() {
+    
     try {
         const giftList = await tiktokLiveConnection.getAvailableGifts();
 
         const data = giftList.reduce((acc, obj) => {
+
             acc[obj.id] = {
                 name: obj.name,
                 name_br: "",
@@ -136,9 +140,19 @@ async function getGiftsData() {
                 status: 0,
                 volume: 50,
                 "points-global": 1,
-                points: 0
+                points: 0,
+                time: "00:00:00",
+                keys: [],
+                key_status: 0,
+                key_time: 0,
+                status_subathon: 0,
+                video_status: 0,
+                video: "",
+                video_time: 0
             };
+
             return acc;
+
         }, {});
 
         const jsonData = JSON.stringify(data, null, 2);
@@ -151,6 +165,7 @@ async function getGiftsData() {
             type: "error_event",
             message: `Erro ${err}`,
         };
+
         sendWebsocket(message);
 
         data = {}
@@ -233,9 +248,9 @@ tiktokLiveConnection.on('disconnected', () => {
 tiktokLiveConnection.on('chat', data => {
 
     try {
-        
-        const is_following = data.followInfo.followStatus > 0 ? true : false;
 
+        const is_following = data.followInfo.followStatus > 0 ? true : false;
+        
         const message = {
             type: "comment_event",
             userid: data.userId,
@@ -249,8 +264,6 @@ tiktokLiveConnection.on('chat', data => {
             is_top_gifter: data.topGifterRank,
             profilePictureUrl: data.profilePictureUrl,
         };
-
-        console.log(message)
 
         sendWebsocket(message);
 
@@ -333,6 +346,7 @@ tiktokLiveConnection.on('like', data => {
 });
 
 tiktokLiveConnection.on('member', data => {
+
     try {
         const message = {
             type: "join_event",
@@ -342,6 +356,7 @@ tiktokLiveConnection.on('member', data => {
             profilePictureUrl: data.profilePictureUrl,
         };
         sendWebsocket(message);
+
     } catch (error) {
         message = {
             type: "error_event",
@@ -352,6 +367,7 @@ tiktokLiveConnection.on('member', data => {
 });
 
 tiktokLiveConnection.on('roomUser', data => {
+
     try {
         const top_viewers = data.topViewers;
         const viewerCount = data.viewerCount;

@@ -39,6 +39,8 @@ function toggle_div(type_id, div_id){
 
         } else if (div_id == "config-roles-div"){
             roles_config('get')
+        } else if (div_id == "config-alerts-div"){
+            ttk_alerts('get_overlay')
         }
 
         document.getElementById("config-div").hidden = true;
@@ -62,8 +64,14 @@ function toggle_div_int(toShow,ToHide){
         ttk_gift('get_global')
     } else if (toShow == 'individual-gifts-div'){
         ttk_gift('get_table')
-    } else if (toShow == "config-queue-div" || toShow == "commom-queue" || toShow == "priority-queue"){
-        queue_js('get','null')
+    } else if (toShow == "config-queue-div"){
+        queue_js('get_config','null')
+    } else if (toShow == "commom-queue"){
+        queue_js('get_queue','null')
+    } else if (toShow == "command-tts-div"){
+        tts_command('get_command')
+    } else if (toShow == "config-tts-div"){
+        tts_command('get_config')
     } else if (toShow == 'giveaway-config'){
         giveaway_js('get_config')
     } else if (toShow == 'giveaway-style'){
@@ -86,7 +94,6 @@ function toggle_div_int(toShow,ToHide){
     document.getElementById(toShow).hidden = false;
 
 }
-
 
 async function config_responses_js(type_id) {
 
@@ -119,75 +126,118 @@ async function config_responses_js(type_id) {
 
         const responses_aliases_respo = {
 
-            error_tts_no_text: "{username}, {nickname}",
-            error_user_level: "{username}, {nickname}, {user_level}, {command}",
-            giveaway_response_win: "{username}, {nickname}",
-            giveaway_response_user_add: "{username}, {nickname}",
-            giveaway_status_enable: "{giveaway_name}",
-            giveaway_status_disable: "{giveaway_name}",
-            giveaway_response_mult_add: "{username}, {nickname}",
-            giveaway_clear: "",
-            giveaway_response_perm: "{perm}",
-            giveaway_status_disabled: "",
-            response_user_giveaway: "{username}, {nickname}",
-            response_no_user_giveaway: "{username}, {nickname}",
-            response_giveaway_disabled: "",
-            response_user_error_giveaway: "{username}, {nickname}",
-            response_check_error_giveaway: "{username}, {nickname}",
-            response_delay_error: "{seconds}",
-            commands_disabled: "",
-            command_disabled: "{username}, {nickname}",
-            music_disabled: "{username}, {nickname}",
-            music_added_to_queue: "{username}, {nickname}, {music}",
-            music_add_error: "{username}, {nickname}",
-            music_process_error: "",
-            music_process_cache_error: "",
-            music_leght_error: "{max_duration}",
-            music_playing: "{music_name}, {music_artist}, {username}, {nickname}",
-            music_link_error: "",
-            music_error_name: "",
-            music_stream_error: "",
-            music_link_youtube: "",
-            skip_votes: "{username}, {nickname}, {votes}, {minimum}",
-            command_skip_inlist: "{username}, {nickname}",
-            command_skip_noplaying: "{username}, {nickname}",
-            command_sr_error_link: "{username}, {nickname}",
-            command_volume_confirm: "{username}, {nickname}, {volume}",
-            command_volume_error: "{username}, {nickname}",
-            command_skip_confirm: "{username}, {nickname}",
-            command_current_confirm: "{username}, {nickname}, {music}",
-            command_next_no_music: "{username}, {nickname}",
-            command_next_confirm: "{username}, {nickname}, {music}, {request_by}",
-            command_volume_number: "{username}, {nickname}",
-            command_volume_response: "{username}, {nickname}, {volume}",
-            command_value: "{username}, {nickname}",
-            command_string: "{username}, {nickname}",
-            music_blacklist: "{music}",
-            command_sufix: "{username}, {nickname}",
-            response_queue: "{username}, {nickname}",
-            response_add_queue: "{username}, {nickname}, {value}, {pos}",
-            response_namein_queue: "{username}, {nickname}, {value}, {pos}",
-            response_rem_queue: "{username}, {nickname}, {value}",
-            response_noname_queue: "{username}, {nickname}, {value}",
-            response_get_queue: "{username}, {nickname}, {queue-3}/{queue-4}/{queue-5}...",
-            goal_start: "{current}, {target}, {type}",
-            goal_end: "{current}, {target}, {type}",
-            goal_progress: "{current}, {target}, {type}",
-            event_ttk_envelope: "{username}, {nickname}, {coins}",
-            event_ttk_gift: "{username}, {nickname}, {amount}, {giftname}, {diamonds}",
-            event_ttk_join: "{username}, {nickname}",
-            event_ttk_like: "{username}, {nickname}, {likes}",
-            event_ttk_share: "{username}, {nickname}",
-            event_ttk_follow: "{username}, {nickname}",
-            event_ttk_disconected: "",
-            event_ttk_connect: "",
-            command_vote_ended : "{votes}, {winner}, {name]",
-            balance_top_error_response : "{username}, {nickname}",
-            balance_top_points : "{username}, {nickname} , {top-1}, {top-2}, {top-3}... ",
-            balance_top_share : "{username}, {nickname} , {top-1}, {top-2}, {top-3}... ",
-            balance_top_likes : "{username}, {nickname} , {top-1}, {top-2}, {top-3}... ",
-            balance_top_gifts: "{username}, {nickname} , {top-1}, {top-2}, {top-3}... ",
-
+            "Likes_role_name": "",
+            "balance": "{username}, {nickname}, {points}, {likes}, {gifts}, {shares}, {rank}",
+            "balance_moderator": "{username}, {nickname}, {usercheck}, {points}, {likes}, {gifts}, {shares}, {rank}",
+            "balance_top_error_response": "{username}, {nickname}",
+            "balance_top_gifts": "{username}, {nickname} , {top-1}, {top-2}, {top-3}... ",
+            "balance_top_likes": "{username}, {nickname} , {top-1}, {top-2}, {top-3}... ",
+            "balance_top_points": "{username}, {nickname} , {top-1}, {top-2}, {top-3}... ",
+            "balance_top_share": "{username}, {nickname} , {top-1}, {top-2}, {top-3}... ",
+            "balance_user_gived": "{username}, {nickname}",
+            "balance_user_insuficient": "{username}, {nickname}",
+            "balance_user_not_found": "{username}, {nickname}",
+            "balance_user_spended": "{username}, {nickname}",
+            "command_cost": "{username}, {nickname}, {cost}",
+            "command_current_confirm": "{username}, {nickname}, {music}",
+            "command_disabled": "{username}, {nickname}",
+            "command_next_confirm": "{username}, {nickname}, {music}, {request_by}",
+            "command_next_no_music": "{username}, {nickname}",
+            "command_root_sufix": "",
+            "command_root_sufix_number": "",
+            "command_skip_confirm": "{username}, {nickname}",
+            "command_skip_inlist": "{username}, {nickname}",
+            "command_skip_noplaying": "{username}, {nickname}",
+            "command_sr_error_link": "{username}, {nickname}",
+            "command_string": "{username}, {nickname}",
+            "command_sufix": "{username}, {nickname}",
+            "command_value": "{username}, {nickname}",
+            "command_volume_confirm": "{username}, {nickname}, {volume}",
+            "command_volume_error": "{username}, {nickname}",
+            "command_volume_number": "{username}, {nickname}",
+            "command_volume_response": "{username}, {nickname}, {volume}",
+            "command_vote_arvoted": "",
+            "command_vote_ended": "{votes}, {winner}, {name]",
+            "command_vote_norun": "",
+            "command_vote_notfound": "",
+            "command_vote_started": "",
+            "command_vote_voted": "",
+            "commands_disabled": "",
+            "error_tts_disabled": "{username}, {nickname},",
+            "error_tts_no_text": "{username}, {nickname}",
+            "error_tts_no_text_command": "",
+            "error_user_level": "{username}, {nickname}, {user_level}, {command}",
+            "event_command": "",
+            "event_ttk_connect": "",
+            "event_ttk_disconected": "",
+            "event_ttk_envelope": "{username}, {nickname}, {coins}",
+            "event_ttk_follow": "{username}, {nickname}",
+            "event_ttk_gift": "{username}, {nickname}, {amount}, {giftname}, {diamonds}",
+            "event_ttk_join": "{username}, {nickname}",
+            "event_ttk_like": "{username}, {nickname}, {likes}",
+            "event_ttk_reconected": "",
+            "event_ttk_share": "{username}, {nickname}",
+            "follow_role_name": "",
+            "gifts_role_name": "",
+            "giveaway_clear": "",
+            "giveaway_response_mult_add": "{username}, {nickname}",
+            "giveaway_response_perm": "{perm}",
+            "giveaway_response_user_add": "{username}, {nickname}",
+            "giveaway_response_win": "{username}, {nickname}",
+            "giveaway_status_disable": "{giveaway_name}",
+            "giveaway_status_disabled": "",
+            "giveaway_status_enable": "{giveaway_name}",
+            "goal_end": "{current}, {target}, {type}",
+            "goal_progress": "{current}, {target}, {type}",
+            "goal_start": "{current}, {target}, {type}",
+            "moderator_role_name": "",
+            "music_add_error": "{username}, {nickname}",
+            "music_added_to_queue": "{username}, {nickname}, {music}",
+            "music_blacklist": "{music}",
+            "music_disabled": "{username}, {nickname}",
+            "music_error_name": "",
+            "music_leght_error": "{max_duration}",
+            "music_length_error": "",
+            "music_link_error": "",
+            "music_link_youtube": "",
+            "music_playing": "{music_name}, {music_artist}, {username}, {nickname}",
+            "music_process_cache_error": "",
+            "music_process_error": "",
+            "music_stream_error": "",
+            "response_add_champ": "",
+            "response_add_queue": "{username}, {nickname}, {value}, {match}, {players}",
+            "response_add_winner": "",
+            "response_check_error_giveaway": "{username}, {nickname}",
+            "response_clear_queue": "",
+            "response_clear_queue_pri": "",
+            "response_delay_error": "{seconds}",
+            "response_end_champ": "",
+            "response_get_queue": "{username}, {nickname}, {match}, {players}",
+            "response_giveaway_disabled": "",
+            "response_giveaway_nonames": "",
+            "response_in_champ": "",
+            "response_namein_playing": "",
+            "response_namein_queue": "{username}, {nickname}, {value}, {match}, {players}",
+            "response_no_user_giveaway": "{username}, {nickname}",
+            "response_noname_queue": "{username}, {nickname}, {value}",
+            "response_not_in_champ": "",
+            "response_queue": "{username}, {nickname}, {match}, {players}",
+            "response_queue_end_match": "",
+            "response_queue_move": "{username}, {nickname},{user}, {match_actual}, {match_move_to}, {queue_type}",
+            "response_queue_playing": "{username}, {nickname}, {queue_type}, {players}",
+            "response_rem_queue": "{username}, {nickname}, {value}",
+            "response_remove_champ": "",
+            "response_user_error_giveaway": "{username}, {nickname}",
+            "response_user_giveaway": "{username}, {nickname}",
+            "shares_role_name": "",
+            "skip_votes": "{username}, {nickname}, {votes}, {minimum}",
+            "subathon_minutes_add": "",
+            "subathon_minutes_remove": "",
+            "subathon_minutes_reset": "",
+            "subscriber_custom_role_name": "",
+            "subscriber_role_name": "",
+            "tts_prefix": "",
+            "user_in_blacklist": ""
         }
 
             
@@ -198,8 +248,6 @@ async function config_responses_js(type_id) {
         } else {
             aliases_responses.value = "{username}";
         }
-
-        
 
     } else if (type_id == "save-response"){
 
@@ -307,73 +355,7 @@ async function sr_config_js(event,type_id){
     
         }
 
-    } else if (type_id == 'get_command'){
-
-        var select_command_player = document.getElementById('command-player-edit');
-
-        var form_player = document.getElementById('command_player_form');
-        var command_player_command = document.getElementById('command-player-command');
-        var command_player_status = document.getElementById('command-player-status');
-        var command_player_delay = document.getElementById('command-player-delay');
-        var command_player_cost_status = document.getElementById('command-cost-status-player'); 
-        var command_player_cost = document.getElementById('command-cost-player');
-
-        var command_data_parse = await window.pywebview.api.sr_config_py(type_id,select_command_player.value)
-
-        if (command_data_parse){
-
-            command_data_parse = JSON.parse(command_data_parse)
-
-            form_player.hidden = false
-
-            command_cost_get('player',command_data_parse.cost_status)
-
-            command_player_command.value = command_data_parse.command
-            command_player_status.checked = command_data_parse.status == 1 ? true : false
-            command_player_delay.value = command_data_parse.delay
-            command_player_cost_status.checked = command_data_parse.cost_status == 1 ? true : false;
-            command_player_cost.value = command_data_parse.cost;
-
-            $("#command-player-perm").selectpicker('val', command_data_parse.user_level);
-            $("#command-player-perm").selectpicker("refresh");
-
-        }
-
-    } else if (type_id == 'save_command') {
-
-        var select_command_player = document.getElementById('command-player-edit');
-
-        var form_player = document.getElementById('command_player_form');
-        
-        var command_player_command = document.getElementById('command-player-command');
-        var command_player_status = document.getElementById('command-player-status');
-        var command_player_delay = document.getElementById('command-player-delay');
-        var command_player_cost_status = document.getElementById('command-cost-status-player'); 
-        var command_player_cost = document.getElementById('command-cost-player'); 
-
-        var roles = []; 
-
-        $('#command-player-perm :selected').each(function(i, selected){ 
-            roles[i] = $(selected).val(); 
-        });
-        var command_player_cost_status = command_player_cost_status.checked ? 1 : 0
-        var command_player_status = command_player_status.checked ? 1 : 0
-        data = {
-            type_command : select_command_player.value,
-            command: command_player_command.value,
-            delay: command_player_delay.value,
-            user_level: roles,
-            status:command_player_status,
-            cost: command_player_cost.value,
-            cost_status: command_player_cost_status
-        }
-
-        var formData = JSON.stringify(data);
-        window.pywebview.api.sr_config_py(type_id,formData);
-
-        document.getElementById("command_player_form").hidden = true
-
-    } else if (type_id == 'save'){
+    }   else if (type_id == 'save'){
 
         var check_seletor = document.getElementById('music-enable');
         var max_duration = document.getElementById("max-duration")
@@ -467,8 +449,6 @@ async function sr_config_js(event,type_id){
 
         blocked_music.value = '';
         
-    } else if (type_id == 'hideconfig'){
-        document.getElementById("command_player_form").hidden = true
     }
 }
 
@@ -521,7 +501,7 @@ async function get_event_state(){
         setElementState('show-event-alert',data_parse["show-event-alert"])
 
     }
-}   
+}
 
 async function event_log_config(type_id){
 
@@ -682,17 +662,26 @@ async function ttk_alerts(type){
     var follow_input_sound = document.getElementById('file-select-ttk-follow');
     var follow_status_sound = document.getElementById('ttk-sound-status-follow');
     var follow_volume_sound = document.getElementById('audio-volume-ttk-follow');
+    var follow_video = document.getElementById('video-follow');
+    var follow_video_status = document.getElementById('follow-video-status');
+    var follow_video_time = document.getElementById('video-time-follow');
 
     var like_input_sound = document.getElementById('file-select-ttk-like');
     var like_status_sound = document.getElementById('ttk-sound-status-like');
     var like_volume_sound = document.getElementById('audio-volume-ttk-like');
+    var like_video = document.getElementById('video-like');
+    var like_video_status = document.getElementById('like-video-status');
+    var like_video_time = document.getElementById('video-time-like');
     
     var like_delay = document.getElementById('ttk-like-delay');
 
     var share_input_sound = document.getElementById('file-select-ttk-share');
     var share_status_sound = document.getElementById('ttk-sound-status-share');
     var share_volume_sound = document.getElementById('audio-volume-ttk-share');
-    
+    var share_video = document.getElementById('video-share');
+    var share_video_status = document.getElementById('share-video-status');
+    var share_video_time = document.getElementById('video-time-share');
+
     var share_delay = document.getElementById('ttk-share-delay');
     
     
@@ -718,6 +707,9 @@ async function ttk_alerts(type){
                 like_status_sound.checked = rec_data.like_sound_status == 1 ? true : false;
                 like_volume_sound.value = rec_data.like_sound_volume;
                 like_input_sound.value = rec_data.like_sound_loc;
+                like_video.value = rec_data.like_video;
+                like_video_status.checked = rec_data.like_video_status == 1 ? true : false;
+                like_video_time.value = rec_data.like_video_time;
 
                 document.getElementById('alert-like').hidden = false;
 
@@ -726,6 +718,9 @@ async function ttk_alerts(type){
                 follow_status_sound.checked = rec_data.follow_sound_status == 1 ? true : false;
                 follow_volume_sound.value = rec_data.follow_sound_volume;
                 follow_input_sound.value = rec_data.follow_sound_loc;
+                follow_video.value = rec_data.follow_video;
+                follow_video_status.checked = rec_data.follow_video_status == 1 ? true : false;
+                follow_video_time.value = rec_data.follow_video_time;
 
                 document.getElementById('alert-follow').hidden = false;
     
@@ -735,6 +730,9 @@ async function ttk_alerts(type){
                 share_status_sound.checked = rec_data.share_sound_status == 1 ? true : false;
                 share_volume_sound.value = rec_data.share_sound_volume;
                 share_input_sound.value = rec_data.share_sound_loc;
+                share_video.value = rec_data.share_video;
+                share_video_status.checked = rec_data.share_video_status == 1 ? true : false;
+                share_video_time.value = rec_data.share_video_time;
 
                 document.getElementById('alert-share').hidden = false;
             }
@@ -744,12 +742,16 @@ async function ttk_alerts(type){
     } else if (type == "save_sound_follow"){
         
         var status_sound = follow_status_sound.checked ? 1 : 0;
+        var status_video = follow_video_status.checked ? 1 : 0;
 
         data = {
             type_id : "save_sound_follow",
             sound: status_sound,
             sound_loc : follow_input_sound.value,
             sound_volume : follow_volume_sound.value,
+            video: follow_video.value,
+            video_status: status_video,
+            video_time: follow_video_time.value
         }
 
         var data = JSON.stringify(data);
@@ -761,13 +763,17 @@ async function ttk_alerts(type){
     } else if (type == "save_sound_like"){
         
         var status_sound = like_status_sound.checked ? 1 : 0;
+        var status_video = like_video_status.checked ? 1 : 0;
 
         data = {
             type_id : "save_sound_like",
             sound: status_sound,
             sound_loc : like_input_sound.value,
             sound_volume : like_volume_sound.value,
-            delay : like_delay.value 
+            delay : like_delay.value,
+            video: like_video.value,
+            video_status: status_video,
+            video_time: like_video_time.value
         }
 
         var data = JSON.stringify(data);
@@ -779,13 +785,17 @@ async function ttk_alerts(type){
     } else if (type == "save_sound_share"){
         
         var status_sound = share_status_sound.checked ? 1 : 0;
+        var status_video = share_video_status.checked ? 1 : 0;
 
         data = {
             type_id : "save_sound_share",
             sound: status_sound,
             sound_loc : share_input_sound.value,
             sound_volume : share_volume_sound.value,
-            delay : share_delay.value 
+            delay : share_delay.value,
+            video: share_video.value,
+            video_status: status_video,
+            video_time: share_video_time.value
         }
 
         var data = JSON.stringify(data);
@@ -798,6 +808,111 @@ async function ttk_alerts(type){
         document.getElementById('alert-follow').hidden = true;
         document.getElementById('alert-like').hidden = true;
         document.getElementById('alert-share').hidden = true;
+    } else if (type == "get_overlay"){
+
+        var sliderFontAlerts = document.getElementById('slider-font-alerts');
+        var sliderOpacityAlerts = document.getElementById('slider-opacity-alerts');
+        var sliderFontAlertsValue = document.getElementById('rangevaluessalertsopacity');
+        var alertsTextColorText = document.getElementById('alerts-text-color-text');
+        var alertsTextColorTextSpan = document.getElementById('alerts-text-color-span');
+        var alertsBackgroundColorText = document.getElementById('alerts-background-color-text');
+        var alertsBackgroundColorTextSpan = document.getElementById('alerts-background-color-span');
+        var alertDelay = document.getElementById('alert-delay');
+        var alertImageSize = document.getElementById('alert-imagesize');
+
+        var sliderFontAlertsVideo = document.getElementById('slider-font-alertsvideo');
+        var sliderOpacityAlertsVideo = document.getElementById('slider-opacity-alertsvideo');
+        var sliderFontAlertsValue = document.getElementById('rangevaluessalertsvideoopacity');
+        var alertsvideoTextColorText = document.getElementById('alertsvideo-text-color-text');
+        var alertsvideoTextColorTextSpan = document.getElementById('alertsvideo-text-color-span');
+        var alertsvideoBackgroundColorText = document.getElementById('alertsvideo-background-color-text');
+        var alertsvideoBackgroundColorTextSpan = document.getElementById('alertsvideo-background-color-span');
+        var alertsvideoImageSize = document.getElementById('alertsvideo-imagesize');
+
+        data = {
+            type_id : type,
+        }
+
+        var data = JSON.stringify(data);
+
+        var data_re = await window.pywebview.api.tiktok_alerts(data);
+    
+        if (data_re) {
+            
+            rec_data = JSON.parse(data_re)
+
+            sliderFontAlerts.value = rec_data.font_alerts;
+            sliderOpacityAlertsVideo.value = rec_data.opacity_alerts;
+            sliderFontAlertsValue.innerHTML = rec_data.opacity_alerts;
+            alertsTextColorText.value = rec_data.color_alerts;
+            alertsBackgroundColorText.value = rec_data.background_alerts;
+            alertDelay.value = rec_data.delay_alerts;
+            alertImageSize.value = rec_data.image_size;
+            
+
+            sliderFontAlertsVideo.value = rec_data.font_alertsvideo;
+            sliderOpacityAlertsVideo.value = rec_data.opacity_alertsvideo;
+            sliderFontAlertsValue.innerHTML = rec_data.opacity_alertsvideo;
+            alertsvideoTextColorText.value = rec_data.color_alertsvideo;
+            alertsvideoBackgroundColorText.value = rec_data.background_alertsvideo;
+            alertsvideoImageSize.value = rec_data.image_sizevideo;
+            
+            alertsTextColorTextSpan.style.backgroundColor = rec_data.color_alerts;
+            alertsBackgroundColorTextSpan.style.backgroundColor = rec_data.background_alerts;
+            alertsvideoTextColorTextSpan.style.backgroundColor = rec_data.color_alertsvideo;
+            alertsvideoBackgroundColorTextSpan.style.backgroundColor = rec_data.background_alertsvideo;
+
+        }
+    } else if (type == "save_overlay"){
+
+        var sliderFontAlerts = document.getElementById('slider-font-alerts');
+        var sliderOpacityAlerts = document.getElementById('slider-opacity-alerts');
+        var sliderFontAlertsValue = document.getElementById('rangevaluessalertsopacity');
+        var alertsTextColorText = document.getElementById('alerts-text-color-text');
+        var alertsTextColorTextSpan = document.getElementById('alerts-text-color-span');
+        var alertsBackgroundColorText = document.getElementById('alerts-background-color-text');
+        var alertsBackgroundColorTextSpan = document.getElementById('alerts-background-color-span');
+        var alertDelay = document.getElementById('alert-delay');
+        var alertImageSize = document.getElementById('alert-imagesize');
+      
+        var sliderFontAlertsVideo = document.getElementById('slider-font-alertsvideo');
+        var sliderOpacityAlertsVideo = document.getElementById('slider-opacity-alertsvideo');
+        var sliderFontAlertsValue = document.getElementById('rangevaluessalertsvideoopacity');
+        var alertsvideoTextColorText = document.getElementById('alertsvideo-text-color-text');
+        var alertsvideoTextColorTextSpan = document.getElementById('alertsvideo-text-color-span');
+        var alertsvideoBackgroundColorText = document.getElementById('alertsvideo-background-color-text');
+        var alertsvideoBackgroundColorTextSpan = document.getElementById('alertsvideo-background-color-span');
+        var alertsvideoImageSize = document.getElementById('alertsvideo-imagesize');
+
+        font_alerts = sliderFontAlerts.value
+        color_alerts = alertsTextColorText.value 
+        background_alerts = alertsBackgroundColorText.value
+        opacity_alerts = sliderOpacityAlerts.value
+        delay_alerts = alertDelay.value
+        alertImageSize = alertImageSize.value
+        
+        font_alertsvideo = sliderFontAlertsVideo.value
+        color_alertsvideo = alertsvideoTextColorText.value
+        background_alertsvideo = alertsvideoBackgroundColorText.value
+        opacity_alertsvideo = sliderOpacityAlertsVideo.value
+        alertsvideoImageSize = alertsvideoImageSize.value
+        
+        data = {
+            type_id : "save_overlay",
+            font_alerts : font_alerts,
+            color_alerts : color_alerts,
+            background_alerts : background_alerts,
+            image_size : alertImageSize,
+            opacity_alerts : opacity_alerts,
+            delay_alerts : delay_alerts,
+            font_alertsvideo : font_alertsvideo,
+            color_alertsvideo : color_alertsvideo,
+            background_alertsvideo : background_alertsvideo,
+            image_sizevideo : alertsvideoImageSize,
+            opacity_alertsvideo : opacity_alertsvideo
+        }
+
+        window.pywebview.api.tiktok_alerts(JSON.stringify(data));
     }
 }
 
@@ -844,7 +959,6 @@ async function ttk_gift(type_id){
                 if (gift_data.hasOwnProperty(key)) {
 
                     const item = gift_data[key];
-                    
                     
                     var gift_id = key
                     var gift_name = item.name
@@ -904,24 +1018,33 @@ async function ttk_gift(type_id){
     } else if (type_id == "get_global"){
 
         data = {
-            type_id : "get",
+            type_id : "get_global",
         }
 
         var data = JSON.stringify(data);
 
-        var rec = await window.pywebview.api.tiktok_gift(data);
+        var rec_data = await window.pywebview.api.tiktok_gift(data);
     
-        if (rec) {
-
-            rec_data = JSON.parse(rec)
+        if (rec_data) {
 
             var global_gift_status = document.getElementById('global-gift-status');
             var global_gift_volume = document.getElementById('global-gift-volume');
+            var global_gift_volume_text = document.getElementById('rangevalue_global_gift_volume');
             var global_gift_sound = document.getElementById('global-gift-sound');
 
+            var global_gift_video = document.getElementById('global-video-gift');
+            var global_gift_video_status = document.getElementById('global-gift-video-status');
+            var global_gift_video_time = document.getElementById('global-video-time-gift');
+            var global_gift_video_time_text = document.getElementById('rangevalue_globalvideotime_gift');
+    
+            global_gift_video.value = rec_data.video;
+            global_gift_video_status.checked = rec_data.video_status == 1 ? true : false;
+            global_gift_video_time.value = rec_data.video_time;
             global_gift_status.checked = rec_data.status == 1 ? true : false;
-            global_gift_sound.value = rec_data.sound;
+            global_gift_sound.value = rec_data.audio;
             global_gift_volume.value = rec_data.volume;
+            global_gift_volume_text.innerHTML = rec_data.volume;
+            global_gift_video_time_text.innerHTML = rec_data.video_time;
         }
 
     } else if (type_id == "get_points"){
@@ -1007,6 +1130,9 @@ async function ttk_gift(type_id){
 
         var gift_name = document.getElementById('gift-name');
         var gift_sound = document.getElementById('file-select-sound-gift');
+        var gift_video = document.getElementById('video-gift');
+        var gift_video_time = document.getElementById('video-time-gift');
+        var gift_video_status = document.getElementById('gift-video-status');
         var gift_status = document.getElementById('gift-sound-status');
         var gift_volume_sound = document.getElementById('audio-volume-ttk-gift');
         var gift_id_inp = document.getElementById('ttk-gift-id');
@@ -1034,9 +1160,12 @@ async function ttk_gift(type_id){
 
             gift_name.value = gift_rec_data.name
             gift_sound.value = gift_rec_data.audio
+            gift_video.value = gift_rec_data.video
+            gift_video_time.value = gift_rec_data.video_time
             gift_status.checked = gift_rec_data.status == 1 ? true : false;
             gift_volume_sound.value = gift_rec_data.volume;
 
+            gift_video_status.checked = gift_rec_data.video_status == 1 ? true : false;
             gift_key_status.checked = gift_rec_data.key_status == 1 ? true : false;
 
             $("#gift-key-1").selectpicker('val', gift_rec_data.keys[0]);
@@ -1054,6 +1183,7 @@ async function ttk_gift(type_id){
             gift_key_time.value = gift_rec_data.key_time
 
             document.getElementById('save-gift-notification').setAttribute('onclick',`ttk_gift('save_sound_gift')`)
+            document.getElementById('test-gift-notification').setAttribute('onclick',`test_js('test_sound_gift')`)
 
         }
         
@@ -1111,6 +1241,9 @@ async function ttk_gift(type_id){
         var gift_sound = document.getElementById('file-select-sound-gift')
         var gift_status = document.getElementById('gift-sound-status')
         var gift_volume_sound = document.getElementById('audio-volume-ttk-gift')
+        var gift_video = document.getElementById('video-gift');
+        var gift_video_time = document.getElementById('video-time-gift');
+        var gift_video_status = document.getElementById('gift-video-status');
         var gift_key_status = document.getElementById('gift-key-status');
         var gift_key1 = document.getElementById('gift-key-1');
         var gift_key2 = document.getElementById('gift-key-2');
@@ -1132,6 +1265,9 @@ async function ttk_gift(type_id){
             status: gift_status,
             sound_loc : gift_sound.value,
             sound_volume : gift_volume_sound.value,
+            video : gift_video.value,
+            video_time : gift_video_time.value,
+            video_status : gift_video_status.checked ? 1 : 0,
             keys: gift_key_list,
             key_status : gift_key_status,
             key_time : gift_key_time.value
@@ -1141,6 +1277,8 @@ async function ttk_gift(type_id){
 
         window.pywebview.api.tiktok_gift(data)
         gift_id_inp.value = ''
+        $("#gift-modal").modal("hide");
+        
 
     } else if (type_id == "global_gift_save"){
 
@@ -1148,11 +1286,18 @@ async function ttk_gift(type_id){
         var global_gift_volume = document.getElementById('global-gift-volume');
         var global_gift_sound = document.getElementById('global-gift-sound');
 
+        var global_gift_video = document.getElementById('global-video-gift');
+        var global_gift_video_status = document.getElementById('global-gift-video-status');
+        var global_gift_video_time = document.getElementById('global-video-time-gift');
+
         data = {
             type_id : "global_gift_save",
             status : global_gift_status.checked ? 1 : 0,
             volume : global_gift_volume.value,
             sound : global_gift_sound.value,
+            video : global_gift_video.value,
+            video_status : global_gift_video_status.checked ? 1 : 0,
+            video_time : global_gift_video_time.value
         }
 
         var data = JSON.stringify(data);
@@ -1189,6 +1334,10 @@ async function ttk_goal(type_id){
     
             var status_goal = document.getElementById('goal-status') 
             var goal_sound_status = document.getElementById('goal-status-sound');
+
+            var goal_video_status = document.getElementById('goal-video-status');
+            var goal_video_file = document.getElementById('video-goal');
+            var goal_video_time = document.getElementById('video-time-goal');
     
             status_goal.checked = goal_data.status == 1 ? true : false;
             goal_sound_status.checked = goal_data.status_sound == 1 ? true : false;
@@ -1196,6 +1345,9 @@ async function ttk_goal(type_id){
             document.getElementById('goal').value = goal_data.goal;
             document.getElementById('file-select-ttk-goal-sound').value = goal_data.sound_file;
             document.getElementById('audio-volume-ttk-goal-sound').value = goal_data.sound_volume;
+            goal_video_file.value = goal_data.video_file;
+            goal_video_time.value = goal_data.video_time;
+            goal_video_status.checked = goal_data.video_status == 1 ? true : false;
 
             if (goal_data.goal_add != "double"){
 
@@ -1241,6 +1393,10 @@ async function ttk_goal(type_id){
         var goal_sound_file = document.getElementById('file-select-ttk-goal-sound');
         var goal_sound_volume = document.getElementById('audio-volume-ttk-goal-sound');
 
+        var goal_video_status = document.getElementById('goal-video-status');
+        var goal_video_file = document.getElementById('video-goal');
+        var goal_video_time = document.getElementById('video-time-goal');
+
         var goal_add_value = document.getElementById('goal-add-value');
 
         if  (goal_type.value == "gift"){
@@ -1255,10 +1411,14 @@ async function ttk_goal(type_id){
                 event:goal_event.value,
                 sound_status: goal_sound_status_value,
                 sound_file: goal_sound_file.value,
-                sound_volume: goal_sound_volume.value
+                sound_volume: goal_sound_volume.value,
+                video_status: goal_video_status.checked ? 1 : 0,
+                video_file: goal_video_file.value,
+                video_time: goal_video_time.value
             }
 
         } else{
+
             data = {
                 type_id : type_id,
                 goal : goal,
@@ -1268,7 +1428,10 @@ async function ttk_goal(type_id){
                 event:goal_event.value,
                 sound_status: goal_sound_status_value,
                 sound_file: goal_sound_file.value,
-                sound_volume: goal_sound_volume.value
+                sound_volume: goal_sound_volume.value,
+                video_status: goal_video_status.checked ? 1 : 0,
+                video_file: goal_video_file.value,
+                video_time: goal_video_time.value
             }
         }
 
@@ -1373,6 +1536,8 @@ async function ttk_goal(type_id){
 
             html_data_parse = JSON.parse(html_data)
 
+            console.log(html_data_parse)
+
             document.getElementById('html_editor').hidden = false
 
             goalText.value = html_data_parse.title_text_value;
@@ -1435,6 +1600,17 @@ async function ttk_goal(type_id){
     } else if (type_id == 'change'){
         document.getElementById('edit-goal-div').hidden = true
         document.getElementById('html_editor').hidden = true
+    } else if (type_id == 'reset'){
+        
+        data = {
+            type_id : type_id,
+            goal_type : goal_type.value
+        }
+    
+        var data_parse = JSON.stringify(data);
+    
+        var goal_data = await window.pywebview.api.tiktok_goal(data_parse);
+    
     }
 }
 
@@ -1747,7 +1923,7 @@ async function test_js(type_id){
         
     } else if (type_id == "tts_command"){
 
-        var command_input = document.getElementById('command-tts-command');
+        var command_input = document.getElementById('tts-command');
         command = `${command_input.value} Esta é uma mensagem de teste, siga o canal GG TEC`
 
         data ={
@@ -1856,7 +2032,7 @@ async function test_js(type_id){
         var command_type = document.getElementById('command-player-edit');
 
         if (command_type.value == "request"){
-            command = `${command_input.value} https://www.youtube.com/watch?v=Vz56ApeiaQ4`
+            command = `${command_input.value} Rap Da Akatsuki: Os Ninjas Mais Procurados Do Mundo (Nerd Hits)`
         } else if (command_type.value == "volume") {
             command = `${command_input.value} 50`
         } else {
@@ -1890,7 +2066,7 @@ async function test_js(type_id){
         var formData = JSON.stringify(data);
         window.pywebview.api.test_fun(formData);
 
-    }  else if (type_id == "goal"){
+    } else if (type_id == "goal"){
 
         var select_goal = document.getElementById('goal-select');
         var select_gift = document.getElementById('goal-gift');
@@ -1904,6 +2080,69 @@ async function test_js(type_id){
         var formData = JSON.stringify(data);
         window.pywebview.api.test_fun(formData);
     
+    } else if (type_id == "like_alert"){
+
+        data ={
+            type_id : 'like_alert'
+        }
+
+        var formData = JSON.stringify(data);
+
+        window.pywebview.api.test_fun(formData);
+
+    } else if (type_id == "share_alert"){
+
+        data ={
+            type_id : 'share_alert'
+        }
+
+        var formData = JSON.stringify(data);
+
+        window.pywebview.api.test_fun(formData);
+
+    } else if (type_id == "follow_alert"){
+
+        data ={
+            type_id : 'follow_alert'
+        }
+
+        var formData = JSON.stringify(data);
+
+        window.pywebview.api.test_fun(formData);
+
+    } else if (type_id == "test_sound_gift"){
+
+        var gift_id_inp = document.getElementById('ttk-gift-id');
+
+        data ={
+            type_id : 'test_sound_gift',
+            gift_id : gift_id_inp.value
+        }
+
+        var formData = JSON.stringify(data);
+
+        window.pywebview.api.test_fun(formData);
+
+    } else if (type_id == "alerts_overlay"){
+
+        data ={
+            type_id : 'alerts_overlay'
+        }
+
+        var formData = JSON.stringify(data);
+
+        window.pywebview.api.test_fun(formData);
+
+    } else if (type_id == "alerts_video_overlay"){
+
+        data ={
+            type_id : 'alerts_video_overlay'
+        }
+
+        var formData = JSON.stringify(data);
+
+        window.pywebview.api.test_fun(formData);
+
     }
 }
 
@@ -2054,7 +2293,7 @@ async function subathon_js(type_id){
         var data = JSON.stringify(data);
         window.pywebview.api.subathon(data);
 
-    } else if (type_id == "save_commands"){
+    } else if (type_id == "save_command"){
 
         var command_subathon_select = document.getElementById('command-subathon-select');
         var command_subathon_status = document.getElementById('command-subathon-status');
@@ -2063,8 +2302,11 @@ async function subathon_js(type_id){
         var command_subathon_cost_status = document.getElementById('command-cost-status-subathon'); 
         var command_subathon_cost = document.getElementById('command-cost-subathon');
 
+        var command_subathon_whitelistStatus = document.getElementById('whitelist-status-subathon');
+
         var command_status = command_subathon_status.checked ? 1 : 0;
         var command_cost_status = command_subathon_cost_status.checked ? 1 : 0;
+        var whitelist_status = command_subathon_whitelistStatus.checked ? 1 : 0;
 
         var roles = []; 
 
@@ -2074,22 +2316,24 @@ async function subathon_js(type_id){
 
         data  = {
             type_id : type_id,
+            type_command_table: 'subathon',
             type_command: command_subathon_select.value,
             command: command_subathon_command.value,
             status: command_status,
             delay: command_subathon_delay.value,
             user_level: roles,
             cost: command_subathon_cost.value,
-            cost_status: command_cost_status
+            cost_status: command_cost_status,
+            whitelist_status: whitelist_status
         }
 
         var formData = JSON.stringify(data);
 
-        window.pywebview.api.subathon(formData)
+        window.pywebview.api.commands_default_py(formData)
 
         document.getElementById("command_subathon_form").hidden = true
 
-    } else if (type_id == "get_commands"){
+    } else if (type_id == "get_command"){
 
         var command_subathon_select = document.getElementById('command-subathon-select');
         var command_subathon_status = document.getElementById('command-subathon-status');
@@ -2098,18 +2342,19 @@ async function subathon_js(type_id){
         var command_subathon_cost_status = document.getElementById('command-cost-status-subathon'); 
         var command_subathon_cost = document.getElementById('command-cost-subathon');
 
+        var command_subathon_whitelistStatus = document.getElementById('whitelist-status-subathon');
+
         var subathon_command_edit = document.getElementById('command_subathon_form');
 
         data = {
             type_id : type_id,
             type_command : command_subathon_select.value,
+            type_command_table: 'subathon'
         }
 
-        var subathon_parse = await window.pywebview.api.subathon(JSON.stringify(data));
+        var subathon_parse = await window.pywebview.api.commands_default_py(data)
 
         if (subathon_parse){
-
-            subathon_parse = JSON.parse(subathon_parse)
             
             subathon_command_edit.hidden = false       
 
@@ -2117,6 +2362,7 @@ async function subathon_js(type_id){
 
             command_subathon_cost_status.checked = subathon_parse.cost_status == 1 ? true : false;
             command_subathon_status.checked = subathon_parse.status == 1 ? true : false;
+            command_subathon_whitelistStatus.checked = subathon_parse.whitelist_status == 1 ? true : false;
             command_subathon_command.value = subathon_parse.command
             command_subathon_delay.value = subathon_parse.delay
             command_subathon_cost.value = subathon_parse.cost

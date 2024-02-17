@@ -1,6 +1,13 @@
 {
-    "background_color": "",
-    "font_color": "",
-    "font_size": "",
-    "image_size" : ""
+    "font_alerts": "20",
+    "color_alerts": "#ffffff",
+    "background_alerts": "#000000",
+    "opacity_alerts": "1",
+    "delay_alerts": "10",
+    "image_size": "120",
+    "font_alertsvideo": "20",
+    "color_alertsvideo": "#ffffff",
+    "background_alertsvideo": "#000000",
+    "opacity_alertsvideo": "0",
+    "image_sizevideo": "120"
 }

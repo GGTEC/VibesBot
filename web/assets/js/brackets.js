@@ -4,7 +4,9 @@ let opponents = 0;
 
 
 function checkThirdPlaceMatch(matchDataArray) {
+
     if (matchDataArray.length === 3 && matchDataArray[2].participants.length === 2) {
+
         const thirdMatchParticipants = matchDataArray[2].participants;
         const firstMatchParticipants = matchDataArray[0].participants;
         const secondMatchParticipants = matchDataArray[1].participants;
@@ -20,6 +22,7 @@ function checkThirdPlaceMatch(matchDataArray) {
             document.getElementById('thirMatchesnotice').hidden = true
         }
     }
+
 }
 
 async function partLength(response) {
@@ -52,6 +55,7 @@ async function partLength(response) {
             document.getElementById("EndChamp").hidden = false;
     
         } else {
+
             document.getElementById("ClearMatches").hidden = false;
             document.getElementById("EndChamp").hidden = true;
         }
@@ -131,6 +135,8 @@ async function removePart(user) {
 }
 
 async function getMatchesLoad() {
+
+    completedMatches = 0
 
     var data_send = {
         type_id: 'get_matches',
@@ -249,9 +255,25 @@ async function endCamp() {
     }
 }
 
-function startCamp() {
+async function startCamp() {
+
     document.getElementById("div-create-champ").hidden = false;
     document.getElementById("div-winner").hidden = true;
+
+    var data_send_parti = {
+        type_id: 'get_participants',
+        data: 'None'
+    };
+
+    var response_part = await window.pywebview.api.camp_command(JSON.stringify(data_send_parti));
+
+    if (response_part) {
+
+        response_part = JSON.parse(response_part)
+
+        createTablePart(response_part)
+
+    }
 }
 
 function checkAllMatchesCompleted() {
@@ -275,6 +297,7 @@ function createTableAndButtons(matchData) {
 
     const matchName = document.createElement("h5");
     matchName.textContent = `Partida ${matchData.match}`;
+
     matchDiv.appendChild(matchName);
 
     const table = document.createElement("table");
@@ -385,6 +408,7 @@ function createTableAndButtons(matchData) {
         matchData.match_status = checkbox.checked;
 
         const buttons = matchDiv.querySelectorAll("button");
+
         buttons.forEach(button => {
             if (buttons.length > 1) {
                 button.disabled = checkbox.checked;
@@ -439,9 +463,22 @@ async function sendDataToBackend(type_id, data) {
             document.documentElement.scrollTop = document.body.scrollTop = scrollPosition;
         }
 
+    } else if (type_id == "add_user"){
+
+        var response_part = await window.pywebview.api.camp_command(JSON.stringify(data_send));
+    
+        if (response_part) {
+    
+            response_part = JSON.parse(response_part)
+    
+            createTablePart(response_part)
+    
+        }
+
     } else {
 
         window.pywebview.api.camp_command(JSON.stringify(data_send));
+        
     }
 
 }

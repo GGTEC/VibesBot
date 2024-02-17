@@ -1,5 +1,6 @@
 {
     "check_queue": {
+        "type": "check_queue",
         "command": "!verfila",
         "status": 1,
         "delay": "10",
@@ -8,9 +9,13 @@
             "follow"
         ],
         "cost" : 0,
-        "cost_status" : 0
+        "cost_status" : 0,
+        "whitelist_status" : 0,
+        "whitelist": [],
+        "blacklist": []
     },
     "check_queue_p": {
+        "type": "check_queue_p",
         "command": "!verfilasub",
         "status": 1,
         "delay": "10",
@@ -19,9 +24,13 @@
             "follow"
         ],
         "cost" : 0,
-        "cost_status" : 0
+        "cost_status" : 0,
+        "whitelist_status" : 0,
+        "whitelist": [],
+        "blacklist": []
     },
     "rem_queue": {
+        "type": "rem_queue",
         "command": "!rfila",
         "status": 0,
         "delay": "10",
@@ -30,9 +39,13 @@
             "moderator"
         ],
         "cost" : 0,
-        "cost_status" : 0
+        "cost_status" : 0,
+        "whitelist_status" : 0,
+        "whitelist": [],
+        "blacklist": []
     },
     "add_queue": {
+        "type": "add_queue",
         "command": "!afila",
         "status": 0,
         "delay": "10",
@@ -41,9 +54,13 @@
             "moderator"
         ],
         "cost" : 0,
-        "cost_status" : 0
+        "cost_status" : 0,
+        "whitelist_status" : 0,
+        "whitelist": [],
+        "blacklist": []
     },
     "self_add_queue": {
+        "type": "self_add_queue",
         "command": "!fila",
         "status": 1,
         "delay": "10",
@@ -52,6 +69,9 @@
             "follow"
         ],
         "cost" : 0,
-        "cost_status" : 0
+        "cost_status" : 0,
+        "whitelist_status" : 0,
+        "whitelist": [],
+        "blacklist": []
     }
 }
